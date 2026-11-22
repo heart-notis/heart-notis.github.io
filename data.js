@@ -5,8 +5,7 @@ window.SITE_DATA = {
     "WHIF",
     "POSTYPE",
     "BLOOM",
-    "TINGLE",
-    "ROFAN"
+    "TINGLE"
   ],
   "profile": {
     "bio": "✦ 티팟을 메인으로 천천히 제작하고 있습니다.\n이식 요청은 하단의 메시지 탭으로 전송해주시면 열심히 작업해 업로드해보겠습니다. ✨\n\n늘 감사하고, 사랑합니다. (ㅅ•᎑•*)💕",
