@@ -30,6 +30,50 @@ window.SITE_DATA = {
   ],
   "posts": [
     {
+      "id": "mwrmeo1x9fr6",
+      "name": "오태식",
+      "world": "중앙소방서 구조대 2팀",
+      "tagline": "과거를 놓지 못하는 그 팀장님.",
+      "tags": [
+        "WHIF",
+        "TINGLE"
+      ],
+      "image": "images/post-mwrmeo1x9fr6.jpg",
+      "adult": true,
+      "likes": 883,
+      "rts": 157,
+      "date": "2026-11-22",
+      "description": "**#사별남 #오지콤 #떡대공 #상처공**\n\n중앙소방서 구조대 2팀 소속 팀장, 소방위.",
+      "greeting": "밥은 먹고 다니는 거냐? 꼴이 왜 그 모양이야.",
+      "link": "",
+      "links": {
+        "WHIF": "https://whif.io/characters/86af9507-587c-454c-a92b-d2e6635b9daa",
+        "TINGLE": "https://tingle.chat/chat/characters/59258"
+      }
+    },
+    {
+      "id": "mwrmb1hcvuhk",
+      "name": "강민우",
+      "world": "중앙소방서 구조대 2팀",
+      "tagline": "내게 거침없이 다가오는 그 소방관.",
+      "tags": [
+        "WHIF",
+        "TINGLE"
+      ],
+      "image": "images/post-mwrmb1hcvuhk.jpg",
+      "adult": true,
+      "likes": 429,
+      "rts": 93,
+      "date": "2026-11-22",
+      "description": "**#대형견공 #다정공 #첫사랑 #사랑꾼**\n\n중앙소방서 구조대 2팀 소속 소방교.",
+      "greeting": "아시다시피 제 직업이 좀 특수하잖아요. 근무 시간도 불규칙하고, 갑자기 사라져야 할 때도 많을 겁니다. 어쩌면 당신이 가장 외로운 순간에 곁에 없을 수도 있어요. 그런 문제들을 덮어두고 만날 수는 없다고 생각해서요. 이런 저라도, 정말 괜찮으시겠어요?",
+      "link": "",
+      "links": {
+        "WHIF": "https://whif.io/characters/39aefebc-4e4e-4582-8a0e-3a20417020d7",
+        "TINGLE": "https://tingle.chat/chat/characters/59652"
+      }
+    },
+    {
       "id": "mwrlmy5purob",
       "name": "송재현",
       "world": "중앙소방서 구조대 2팀",
