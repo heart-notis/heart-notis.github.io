@@ -661,8 +661,8 @@
       el.innerHTML = `
         <form class="msg-card" id="msgForm" autocomplete="off">
           <h3>💌 비공개 메시지</h3>
-          <div class="msg-hint">제작자에게만 전달되고, 다른 사람에게는 보이지 않아요.</div>
-          <input id="msgNick" maxlength="30" placeholder="닉네임 (안 적어도 돼요)" />
+          <div class="msg-hint">제작자에게만 전달되고, 다른 사람에게는 보이지 않아요.<br/>닉네임은 공란으로 비워둘 수 있습니다.</div>
+          <input id="msgNick" maxlength="30" placeholder="닉네임" />
           <textarea id="msgBody" maxlength="${MSG_MAX}" placeholder="하고 싶은 말을 자유롭게 남겨주세요"></textarea>
           <input class="msg-hp" id="msgHp" tabindex="-1" aria-hidden="true" />
           <div class="msg-foot"><span class="msg-count" id="msgCount">0 / ${MSG_MAX}</span><button class="msg-send" id="msgSend" type="submit">보내기</button></div>
