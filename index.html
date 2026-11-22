@@ -647,26 +647,8 @@
     }
 
     /* ---- 💌 비공개 메시지 (구글 폼으로 전송) ---- */
-    const MSG_FORM = {
-      action: "https://docs.google.com/forms/d/e/1FAIpQLSfFy6n5Uh3Ry_TV7dXjRDI1xHJ3Xp2FyphbTzqc0_f9RDQcXw/formResponse",
-      nick: "entry.1940105305",
-      body: "entry.311236213"
-    };
-    // 📱 새 메시지 알림 (ntfy 앱) — 내용은 안 보내고 "왔다"는 것만 알려요
-    const NTFY_TOPIC = "heart-notis-lzx4l5hjazp6e3xeksbz";
-    function notifyOwner() {
-      // JSON 방식으로 보내면 브라우저가 추가 확인 없이 바로 보낼 수 있어요
-      return fetch("https://ntfy.sh/", {
-        method: "POST",
-        body: JSON.stringify({
-          topic: NTFY_TOPIC,
-          title: "💌 새 비공개 메시지",
-          message: "홈페이지에 새 메시지가 왔어요. 구글 폼 응답에서 확인해주세요!",
-          tags: ["love_letter"],
-          click: "https://docs.google.com/forms/"
-        })
-      }).catch(() => {});
-    }
+    // 메시지는 비공개 보관함(Netlify)으로 보내요. 알림도 거기서 보내서, 알림 채널 이름은 여기 없어요.
+    const MSG_API = "https://heart-notis.netlify.app/api/messages";
     const MSG_MAX = 1000, MSG_COOLDOWN = 30;   // 글자 수 제한, 연속 전송 막기(초)
     let msgDraft = { nick: "", body: "" }, msgSent = false;
     function renderMessage(el) {
@@ -699,10 +681,13 @@
         if (wait > 0) { toast(`${wait}초 뒤에 다시 보낼 수 있어요`); return; }
         const btn = $("msgSend"); btn.disabled = true; btn.textContent = "보내는 중…";
         try {
-          const fd = new URLSearchParams();
-          fd.append(MSG_FORM.nick, nick); fd.append(MSG_FORM.body, body);
-          await fetch(MSG_FORM.action, { method: "POST", mode: "no-cors", body: fd });
-          notifyOwner();
+          const res = await fetch(MSG_API, {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ action: "send", nick, body, hp: $("msgHp").value })
+          });
+          if (res.status === 429) { toast("잠깐만요! 조금 뒤에 다시 보내주세요"); btn.disabled = false; btn.textContent = "보내기"; return; }
+          if (!res.ok) throw new Error(res.status);
           store.set("msg_last", Date.now());
           msgDraft = { nick: "", body: "" }; msgSent = true; renderMessage(el);
         } catch {

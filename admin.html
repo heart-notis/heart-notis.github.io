@@ -185,6 +185,7 @@
         <button class="tab" data-tab="notices">공지</button>
         <button class="tab" data-tab="tags">해시태그</button>
         <button class="tab" data-tab="profile">프로필</button>
+        <button class="tab" data-tab="messages">메시지<span id="msgBadge" class="badge new hidden" style="margin-left:4px">0</span></button>
       </nav>
 
       <section id="tab-posts">
@@ -201,6 +202,14 @@
           <button class="btn btn-main" id="newNotice">+ 새 공지</button>
         </div>
         <div class="list" id="noticeList"></div>
+      </section>
+
+      <section id="tab-messages" class="hidden">
+        <div class="section-head">
+          <div><h2>받은 메시지</h2><div class="hint">홈페이지 메시지 탭에서 온 비공개 메시지예요</div></div>
+          <button class="btn btn-line" id="msgRefresh">새로고침</button>
+        </div>
+        <div id="msgArea" class="list"></div>
       </section>
 
       <section id="tab-profile" class="hidden">
@@ -343,7 +352,7 @@
     $("lockForm").addEventListener("submit", async e => {
       e.preventDefault();
       if (!crypto.subtle) { $("pwErr").textContent = "이 주소에서는 열 수 없어요. https:// 사이트 주소로 열어주세요."; return; }
-      if (await sha256($("pw").value) === PASSWORD_HASH) unlock();
+      if (await sha256($("pw").value) === PASSWORD_HASH) { adminPw = $("pw").value; unlock(); }
       else { $("pwErr").textContent = "비밀번호가 달라요"; $("pw").select(); }
     });
     $("logoutBtn").onclick = () => { try { sessionStorage.removeItem("heart_admin_ok"); } catch {} location.reload(); };
@@ -353,10 +362,12 @@
     document.querySelectorAll(".tab").forEach(b => b.onclick = () => {
       tab = b.dataset.tab;
       document.querySelectorAll(".tab").forEach(x => x.classList.toggle("active", x === b));
-      ["posts", "notices", "tags", "profile"].forEach(t => $("tab-" + t).classList.toggle("hidden", t !== tab));
+      ["posts", "notices", "tags", "profile", "messages"].forEach(t => $("tab-" + t).classList.toggle("hidden", t !== tab));
+      if (tab === "messages") loadMessages();
     });
 
     function initApp() {
+      loadMessages(true);
       const draft = store.get(DRAFT_KEY);
       if (draft && draft.posts && !sameAsServer(draft)) {
         const b = $("draftBanner");
@@ -589,6 +600,66 @@
     }
     document.addEventListener("click", e => { if (e.target.closest("[data-close]")) closeEditor(); });
     document.addEventListener("keydown", e => { if (e.key === "Escape" && edit) closeEditor(); });
+
+    /* ---------- 💌 받은 메시지 ---------- */
+    const MSG_API = "https://heart-notis.netlify.app/api/messages";
+    let adminPw = "";          // 메시지를 볼 때만 쓰고, 어디에도 저장하지 않아요
+    let msgCache = [];
+    async function msgApi(action, extra = {}) {
+      const r = await fetch(MSG_API, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action, pw: adminPw, ...extra }) });
+      if (r.status === 401) { adminPw = ""; throw Object.assign(new Error("auth"), { code: "auth" }); }
+      if (r.status === 429) throw Object.assign(new Error("locked"), { code: "locked" });
+      if (!r.ok) throw new Error(String(r.status));
+      return r.json();
+    }
+    const fmtWhen = iso => { const d = new Date(iso); return isNaN(d) ? "" : `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`; };
+    function setBadge(n) { const b = $("msgBadge"); b.textContent = n; b.classList.toggle("hidden", !n); }
+    function askPw(note) {
+      $("msgArea").innerHTML = `
+        <form class="item" id="msgPwForm" style="flex-direction:column;align-items:stretch;gap:10px">
+          <div class="hint">${note || "메시지를 보려면 비밀번호를 한 번 더 입력해주세요."}</div>
+          <input type="password" id="msgPw" placeholder="비밀번호" style="padding:10px 12px;border:1px solid var(--line);border-radius:10px" />
+          <button class="btn btn-main" type="submit" style="align-self:flex-end">메시지 보기</button>
+        </form>`;
+      $("msgPwForm").onsubmit = e => { e.preventDefault(); adminPw = $("msgPw").value; loadMessages(); };
+    }
+    async function loadMessages(quiet) {
+      if (!adminPw) { if (!quiet) askPw(); return; }
+      if (!quiet) $("msgArea").innerHTML = `<div class="empty">불러오는 중…</div>`;
+      try {
+        const { messages } = await msgApi("list");
+        msgCache = messages || [];
+        setBadge(msgCache.filter(m => !m.read).length);
+        if (!quiet) renderMessages();
+      } catch (e) {
+        if (quiet) return;
+        if (e.code === "auth") askPw("비밀번호가 달라요. 다시 입력해주세요.");
+        else if (e.code === "locked") $("msgArea").innerHTML = `<div class="empty">비밀번호를 여러 번 틀려서 잠깐 잠겼어요.<br/>1시간 뒤에 다시 시도해주세요.</div>`;
+        else $("msgArea").innerHTML = `<div class="empty">메시지를 못 불러왔어요. 인터넷 연결을 확인하고 새로고침해주세요.</div>`;
+      }
+    }
+    function renderMessages() {
+      if (!msgCache.length) { $("msgArea").innerHTML = `<div class="empty">아직 받은 메시지가 없어요 💌</div>`; return; }
+      const unread = msgCache.filter(m => !m.read).map(m => m.id);
+      $("msgArea").innerHTML = msgCache.map(m => `
+        <div class="item" style="align-items:flex-start">
+          <div class="item-main">
+            <div class="item-title">${esc(m.nick || "익명")}${m.read ? "" : `<span class="badge new">NEW</span>`}</div>
+            <div class="item-sub">${fmtWhen(m.createdAt)}</div>
+            <div style="white-space:pre-wrap;word-break:break-word;font-size:.9rem;margin-top:6px;line-height:1.6">${esc(m.body)}</div>
+          </div>
+          <div class="item-actions"><button class="icon del" data-msgdel="${esc(m.id)}" aria-label="삭제">${I.del}</button></div>
+        </div>`).join("");
+      // 본 메시지는 읽음으로 표시 (NEW 표시는 이번 화면에서는 그대로 보여줘요)
+      if (unread.length) msgApi("read", { ids: unread }).then(() => { msgCache.forEach(m => { if (unread.includes(m.id)) m.read = true; }); setBadge(0); }).catch(() => {});
+    }
+    $("msgRefresh").onclick = () => loadMessages();
+    document.addEventListener("click", async e => {
+      const b = e.target.closest("[data-msgdel]"); if (!b) return;
+      if (!confirmBox("이 메시지를 지울까요? 되돌릴 수 없어요.")) return;
+      try { await msgApi("delete", { ids: [b.dataset.msgdel] }); msgCache = msgCache.filter(m => m.id !== b.dataset.msgdel); renderMessages(); toast("메시지를 지웠어요"); }
+      catch { toast("지우지 못했어요. 다시 시도해주세요."); }
+    });
 
     /* ---------- 프로필 ---------- */
     let profImg = { ava: null, avaPos: 40 };
