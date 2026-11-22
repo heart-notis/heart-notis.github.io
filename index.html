@@ -310,10 +310,17 @@
     .d-head { display: flex; gap: 12px; align-items: center; }
     .d-head .name { font-weight: 800; display: flex; align-items: center; gap: 4px; }
     .d-head .handle { color: var(--sub); font-size: .9rem; }
-    .d-text { margin-top: 12px; font-size: 1.12rem; line-height: 1.55; white-space: pre-line; }
+    .d-title { margin-top: 14px; font-size: 1.12rem; font-weight: 800; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; line-height: 1.3; }
+    .d-world { font-size: .7rem; font-weight: 700; color: var(--blue); background: var(--blue-soft); padding: 2px 9px; border-radius: 999px; }
+    .d-tagline { margin-top: 10px; padding: 8px 12px; border-left: 3px solid #c9b8fa; background: #faf8ff; border-radius: 0 10px 10px 0; font-size: .88rem; color: #4a4f57; white-space: pre-line; }
+    .d-text { margin-top: 12px; font-size: .92rem; line-height: 1.7; white-space: pre-line; color: #2b2f35; }
+    .d-tags { margin-top: 8px; font-size: .86rem; }
+    .t-title { font-weight: 800; font-size: .98rem; margin-top: 2px; }
+    .t-tagline { font-size: .88rem; color: #4a4f57; margin-top: 1px; white-space: pre-line; }
+    .t-tags { font-size: .85rem; margin-top: 3px; }
     .d-text .who { font-weight: 800; }
-    .d-time { color: var(--sub); font-size: .9rem; padding: 14px 0; border-bottom: 1px solid var(--line); }
-    .d-stats { padding: 12px 0; border-bottom: 1px solid var(--line); font-size: .9rem; color: var(--sub); }
+    .d-time { color: var(--sub); font-size: .8rem; padding: 12px 0; border-bottom: 1px solid var(--line); }
+    .d-stats { padding: 10px 0; border-bottom: 1px solid var(--line); font-size: .84rem; color: var(--sub); }
     .d-stats b { color: var(--ink); margin-right: 3px; }
     .d-actions { display: flex; justify-content: space-around; padding: 4px 0; border-bottom: 1px solid var(--line); }
     .d-actions .act svg { width: 22px; height: 22px; }
@@ -326,7 +333,9 @@
       box-shadow: 0 4px 14px rgba(150, 140, 240, .35);
       transition: filter .15s, transform .15s;
     }
-    .chat-ctas { display: flex; flex-direction: column; gap: 8px; margin: 14px 16px; }
+    .chat-ctas { display: flex; flex-direction: column; gap: 7px; margin: 12px 16px; }
+    .chat-ctas .chat-cta { padding: 9px; font-size: .84rem; box-shadow: 0 3px 10px rgba(150, 140, 240, .28); }
+    .chat-ctas .chat-cta svg { width: 15px; height: 15px; }
     .chat-ctas .chat-cta { margin: 0; }
     .chat-cta:hover { filter: brightness(.96); transform: translateY(-1px); }
     .chat-cta svg { width: 18px; height: 18px; }
@@ -503,6 +512,11 @@
       if (!hasNum(c.rts)) c.rts = Math.max(3, Math.round(c.likes * (0.10 + seedNum(key + "↻", 0, 25) / 100)));
       c.likes = +c.likes; c.rts = +c.rts;
     });
+    // *기울기*  **두껍게**  (안전하게 글자를 먼저 바꾼 뒤 꾸밈만 적용)
+    const fmtText = str => esc(str)
+      .replace(/\*\*([^*\n]+?)\*\*/g, "<b>$1</b>")
+      .replace(/\*([^*\n]+?)\*/g, "<i>$1</i>");
+
     // 대화 링크: 체크한 플랫폼(해시태그)마다 하나씩, 없으면 기본 링크 하나
     const chatLinks = c => {
       const out = [];
@@ -578,7 +592,9 @@
           ${meAva()}
           <div class="t-main">
             ${headHTML(c.date)}
-            <p class="t-text"><span class="who">${esc(c.name)}</span>${c.tagline ? ` — ${esc(c.tagline)}` : ""}\n${hashtags(c)}</p>
+            <p class="t-title">${esc(c.name)}</p>
+            ${c.tagline ? `<p class="t-tagline">${fmtText(c.tagline)}</p>` : ""}
+            <p class="t-tags">${hashtags(c)}</p>
             <div class="t-media preview">${mediaHTML(c)}${c.adult ? `<span class="badge">19+</span>` : ""}<span class="expand">♡ 전체 보기</span></div>
             <div class="t-actions">
               <button class="act reply" data-open="${i}" aria-label="자세히">${I.reply}</button>
@@ -596,7 +612,7 @@
           <div class="t-main">
             ${pinnedCtx ? `<div class="t-context">${I.pin}고정된 공지</div>` : ""}
             ${headHTML(n.date)}
-            <p class="t-text"><span class="notice-label">공지</span><span class="n-title">${esc(n.title)}</span>\n${esc(n.body)}</p>
+            <p class="t-text"><span class="notice-label">공지</span><span class="n-title">${esc(n.title)}</span>\n${fmtText(n.body)}</p>
           </div>
         </article>`;
     }
@@ -687,7 +703,10 @@
             ${meAva()}
             <div><div class="name">${esc(profile.name)}${I.verified}</div><div class="handle">@${esc(profile.handle)}</div></div>
           </div>
-          <p class="d-text"><span class="who">${esc(c.name)}</span>${c.tagline ? ` — ${esc(c.tagline)}` : ""}\n\n${esc(c.description)}\n${hashtags(c)}</p>
+          <div class="d-title">${esc(c.name)}${c.world ? `<span class="d-world">${esc(c.world)}</span>` : ""}</div>
+          ${c.tagline ? `<div class="d-tagline">${fmtText(c.tagline)}</div>` : ""}
+          ${c.description ? `<p class="d-text">${fmtText(c.description)}</p>` : ""}
+          <p class="d-tags">${hashtags(c)}</p>
           <div class="t-media">${mediaHTML(c)}${c.adult ? `<span class="badge">19+</span>` : ""}</div>
           <div class="d-time">${longDate(c.date)}${c.world ? ` · ${esc(c.world)}` : ""}</div>
           <div class="d-stats"><b>${fmt(c.rts || 0)}</b>재게시 &nbsp; <b data-likes="${i}">${fmt(likeCount(c))}</b>마음에 들어요</div>
@@ -704,8 +723,8 @@
           ${charAva(c)}
           <div class="t-main">
             <div class="t-head"><b>${esc(c.name)}</b><span class="muted">· ${esc(c.world || "")}</span></div>
-            <div class="reply-to">답글 대상: <span>@${esc(profile.handle)}</span></div>
-            <p class="t-text">${esc(c.greeting)}</p>
+            <div class="reply-to">답글 대상: <span>{{user}}</span></div>
+            <p class="t-text">${fmtText(c.greeting)}</p>
           </div>
         </article>` : ""}`;
       $("overlay").classList.add("open");

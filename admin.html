@@ -212,7 +212,7 @@
             <div class="ava-prev" id="avaPrev"></div>
             <div class="img-side">
               <label class="btn btn-line file-btn">프로필 사진 바꾸기<input type="file" accept="image/*" id="avaFile" /></label>
-              <div>정사각형으로 잘라서 넣어줘요.</div>
+              <div>정사각형으로 잘라서 넣어줘요.<br/>🔒 사진 정보(EXIF)는 자동으로 지워져요.</div>
               <div id="avaCropWrap" class="hidden">보이는 위치 조정<input type="range" min="0" max="100" value="40" id="avaCrop" /></div>
             </div>
           </div>
@@ -446,7 +446,7 @@
             <div class="img-prev" id="imgPrev">${item.image ? `<img src="${esc(item.image)}" alt="" />` : "이미지<br/>없음"}</div>
             <div class="img-side">
               <label class="btn btn-line file-btn">사진 고르기<input type="file" accept="image/*" id="imgFile" /></label>
-              <div>사진은 987×1216 비율로 자동으로 잘라서 넣어줘요.</div>
+              <div>사진은 987×1216 비율로 자동으로 잘라서 넣어줘요.<br/>🔒 사진 정보(EXIF · 위치 · 기기)는 자동으로 지워져요.</div>
               <div id="cropWrap" class="hidden">보이는 위치 조정<input type="range" min="0" max="100" value="30" id="cropPos" /></div>
               ${item.image ? `<button class="btn btn-ghost" id="imgRemove" style="align-self:flex-start">사진 빼기</button>` : ""}
             </div>
@@ -458,6 +458,7 @@
           </div>
           <label class="f">한 줄 소개<input type="text" id="f_tagline" value="${esc(item.tagline)}" /></label>
           <label class="f">해시태그<div class="tag-pick" id="f_tags">${data.tags.map(t => `<button type="button" class="${(item.tags || []).includes(t) ? "on" : ""}" data-tag="${esc(t)}">#${esc(t)}</button>`).join("") || `<small>해시태그 탭에서 먼저 태그를 만들어주세요</small>`}</div></label>
+          <div class="hint" style="margin-bottom:-6px">✍️ 글 꾸미기: <i>*기울기*</i> · <b>**두껍게**</b></div>
           <label class="f">자세한 소개<textarea id="f_desc">${esc(item.description)}</textarea></label>
           <label class="f">첫 인사말 <small>상세 화면에서 캐릭터의 답글처럼 보여요</small><textarea id="f_greet" style="min-height:60px">${esc(item.greeting)}</textarea></label>
           <label class="f">대화하러 가기 링크 <small>위에서 체크한 해시태그(플랫폼)마다 주소 칸이 생겨요</small><div class="links-box" id="f_links"></div></label>
@@ -564,7 +565,7 @@
         <div class="ed-body">
           <label class="f">제목 *<input type="text" id="n_title" value="${esc(item.title)}" /></label>
           <label class="f">날짜<input type="date" id="n_date" value="${esc(item.date)}" /></label>
-          <label class="f">내용<textarea id="n_body" style="min-height:140px">${esc(item.body)}</textarea></label>
+          <label class="f">내용 <small>✍️ *기울기* · **두껍게**</small><textarea id="n_body" style="min-height:140px">${esc(item.body)}</textarea></label>
           <label class="check"><input type="checkbox" id="n_pin" ${item.pinned ? "checked" : ""} /> 📌 공지 탭 맨 위에 고정</label>
           <label class="check"><input type="checkbox" id="n_onposts" ${item.onPosts ? "checked" : ""} /> 📣 게시물 탭 맨 위에도 띄우기</label>
         </div>
