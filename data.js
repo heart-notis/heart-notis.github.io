@@ -5,7 +5,8 @@ window.SITE_DATA = {
     "WHIF",
     "POSTYPE",
     "BLOOM",
-    "TINGLE"
+    "TINGLE",
+    "합작"
   ],
   "profile": {
     "bio": "✦ 티팟을 메인으로 천천히 제작하고 있습니다.\n이식 요청은 하단의 메시지 탭으로 전송해주시면 열심히 작업해 업로드해보겠습니다. ✨\n\n늘 감사하고, 사랑합니다. (ㅅ•᎑•*)♥",
@@ -44,7 +45,8 @@ window.SITE_DATA = {
       "tagline": "마침 배고팠는데, 잘 먹을게요♥",
       "tags": [
         "WHIF",
-        "TINGLE"
+        "TINGLE",
+        "합작"
       ],
       "image": "images/post-mwrzr4dyeaev.jpg",
       "adult": true,
@@ -54,10 +56,11 @@ window.SITE_DATA = {
       "description": "**#인외존재 #능글수 #문란수 #유혹수 #절륜수**\n\n맥과 몽마의 혼혈. 맥으로서의 피가 더 짙은 편이다. 옷 틈 사이로 몽마의 꼬리가 툭 튀어나와 살랑거린다. 나른하고 나긋하며 감정 변화 폭이 크지 않은 연구개발부의 책임연구원.",
       "greeting": "괜찮아요. 잡아먹지 않을 테니까.\n*물론, 다른 의미로는 잡아먹을 예정이었지만.*",
       "link": "",
-      "previewPos": 14,
+      "previewPos": 13,
       "links": {
         "WHIF": "https://www.whif.io/characters/3c5213aa-4fbe-4e66-9e83-e3426b2b941d",
-        "TINGLE": "https://tingle.chat/chat/characters/53922"
+        "TINGLE": "https://tingle.chat/chat/characters/53922",
+        "합작": "https://www.whif.io/universes/7f9e2f76-569c-4d3c-ae0d-4577f7760b1d"
       },
       "theme": "noir"
     },
