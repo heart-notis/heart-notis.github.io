@@ -29,27 +29,29 @@ window.SITE_DATA = {
   ],
   "posts": [
     {
-      "id": "mwrt5qnwj1s6",
-      "name": "그림자 신사",
-      "world": "LOT. HUMAN",
-      "tagline": "당신을 낙찰받은, 얼굴 없는 인외 신사님.",
+      "id": "mwrtiya3dc2d",
+      "name": "차은호",
+      "world": "純愛",
+      "tagline": "나를 위해 남친 대행을 하겠다는 대기업 본부장 남사친.",
       "tags": [
         "TEAPOT",
         "WHIF",
+        "POSTYPE",
         "BLOOM"
       ],
-      "image": "images/post-mwrt5qnwj1s6.jpg",
+      "image": "",
       "adult": true,
-      "likes": 721,
-      "rts": 170,
+      "likes": 139,
+      "rts": 20,
       "date": "2026-11-22",
-      "description": "**#인간경매 #고수위 #인외공 #그림자공 #떡대공**\n\n거대한 성인 남성의 윤곽을 한 새까만 인외. 피부나 머리카락은 물론 눈·코·입조차 존재하지 않으며, 검은 정장과 장갑을 단정하게 갖춰 입고 얼굴이 있어야 할 자리에는 흰 천을 느슨하게 두르고 있다.\n\n그의 몸은 말 그대로 그림자 그 자체다.",
-      "greeting": "하던 걸 멈출 필요는 없어. 어떤 느낌인지 궁금하군. 조금 더, 가까이서 봐도 될까?",
+      "description": "**#순애 #짝사랑 #능력공 #소꿉친구**\n\n뒤끝 없고 쿨한 성격. 능력에서 나오는 건강한 자신감과 여유가 넘친다. 꼬인 구석이 없어 누구에게나 호감을 사지만, 내 사람과 아닌 사람을 대하는 온도 차이는 확실하다.\n\n음침한 집착이나 통제 대신, {{user}}가 스스로 자신을 선택하게 만드는 매력 넘치는 직진남.",
+      "greeting": "어때. 저딴 놈 보란 듯이, 세상에서 제일 잘난 놈이랑 나타나 주는 거. 나 정도면 충분히 괜찮은 카드 아니야?",
       "link": "",
       "links": {
-        "TEAPOT": "https://teapotchat.com/character/2D1ZCZNFfckyUMjs49D0",
-        "WHIF": "https://www.whif.io/characters/78266daf-af99-48bb-88a4-c9a5090b796d",
-        "BLOOM": "https://bloom-ai.me/content/cb8517a2-e9ac-4e18-8ce5-4be79bfa8bff"
+        "TEAPOT": "https://teapotchat.com/character/pYQOiCZENdhvDSXFNtGB",
+        "WHIF": "https://www.whif.io/characters/805c5315-1918-4259-bfa1-81f08e46b6d1",
+        "POSTYPE": "https://posty.pe/phpwnh2mc",
+        "BLOOM": "https://bloom-ai.me/content/c507c1b6-c632-421a-9a04-ec2f2a53dc7e"
       }
     },
     {
