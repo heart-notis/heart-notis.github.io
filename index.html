@@ -786,7 +786,7 @@
     }
 
     /* ---- 상세 ---- */
-    function openTweet(i) {
+    function showTweet(i) {
       const c = characters[i];
       $("modal").innerHTML = `
         <div class="m-top"><button class="x-btn" data-close aria-label="닫기">${I.back}</button>게시물</div>
@@ -822,10 +822,36 @@
       $("overlay").classList.add("open");
       document.body.style.overflow = "hidden";
     }
-    function closeTweet() {
+    function hideTweet() {
       $("overlay").classList.remove("open");
       document.body.style.overflow = "";
     }
+
+    /* ---- 뒤로가기: 게시물 → 목록, 탭 → 이전 탭 (사이트를 나가지 않게) ---- */
+    const baseUrl = () => location.pathname + location.search;
+    const postKey = i => characters[i] && (characters[i].id || String(i));
+    function openTweet(i) {
+      showTweet(i);
+      history.pushState({ heart: "post", i, view }, "", baseUrl() + "#post-" + postKey(i));
+    }
+    function closeTweet() {
+      if (!$("overlay").classList.contains("open")) return;
+      if (history.state && history.state.heart === "post") history.back();   // 뒤로가기와 똑같이 닫기
+      else hideTweet();
+    }
+    function setView(v, push) {
+      if (!document.querySelector(`.tab[data-view="${v}"]`)) v = "tweets";
+      view = v;
+      document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.view === v));
+      renderView();
+      if (push) history.pushState({ heart: "tab", view: v }, "", baseUrl() + (v === "tweets" ? "" : "#" + v));
+    }
+    window.addEventListener("popstate", () => {
+      const st = history.state || {};
+      if (st.view && st.view !== view) setView(st.view, false);
+      if (st.heart === "post" && characters[st.i]) showTweet(st.i);
+      else hideTweet();
+    });
 
     function toggleLike(i) {
       const c = characters[i];
@@ -860,11 +886,7 @@
       const chip = e.target.closest(".chip");
       if (chip) { activeTag = chip.dataset.tag; return renderView(); }
       const tab = e.target.closest(".tab");
-      if (tab) {
-        view = tab.dataset.view;
-        document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t === tab));
-        return renderView();
-      }
+      if (tab) { if (tab.dataset.view !== view) setView(tab.dataset.view, true); return; }
       if (e.target.closest("[data-close]") || e.target.id === "overlay") return closeTweet();
       const open = e.target.closest("[data-open]");
       if (open && !e.target.closest(".modal")) return openTweet(+open.dataset.open);
@@ -947,6 +969,16 @@
 
     renderProfile();
     renderView();
+
+    // 처음 들어왔을 때: 주소 끝(#media, #post-…)에 맞춰 열고, 뒤로가기하면 홈으로 오게 기록
+    (function initHistory() {
+      const h = decodeURIComponent(location.hash.slice(1));
+      const postIdx = h.startsWith("post-") ? characters.findIndex((c, i) => (c.id || String(i)) === h.slice(5)) : -1;
+      const startView = ["media", "notice", "message"].includes(h) ? h : "tweets";
+      history.replaceState({ heart: "tab", view: startView }, "", baseUrl() + (startView === "tweets" ? "" : "#" + startView));
+      if (startView !== "tweets") setView(startView, false);
+      if (postIdx >= 0) openTweet(postIdx);
+    })();
   </script>
 </body>
 </html>
