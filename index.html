@@ -264,6 +264,8 @@
     .act.like.liked path { fill: url(#hg); stroke: url(#hg); }
     .act.like.pop svg { animation: pop .35s ease; }
     @keyframes pop { 50% { transform: scale(1.3); } }
+    /* 재게시 · 공유는 보여주기만 (눌러도 아무 일 없음) */
+    .act.deco { cursor: inherit; pointer-events: none; }
     .act.share:hover { color: var(--blue); background: var(--blue-soft); }
 
     .notice-label {
@@ -598,9 +600,9 @@
             <div class="t-media preview">${mediaHTML(c)}${c.adult ? `<span class="badge">19+</span>` : ""}<span class="expand">♡ 전체 보기</span></div>
             <div class="t-actions">
               <button class="act reply" data-open="${i}" aria-label="자세히">${I.reply}</button>
-              <button class="act rt" aria-label="재게시" data-share="${i}">${I.rt}${fmt(c.rts || 0)}</button>
+              <span class="act rt deco" aria-hidden="true">${I.rt}${fmt(c.rts || 0)}</span>
               <button class="act like ${liked[c.name] ? "liked" : ""}" data-like="${i}" aria-label="마음에 들어요">${I.like}<span data-likes="${i}">${fmt(likeCount(c))}</span></button>
-              <button class="act share" data-share="${i}" aria-label="공유">${I.share}</button>
+              <span class="act share deco" aria-hidden="true">${I.share}</span>
             </div>
           </div>
         </article>`;
@@ -712,9 +714,9 @@
           <div class="d-stats"><b>${fmt(c.rts || 0)}</b>재게시 &nbsp; <b data-likes="${i}">${fmt(likeCount(c))}</b>마음에 들어요</div>
           <div class="d-actions">
             <button class="act reply" aria-label="답글">${I.reply}</button>
-            <button class="act rt" data-share="${i}" aria-label="재게시">${I.rt}</button>
+            <span class="act rt deco" aria-hidden="true">${I.rt}</span>
             <button class="act like ${liked[c.name] ? "liked" : ""}" data-like="${i}" aria-label="마음에 들어요">${I.like}</button>
-            <button class="act share" data-share="${i}" aria-label="공유">${I.share}</button>
+            <span class="act share deco" aria-hidden="true">${I.share}</span>
           </div>
         </div>
         ${chatLinks(c).length ? `<div class="chat-ctas">${chatLinks(c).map(([t, url]) => `<a class="chat-cta" href="${esc(url)}" target="_blank" rel="noopener">${I.reply} ${t ? `${esc(t)}에서 대화하기` : `${esc(c.name)}와 대화하러 가기`}</a>`).join("")}</div>` : ""}
