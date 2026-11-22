@@ -278,6 +278,28 @@
     }
     .n-title { font-weight: 800; }
 
+    /* ---------- 메시지 탭 ---------- */
+    .msg-wrap { padding: 16px; }
+    .msg-card { border: 1px solid var(--line); border-radius: 16px; padding: 18px 16px; background: linear-gradient(180deg, #faf8ff, #fff 60%); }
+    .msg-card h3 { font-size: 1rem; font-weight: 800; display: flex; align-items: center; gap: 6px; }
+    .msg-card .msg-hint { font-size: .8rem; color: var(--sub); margin: 4px 0 14px; }
+    .msg-card input, .msg-card textarea {
+      width: 100%; font: inherit; font-size: .9rem; color: var(--ink);
+      border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; outline: none; background: #fff;
+    }
+    .msg-card input:focus, .msg-card textarea:focus { border-color: #b9a7f6; box-shadow: 0 0 0 3px var(--blue-soft); }
+    .msg-card textarea { min-height: 140px; resize: vertical; line-height: 1.6; margin-top: 8px; }
+    .msg-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; gap: 10px; }
+    .msg-count { font-size: .75rem; color: var(--faint); }
+    .msg-send { background: var(--grad-strong); color: #fff; font-weight: 800; font-size: .88rem; padding: 9px 22px; border-radius: 999px; box-shadow: 0 3px 10px rgba(150, 140, 240, .28); }
+    .msg-send:disabled { opacity: .5; cursor: default; }
+    .msg-hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+    .msg-done { text-align: center; padding: 26px 10px 8px; }
+    .msg-done .big { font-size: 2rem; }
+    .msg-done p { font-size: .9rem; margin-top: 6px; }
+    .msg-done small { color: var(--sub); font-size: .78rem; }
+    .msg-done button { margin-top: 14px; color: var(--blue); font-weight: 700; font-size: .85rem; }
+
     /* ---------- 미디어 탭 ---------- */
     .media-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; padding: 2px; }
     .m-tile { position: relative; aspect-ratio: var(--ratio); overflow: hidden; background: var(--page); }
@@ -438,6 +460,7 @@
       <button class="tab active" data-view="tweets">게시물</button>
       <button class="tab" data-view="media">미디어</button>
       <button class="tab" data-view="notice">공지</button>
+      <button class="tab" data-view="message">메시지</button>
     </nav>
 
     <section id="view"></section>
@@ -541,7 +564,7 @@
 
     const I = {
       reply: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M14 4H10a7 7 0 0 0-1 13.9V21l4.5-3.5H14a7 7 0 0 0 0-14z"/></svg>`,
-      rt: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8l3-3 3 3"/><path d="M7 5v10a2 2 0 0 0 2 2h5"/><path d="M20 16l-3 3-3-3"/><path d="M17 19V9a2 2 0 0 0-2-2h-5"/></svg>`,
+      rt: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2.5l3.5 3.5L17 9.5"/><path d="M3.5 11V9.5a3.5 3.5 0 0 1 3.5-3.5h13.5"/><path d="M7 21.5L3.5 18 7 14.5"/><path d="M20.5 13v1.5a3.5 3.5 0 0 1-3.5 3.5H3.5"/></svg>`,
       like: `<svg viewBox="0 0 24 24"><path d="M12 20.5s-7.5-4.6-9.3-9.4C1.4 7.6 3.6 4 7.2 4c2 0 3.6 1.1 4.8 2.8C13.2 5.1 14.8 4 16.8 4c3.6 0 5.8 3.6 4.5 7.1-1.8 4.8-9.3 9.4-9.3 9.4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>`,
       share: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>`,
       pin: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 3l5 5-3 1-3 3 1 5-2 2-4-4-5 5-1-1 5-5-4-4 2-2 5 1 3-3z"/></svg>`,
@@ -619,9 +642,60 @@
         </article>`;
     }
 
+    /* ---- 💌 비공개 메시지 (구글 폼으로 전송) ---- */
+    const MSG_FORM = {
+      action: "https://docs.google.com/forms/d/e/1FAIpQLSfFy6n5Uh3Ry_TV7dXjRDI1xHJ3Xp2FyphbTzqc0_f9RDQcXw/formResponse",
+      nick: "entry.1940105305",
+      body: "entry.311236213"
+    };
+    const MSG_MAX = 1000, MSG_COOLDOWN = 30;   // 글자 수 제한, 연속 전송 막기(초)
+    let msgDraft = { nick: "", body: "" }, msgSent = false;
+    function renderMessage(el) {
+      el.className = "msg-wrap";
+      if (msgSent) {
+        el.innerHTML = `<div class="msg-card msg-done"><div class="big">💌</div><p><b>메시지를 보냈어요!</b></p><small>제작자에게만 전달돼요. 고마워요 💜</small><br/><button id="msgAgain">메시지 하나 더 쓰기</button></div>`;
+        $("msgAgain").onclick = () => { msgSent = false; renderMessage(el); };
+        return;
+      }
+      el.innerHTML = `
+        <form class="msg-card" id="msgForm" autocomplete="off">
+          <h3>💌 비공개 메시지</h3>
+          <div class="msg-hint">제작자에게만 전달되고, 다른 사람에게는 보이지 않아요.</div>
+          <input id="msgNick" maxlength="30" placeholder="닉네임 (안 적어도 돼요)" />
+          <textarea id="msgBody" maxlength="${MSG_MAX}" placeholder="하고 싶은 말을 자유롭게 남겨주세요"></textarea>
+          <input class="msg-hp" id="msgHp" tabindex="-1" aria-hidden="true" />
+          <div class="msg-foot"><span class="msg-count" id="msgCount">0 / ${MSG_MAX}</span><button class="msg-send" id="msgSend" type="submit">보내기</button></div>
+        </form>`;
+      $("msgNick").value = msgDraft.nick; $("msgBody").value = msgDraft.body;
+      const count = () => { $("msgCount").textContent = `${$("msgBody").value.length} / ${MSG_MAX}`; };
+      count();
+      $("msgNick").oninput = e => { msgDraft.nick = e.target.value; };
+      $("msgBody").oninput = e => { msgDraft.body = e.target.value; count(); };
+      $("msgForm").onsubmit = async e => {
+        e.preventDefault();
+        const body = $("msgBody").value.trim(), nick = $("msgNick").value.trim();
+        if (!body) { toast("메시지를 적어주세요"); $("msgBody").focus(); return; }
+        if ($("msgHp").value) return;   // 스팸 로봇 차단
+        const last = +(store.get("msg_last", 0)), wait = MSG_COOLDOWN - Math.floor((Date.now() - last) / 1000);
+        if (wait > 0) { toast(`${wait}초 뒤에 다시 보낼 수 있어요`); return; }
+        const btn = $("msgSend"); btn.disabled = true; btn.textContent = "보내는 중…";
+        try {
+          const fd = new URLSearchParams();
+          fd.append(MSG_FORM.nick, nick); fd.append(MSG_FORM.body, body);
+          await fetch(MSG_FORM.action, { method: "POST", mode: "no-cors", body: fd });
+          store.set("msg_last", Date.now());
+          msgDraft = { nick: "", body: "" }; msgSent = true; renderMessage(el);
+        } catch {
+          toast("전송에 실패했어요. 인터넷 연결을 확인해주세요.");
+          btn.disabled = false; btn.textContent = "보내기";
+        }
+      };
+    }
+
     /* ---- 본문 ---- */
     function renderView() {
       const el = $("view");
+      if (view === "message") { renderMessage(el); return; }
       if (view === "notice") {
         const sorted = [...notices.filter(n => n.pinned), ...notices.filter(n => !n.pinned)];
         el.innerHTML = sorted.length ? sorted.map(n => noticeTweet(n, n.pinned)).join("") : `<p class="empty">아직 공지가 없어요</p>`;
