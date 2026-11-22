@@ -459,27 +459,28 @@
       --m-deco: linear-gradient(90deg, rgba(240,168,104,.07) 50%, transparent 50%), linear-gradient(rgba(240,168,104,.07) 50%, transparent 50%);
       --m-deco-size: 28px 28px;
     }
-    .modal[data-theme="fire"] {  /* 소방서: 소방차 빨강 + 방화복 반사띠(노랑·은색) + 경광등 */
-      --blue: #d3201a; --blue-soft: #fde8e6; --line: #f1dcd8; --page: #fff3f1;
-      --grad-strong: linear-gradient(180deg, #e8291f 0%, #c81a12 100%);
-      --m-bg: #fffaf8; --m-quote: #fff8dc; --m-quote-line: #f2c81d; --m-glow: rgba(200,26,18,.35);
-      --m-tape: linear-gradient(180deg, #d3201a 0 8px, #f2c81d 8px 13px, #cfd3d8 13px 17px, #f2c81d 17px 22px, transparent 22px);
-      --m-deco: var(--m-tape), repeating-linear-gradient(135deg, rgba(211,32,26,.025) 0 14px, transparent 14px 28px);
-      --m-deco-size: 100% 22px, auto;
+    /* 🚒 소방서: 구조대 FIELD LOG 느낌 (갈색→주황 상단 바 + 경고 사선 띠) */
+    .modal[data-theme="fire"] {
+      --r-or: #f08a24; --r-ap: #f5b06a; --r-hz: repeating-linear-gradient(-45deg, #f2861b 0 4px, #141414 4px 8px);
+      --r-head: linear-gradient(135deg, #a24e17, #55290d 70%, #1e0f07);
+      --grad-strong: var(--r-head); --heart: #f08a24; --m-glow: rgba(0,0,0,0);
+      --blue: #c4620f; --blue-soft: #fdf0e4; --line: #ece4db; --page: #f7f2ec;
+      --m-bg: #ffffff; --m-text: #2f2a25; --m-text2: #4a3a2c; --m-quote: #fbf6f0; --m-quote-line: #f08a24;
     }
-    .modal[data-theme="fire"] { background-repeat: no-repeat, repeat; }
-    .modal[data-theme="fire"] .m-top { margin-top: 22px; }
-    .modal[data-theme="fire"] .chat-ctas .chat-cta {
-      background: linear-gradient(180deg, transparent 0 75%, #f2c81d 75% 81%, #e3e6ea 81% 86%, #f2c81d 86% 92%, transparent 92%), var(--grad-strong);
-      padding: 10px 12px 20px;
-      text-shadow: 0 1px 2px rgba(0,0,0,.25); border-radius: 12px;
-    }
-    .modal[data-theme="fire"] .d-world { background: #d3201a; color: #fff; }
-    .modal[data-theme="fire"] .d-title::before {
-      content: ""; width: 9px; height: 9px; border-radius: 50%; background: #ff2a1f;
-      box-shadow: 0 0 0 3px rgba(255,42,31,.18), 0 0 10px #ff2a1f; animation: siren 1s ease-in-out infinite;
-    }
-    @keyframes siren { 50% { background: #2b6dff; box-shadow: 0 0 0 3px rgba(43,109,255,.18), 0 0 10px #2b6dff; } }
+    .modal[data-theme="fire"] .m-top { position: relative; background: var(--r-head); color: #fff; border-bottom: 0; padding-left: 18px; font-size: .9rem; letter-spacing: .02em; }
+    .modal[data-theme="fire"] .m-top::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: var(--r-hz); }
+    .modal[data-theme="fire"] .m-top::after { content: "RESCUE · FIELD LOG"; margin-left: auto; font-size: .62rem; font-weight: 800; letter-spacing: .2em; color: rgba(255,255,255,.85); }
+    .modal[data-theme="fire"] .m-top .x-btn { color: #fff; }
+    .modal[data-theme="fire"] .d-world { display: inline-flex; align-items: center; gap: 5px; line-height: 1; padding: 4px 9px; border-radius: 20px; font-size: .66rem; background: rgba(240,138,36,.1); border: 1px solid rgba(240,138,36,.35); color: var(--blue); }
+    .modal[data-theme="fire"] .d-world::before { content: ""; flex: 0 0 6px; width: 6px; height: 6px; border-radius: 50%; background: #ff6a00; box-shadow: 0 0 7px #ff6a00; animation: rBlink 1.4s steps(2) infinite; }
+    @keyframes rBlink { 50% { opacity: .25; box-shadow: none; } }
+    .modal[data-theme="fire"] .d-tagline { border-radius: 4px; border: 1px solid var(--line); border-left: 3px solid var(--r-or); }
+    .modal[data-theme="fire"] .d-time { border-bottom-style: dashed; font-size: .74rem; letter-spacing: .02em; }
+    .modal[data-theme="fire"] .d-time::before { content: "LOG"; font-size: .62rem; font-weight: 800; letter-spacing: .14em; color: var(--sub); margin-right: 7px; }
+    .modal[data-theme="fire"] .d-stats, .modal[data-theme="fire"] .d-actions { border-bottom-style: dashed; }
+    .modal[data-theme="fire"] .chat-ctas .chat-cta { border-radius: 4px; justify-content: flex-start; padding: 11px 14px 11px 20px; font-size: .84rem; background: var(--r-hz) left / 6px 100% no-repeat, var(--r-head); border: 1px solid rgba(240,138,36,.25); }
+    .modal[data-theme="fire"] .chat-ctas .chat-cta::after { content: "▸"; margin-left: auto; color: var(--r-ap); }
+    .modal[data-theme="fire"] .t-media, .modal[data-theme="fire"] .t-media .media { border-radius: 4px; }
     .modal[data-theme="police"] {  /* 경찰·수사 */
       --blue: #1f3c88; --blue-soft: #e8edf8; --line: #dbe2f1; --page: #f1f4fa;
       --grad-strong: linear-gradient(120deg, #1f3c88 0%, #2f58b5 50%, #c9a43a 100%);
