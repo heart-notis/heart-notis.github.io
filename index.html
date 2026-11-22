@@ -648,6 +648,21 @@
       nick: "entry.1940105305",
       body: "entry.311236213"
     };
+    // 📱 새 메시지 알림 (ntfy 앱) — 내용은 안 보내고 "왔다"는 것만 알려요
+    const NTFY_TOPIC = "heart-notis-lzx4l5hjazp6e3xeksbz";
+    function notifyOwner() {
+      // JSON 방식으로 보내면 브라우저가 추가 확인 없이 바로 보낼 수 있어요
+      return fetch("https://ntfy.sh/", {
+        method: "POST",
+        body: JSON.stringify({
+          topic: NTFY_TOPIC,
+          title: "💌 새 비공개 메시지",
+          message: "홈페이지에 새 메시지가 왔어요. 구글 폼 응답에서 확인해주세요!",
+          tags: ["love_letter"],
+          click: "https://docs.google.com/forms/"
+        })
+      }).catch(() => {});
+    }
     const MSG_MAX = 1000, MSG_COOLDOWN = 30;   // 글자 수 제한, 연속 전송 막기(초)
     let msgDraft = { nick: "", body: "" }, msgSent = false;
     function renderMessage(el) {
@@ -683,6 +698,7 @@
           const fd = new URLSearchParams();
           fd.append(MSG_FORM.nick, nick); fd.append(MSG_FORM.body, body);
           await fetch(MSG_FORM.action, { method: "POST", mode: "no-cors", body: fd });
+          notifyOwner();
           store.set("msg_last", Date.now());
           msgDraft = { nick: "", body: "" }; msgSent = true; renderMessage(el);
         } catch {
