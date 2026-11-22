@@ -137,6 +137,11 @@
     .bottom-inner .status b { color: var(--accent); }
 
     .done-card { text-align: left; }
+    /* ---------- 목록 미리보기 위치 ---------- */
+    .pv-wrap { display: flex; flex-direction: column; gap: 6px; }
+    .pv-box { width: 100%; aspect-ratio: 3 / 1; border-radius: 12px; border: 1px solid var(--line); background: var(--soft) center / cover no-repeat; cursor: ns-resize; touch-action: none; position: relative; }
+    .pv-box::after { content: "↕ 끌어서 맞추기"; position: absolute; right: 8px; bottom: 6px; font-size: .68rem; font-weight: 700; color: #fff; background: rgba(0,0,0,.45); padding: 2px 8px; border-radius: 999px; }
+    .pv-wrap input { width: 100%; accent-color: var(--accent); }
     /* ---------- 사진 자르기 창 ---------- */
     .crop-overlay { position: fixed; inset: 0; z-index: 70; background: rgba(20, 16, 40, .78); display: none; align-items: center; justify-content: center; padding: 12px; }
     .crop-overlay.open { display: flex; }
@@ -513,6 +518,11 @@
               ${item.image ? `<button class="btn btn-ghost" id="imgRemove" style="align-self:flex-start">사진 빼기</button>` : ""}
             </div>
           </div>
+          <div class="pv-wrap ${item.image ? "" : "hidden"}" id="pvWrap">
+            <label class="f" style="margin:0">목록에서 보이는 부분 <small>홈 게시물 목록에는 사진이 가로로 길게 잘려서 보여요. 끌거나 슬라이더로 위치를 맞춰주세요.</small></label>
+            <div class="pv-box" id="pvBox"></div>
+            <input type="range" min="0" max="100" id="pvPos" aria-label="목록 미리보기 위치" />
+          </div>
           <label class="f">캐릭터 이름 *<input type="text" id="f_name" value="${esc(item.name)}" /></label>
           <div class="row">
             <label class="f">세계관 · 장소<input type="text" id="f_world" value="${esc(item.world)}" /></label>
@@ -544,9 +554,32 @@
       if (item.link && !(item.links && Object.keys(item.links).length) && (item.tags || [])[0]) edit.linkVals[item.tags[0]] = item.link;
       renderLinkInputs();
       $("f_tags").onclick = e => { const b = e.target.closest("[data-tag]"); if (!b) return; readLinkInputs(); b.classList.toggle("on"); renderLinkInputs(); };
+      // 목록 미리보기(3:1) 위치: 0 = 맨 위, 100 = 맨 아래
+      if (typeof item.previewPos !== "number") item.previewPos = 25;
+      const drawPv = () => {
+        $("pvWrap").classList.toggle("hidden", !edit.item.image);
+        $("pvBox").style.backgroundImage = edit.item.image ? `url("${edit.item.image}")` : "";
+        $("pvBox").style.backgroundPosition = `center ${edit.item.previewPos}%`;
+        $("pvPos").value = edit.item.previewPos;
+      };
+      drawPv();
+      $("pvPos").oninput = e => { edit.item.previewPos = +e.target.value; drawPv(); };
+      (() => {   // 미리보기를 위아래로 끌어서 맞추기
+        const box = $("pvBox"); let start = null;
+        box.onpointerdown = e => { box.setPointerCapture(e.pointerId); start = { y: e.clientY, p: edit.item.previewPos }; };
+        box.onpointermove = e => {
+          if (!start) return;
+          // 사진이 보이는 칸보다 얼마나 긴지에 맞춰 이동량 계산 (손가락 따라 사진이 움직이게)
+          const bw = box.clientWidth, bh = box.clientHeight, overflow = Math.max(1, bw * IMG_H / IMG_W - bh);
+          edit.item.previewPos = Math.max(0, Math.min(100, Math.round(start.p - (e.clientY - start.y) / overflow * 100)));
+          drawPv();
+        };
+        box.onpointerup = box.onpointercancel = () => { start = null; };
+      })();
       const setPostImg = url => {
         edit.item.image = url;
         $("imgPrev").innerHTML = `<img src="${url}" alt="" />`;
+        drawPv();
         if (!$("imgRecrop")) $("imgFile").closest(".img-side").insertAdjacentHTML("beforeend", `<button class="btn btn-ghost" id="imgRecrop" style="align-self:flex-start">✂️ 다시 자르기</button>`);
         $("imgRecrop").onclick = recrop;
       };
@@ -560,7 +593,7 @@
         catch { toast("이 사진은 열 수 없어요. 다른 사진을 골라주세요."); }
       };
       if ($("imgRecrop")) $("imgRecrop").onclick = recrop;
-      if ($("imgRemove")) $("imgRemove").onclick = () => { edit.item.image = ""; if ($("imgRecrop")) $("imgRecrop").remove(); $("imgPrev").innerHTML = "이미지<br/>없음"; $("imgRemove").remove(); };
+      if ($("imgRemove")) $("imgRemove").onclick = () => { edit.item.image = ""; drawPv(); if ($("imgRecrop")) $("imgRecrop").remove(); $("imgPrev").innerHTML = "이미지<br/>없음"; $("imgRemove").remove(); };
       $("savePost").onclick = savePost;
       $("f_name").focus();
     }
