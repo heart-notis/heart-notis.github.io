@@ -610,7 +610,7 @@
         showDone();
       } catch (err) {
         console.error(err);
-        toast("파일을 못 만들었어요. 사이트 주소(https://heart-notis.netlify.app/admin.html)에서 열었는지 확인해주세요.");
+        toast("파일을 못 만들었어요. 사이트 주소(https://heart-notis.github.io/admin.html)에서 열었는지 확인해주세요.");
       } finally {
         btn.disabled = false; btn.textContent = "업데이트 파일 만들기";
       }
@@ -622,13 +622,12 @@
         <div class="ed-body done-card">
           <ol>
             <li>다운로드된 <code>heart-site.zip</code>을 확인해주세요. (압축은 안 풀어도 돼요)</li>
-            <li>Netlify의 <b>heart-notis</b> 프로젝트 화면을 열어주세요.</li>
-            <li>zip 파일을 끌어다 놓으면 사이트에 반영돼요.</li>
+            <li>Claude와의 대화에 zip 파일을 첨부하고 <b>"올려줘"</b>라고 말해주세요.</li>
+            <li>Claude가 GitHub에 올리면 1~2분 뒤 사이트에 반영돼요.</li>
           </ol>
           <div class="hint">올리기 전까지는 사이트에 안 바뀌어요. 그 전에 이 페이지를 닫아도 작업은 이 브라우저에 남아 있어요.</div>
         </div>
         <div class="ed-foot">
-          <a class="btn btn-line" href="https://app.netlify.com/projects/heart-notis" target="_blank" rel="noopener">Netlify 열기 ↗</a>
           <button class="btn btn-main" data-close>확인</button>
         </div>`;
       $("overlay").classList.add("open");
