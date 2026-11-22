@@ -238,7 +238,10 @@ window.SITE_DATA = {
         "WHIF": "https://whif.io/characters/86af9507-587c-454c-a92b-d2e6635b9daa",
         "TINGLE": "https://tingle.chat/chat/characters/59258"
       },
-      "previewPos": 16
+      "previewPos": 16,
+      "previewX": 50,
+      "previewZoom": 1,
+      "theme": "fire"
     },
     {
       "id": "mwrmb1hcvuhk",
@@ -260,7 +263,11 @@ window.SITE_DATA = {
       "links": {
         "WHIF": "https://whif.io/characters/39aefebc-4e4e-4582-8a0e-3a20417020d7",
         "TINGLE": "https://tingle.chat/chat/characters/59652"
-      }
+      },
+      "previewPos": 25,
+      "previewX": 50,
+      "previewZoom": 1,
+      "theme": "fire"
     },
     {
       "id": "mwrlmy5purob",
@@ -284,7 +291,11 @@ window.SITE_DATA = {
         "TEAPOT": "https://teapotchat.com/character/DYUZO1ey0rJOutVFTvDu",
         "WHIF": "https://whif.io/characters/b25d7594-d064-491d-bc18-da71224ccc04",
         "TINGLE": "https://tingle.chat/chat/characters/59176"
-      }
+      },
+      "previewPos": 25,
+      "previewX": 50,
+      "previewZoom": 1,
+      "theme": "fire"
     }
   ]
 };
