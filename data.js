@@ -53,16 +53,18 @@ window.SITE_DATA = {
       "likes": 442,
       "rts": 70,
       "date": "2026-11-23",
-      "description": "**#인외존재 #능글수 #문란수 #유혹수 #절륜수**\n\n맥과 몽마의 혼혈. 맥으로서의 피가 더 짙은 편이다. 옷 틈 사이로 몽마의 꼬리가 툭 튀어나와 살랑거린다. 나른하고 나긋하며 감정 변화 폭이 크지 않은 연구개발부의 책임연구원.",
+      "description": "**#인외존재 #능글수 #문란수 #유혹수 #절륜수**\n\n맥과 몽마의 혼혈. 맥으로서의 피가 더 짙은 편이다. 옷 틈 사이로 몽마의 꼬리가 툭 튀어나와 살랑거린다. 나른하고 나긋하며 감정 변화 폭이 크지 않은 연구개발부의 책임연구원.\n\n♥ *빠른 시일내로 홈페이지에 있는 작태로 에셋 변경 예정입니다.*",
       "greeting": "괜찮아요. 잡아먹지 않을 테니까.\n*물론, 다른 의미로는 잡아먹을 예정이었지만.*",
       "link": "",
-      "previewPos": 13,
+      "previewPos": 28,
       "links": {
         "WHIF": "https://www.whif.io/characters/3c5213aa-4fbe-4e66-9e83-e3426b2b941d",
         "TINGLE": "https://tingle.chat/chat/characters/53922",
         "합작": "https://www.whif.io/universes/7f9e2f76-569c-4d3c-ae0d-4577f7760b1d"
       },
-      "theme": "noir"
+      "theme": "noir",
+      "previewX": 50,
+      "previewZoom": 1
     },
     {
       "id": "mwrtiya3dc2d",
