@@ -614,7 +614,6 @@
         const b = e.target.closest("[data-theme-key]"); if (!b) return;
         document.querySelectorAll("#f_theme button").forEach(x => x.classList.toggle("on", x === b));
         $("f_themeNow").textContent = themeName(b.dataset.themeKey);
-        $("f_themeFold").open = false;   // 고르면 다시 접혀요
       };
       $("f_tags").onclick = e => { const b = e.target.closest("[data-tag]"); if (!b) return; readLinkInputs(); b.classList.toggle("on"); renderLinkInputs(); };
       // 목록 미리보기(3:1) 위치: 0 = 맨 위, 100 = 맨 아래
@@ -720,7 +719,8 @@
       { key: "apocalypse", name: "아포칼립스", group: "concept", bg: "#1b1a16", btn: "linear-gradient(120deg,#4a4a32,#c4782f)" },
       { key: "cyber", name: "사이버펑크", group: "concept", bg: "#0b0d1a", btn: "linear-gradient(120deg,#ff2fd0,#2fe6ff)" },
       { key: "horror", name: "호러·오컬트", group: "concept", bg: "#0d0a0a", btn: "linear-gradient(120deg,#3a0a0f,#c0262f)" },
-      { key: "game", name: "게임", group: "concept", bg: "#14122b", btn: "linear-gradient(120deg,#ff6b9d,#7dff9b)" }
+      { key: "game", name: "게임", group: "concept", bg: "#fdfcf6", btn: "linear-gradient(120deg,#ff6b9d,#4fd1a5)" },
+      { key: "gamedark", name: "게임 (다크)", group: "concept", bg: "#14122b", btn: "linear-gradient(120deg,#ff6b9d,#7dff9b)" }
     ];
     const THEME_GROUPS = [["color", "🎨 색감"], ["concept", "🏷️ 컨셉"]];
     const themeBtn = (t, cur) => `<button type="button" data-theme-key="${t.key}" class="${cur === t.key ? "on" : ""}"><span class="sw" style="background:${t.bg};--btn:${t.btn}"></span>${t.name}</button>`;

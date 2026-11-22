@@ -546,7 +546,14 @@
       --m-deco: radial-gradient(ellipse at 50% 0%, rgba(192,38,47,.14), transparent 60%);
       --m-deco-size: 100% 100%;
     }
-    .modal[data-theme="game"] {  /* 게임 */
+    .modal[data-theme="game"] {  /* 게임 (밝은) */
+      --blue: #5a46e0; --blue-soft: #eeebff; --line: #e3e0f5; --page: #f6f4ff;
+      --grad-strong: linear-gradient(120deg, #ff6b9d 0%, #ffb86b 50%, #4fd1a5 100%);
+      --m-bg: #fdfcf6; --m-quote: #f1efff; --m-quote-line: #5a46e0; --m-glow: rgba(0,0,0,0);
+      --m-deco: conic-gradient(rgba(90,70,224,.045) 25%, transparent 0 50%, rgba(90,70,224,.045) 0 75%, transparent 0);
+      --m-deco-size: 16px 16px; --m-px: #2b2850;
+    }
+    .modal[data-theme="gamedark"] {  /* 게임 (어두운) */
       --blue: #7dff9b; --blue-soft: rgba(125,255,155,.1); --line: #2b2850; --page: #1c1a3a;
       --ink: #f3f1ff; --sub: #9a96c8; --heart: #ff6b9d;
       --grad-strong: linear-gradient(120deg, #ff6b9d 0%, #ffb86b 50%, #7dff9b 100%);
@@ -555,10 +562,10 @@
       --m-deco-size: 16px 16px;
     }
     /* 게임: 픽셀 느낌 */
-    .modal[data-theme="game"] .chat-ctas .chat-cta { border-radius: 6px; box-shadow: 4px 4px 0 #000; color: #14122b; }
-    .modal[data-theme="game"] .chat-ctas .chat-cta:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 #000; }
-    .modal[data-theme="game"] .d-tagline { border-radius: 0; border-left-width: 4px; border-left-style: dashed; }
-    .modal[data-theme="game"] .d-title::before { content: "▶"; color: var(--blue); font-size: .8em; animation: blink 1.1s steps(2) infinite; }
+    .modal[data-theme^="game"] .chat-ctas .chat-cta { border-radius: 6px; box-shadow: 4px 4px 0 var(--m-px, #000); color: #14122b; }
+    .modal[data-theme^="game"] .chat-ctas .chat-cta:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--m-px, #000); }
+    .modal[data-theme^="game"] .d-tagline { border-radius: 0; border-left-width: 4px; border-left-style: dashed; }
+    .modal[data-theme^="game"] .d-title::before { content: "▶"; color: var(--blue); font-size: .8em; animation: blink 1.1s steps(2) infinite; }
     @keyframes blink { 50% { opacity: 0; } }
     .m-top {
       display: flex; align-items: center; gap: 22px;
@@ -1037,7 +1044,7 @@
     }
 
     /* ---- 상세 ---- */
-    const THEMES = ["sakura", "night", "forest", "sunset", "ocean", "cream", "noir", "rose", "lavender","mint","lemon","peach","sky","mono","wine","home","fire","police","hospital","school","office","cafe","idol","palace","oriental","apocalypse","cyber","horror","game"];
+    const THEMES = ["sakura", "night", "forest", "sunset", "ocean", "cream", "noir", "rose", "lavender","mint","lemon","peach","sky","mono","wine","home","fire","police","hospital","school","office","cafe","idol","palace","oriental","apocalypse","cyber","horror","game","gamedark"];
     function showTweet(i) {
       const c = characters[i];
       if (THEMES.includes(c.theme)) $("modal").dataset.theme = c.theme; else delete $("modal").dataset.theme;
