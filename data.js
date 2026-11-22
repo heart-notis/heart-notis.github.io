@@ -24,7 +24,8 @@ window.SITE_DATA = {
       "title": "제작 캐릭터 홈페이지 업데이트 중♥",
       "date": "2026-11-22",
       "pinned": true,
-      "body": "천천히 진행하고 있습니다. (ㅅ•᎑•*)♥"
+      "body": "천천히 진행하고 있습니다. (ㅅ•᎑•*)♥",
+      "onPosts": true
     }
   ],
   "posts": [
