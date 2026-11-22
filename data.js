@@ -11,10 +11,10 @@ window.SITE_DATA = {
   "notices": [
     {
       "id": "mwrle0z9yili",
-      "title": "TEST",
+      "title": "제작 캐릭터 홈페이지 업데이트 중♥",
       "date": "2026-11-22",
       "pinned": true,
-      "body": "테스트"
+      "body": "천천히 진행하고 있습니다. (ㅅ•᎑•*)♥"
     }
   ],
   "posts": []
