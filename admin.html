@@ -163,6 +163,7 @@
         <svg class="heart" viewBox="0 0 24 24"><path fill="url(#hg)" d="M12 21.2s-8.6-5.2-10.4-10.6C.3 6.6 2.8 2.8 6.7 2.8c2.3 0 4.1 1.2 5.3 3.1 1.2-1.9 3-3.1 5.3-3.1 3.9 0 6.4 3.8 5.1 7.8C20.6 16 12 21.2 12 21.2z"/></svg>
         <h1>제작자 페이지</h1>
         <a class="link-btn" href="index.html" target="_blank" rel="noopener">사이트 보기 ↗</a>
+        <button class="link-btn" id="settingsBtn">⚙️ 연결</button>
         <button class="link-btn" id="logoutBtn">잠그기</button>
       </div>
     </header>
@@ -209,7 +210,7 @@
       <div class="bottom-inner">
         <div class="status" id="status"></div>
         <button class="btn btn-ghost" id="previewBtn">미리보기</button>
-        <button class="btn btn-main" id="exportBtn">업데이트 파일 만들기</button>
+        <button class="btn btn-main" id="publishBtn">사이트에 올리기</button>
       </div>
     </div>
   </div>
@@ -220,7 +221,7 @@
   </div>
   <div class="toast" id="toast"></div>
 
-  <script src="data.js"></script>
+  <script>document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script>
   <script>
     /* =====================================================
        🔒 비밀번호 — 바꾸고 싶으면 Claude에게 말해주세요
@@ -268,7 +269,7 @@
     };
 
     /* ---------- 데이터 ---------- */
-    const SERVER = clone(window.SITE_DATA || { tags: [], notices: [], posts: [] });
+    let SERVER = clone(window.SITE_DATA || { tags: [], notices: [], posts: [] });
     SERVER.tags = SERVER.tags || []; SERVER.notices = SERVER.notices || []; SERVER.posts = SERVER.posts || [];
     let data = clone(SERVER);
     const sameAsServer = d => JSON.stringify({ t: d.tags, n: d.notices, p: d.posts }) === JSON.stringify({ t: SERVER.tags, n: SERVER.notices, p: SERVER.posts });
@@ -578,8 +579,8 @@
       return new Uint8Array(await r.arrayBuffer());
     }
 
-    $("exportBtn").onclick = async () => {
-      const btn = $("exportBtn");
+    async function exportZip(btn) {
+      const label = btn.textContent;
       btn.disabled = true; btn.textContent = "만드는 중…";
       try {
         const out = clone(data);
@@ -612,9 +613,9 @@
         console.error(err);
         toast("파일을 못 만들었어요. 사이트 주소(https://heart-notis.github.io/admin.html)에서 열었는지 확인해주세요.");
       } finally {
-        btn.disabled = false; btn.textContent = "업데이트 파일 만들기";
+        btn.disabled = false; btn.textContent = label;
       }
-    };
+    }
     function showDone() {
       edit = { kind: "done" };
       $("editor").innerHTML = `
@@ -631,6 +632,145 @@
           <button class="btn btn-main" data-close>확인</button>
         </div>`;
       $("overlay").classList.add("open");
+    }
+
+    /* =====================================================
+       🚀 GitHub에 바로 올리기
+       ===================================================== */
+    const REPO = "heart-notis/heart-notis.github.io", BRANCH = "main";
+    const TOKEN_KEY = "heart_gh_token";
+    const getToken = () => { try { return localStorage.getItem(TOKEN_KEY) || ""; } catch { return ""; } };
+    const setToken = t => { try { t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY); } catch {} };
+    const toB64 = bytes => { let s = ""; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(s); };
+
+    async function gh(path, opts = {}) {
+      const r = await fetch(`https://api.github.com/repos/${REPO}${path}`, {
+        ...opts,
+        cache: "no-store",
+        headers: { Authorization: `Bearer ${getToken()}`, Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28", ...(opts.body ? { "Content-Type": "application/json" } : {}) }
+      });
+      if (!r.ok) { const e = new Error("GitHub " + r.status); e.status = r.status; throw e; }
+      return r.status === 204 ? null : r.json();
+    }
+    async function fileSha(path) {
+      try { return (await gh(`/contents/${path}?ref=${BRANCH}`)).sha; }
+      catch (e) { if (e.status === 404) return null; throw e; }
+    }
+    async function putFile(path, bytes, message) {
+      const sha = await fileSha(path);
+      await gh(`/contents/${path}`, { method: "PUT", body: JSON.stringify({ message, content: toB64(bytes), branch: BRANCH, ...(sha ? { sha } : {}) }) });
+    }
+    function ghErrorText(e) {
+      if (e.status === 401) return "열쇠(토큰)가 틀렸거나 기간이 끝났어요. ⚙️ 연결에서 다시 넣어주세요.";
+      if (e.status === 403 || e.status === 404) return "열쇠(토큰)에 heart-notis.github.io 쓰기 권한이 없어요. ⚙️ 연결을 확인해주세요.";
+      if (e.status === 409 || e.status === 422) return "GitHub가 잠깐 바빴어요. 한 번만 다시 눌러주세요.";
+      return "인터넷 연결을 확인하고 다시 시도해주세요.";
+    }
+
+    $("publishBtn").onclick = async () => {
+      if (!getToken()) { openSettings(true); return; }
+      if (sameAsServer(data)) { toast("이미 사이트와 같은 상태예요"); return; }
+      const btn = $("publishBtn");
+      btn.disabled = true;
+      const step = t => { btn.textContent = t; };
+      try {
+        const out = clone(data);
+        const uploads = [];
+        for (const p of out.posts) {
+          if (p.image && p.image.startsWith("data:")) {
+            const path = `images/post-${p.id}.jpg`;
+            uploads.push({ path, bytes: dataUrlBytes(p.image), name: p.name });
+            p.image = path;
+          }
+        }
+        let n = 0;
+        for (const u of uploads) { step(`사진 올리는 중 (${++n}/${uploads.length})`); await putFile(u.path, u.bytes, `사진 추가: ${u.name}`); }
+
+        step("글 저장하는 중…");
+        const js = "/* 이 파일은 제작자 페이지(admin.html)가 자동으로 만들어요. 직접 고치지 않아도 돼요. */\nwindow.SITE_DATA = " + JSON.stringify({ tags: out.tags, notices: out.notices, posts: out.posts }, null, 2) + ";\n";
+        await putFile("data.js", new TextEncoder().encode(js), "게시물 · 공지 업데이트");
+
+        // 지운 게시물의 사진 정리
+        step("정리하는 중…");
+        try {
+          const used = new Set(out.posts.map(p => p.image));
+          const list = await gh(`/contents/images?ref=${BRANCH}`);
+          for (const f of list) {
+            if (/^post-.*\.jpg$/.test(f.name) && !used.has(f.path)) {
+              await gh(`/contents/${f.path}`, { method: "DELETE", body: JSON.stringify({ message: `사진 정리: ${f.name}`, sha: f.sha, branch: BRANCH }) });
+            }
+          }
+        } catch (e) { console.warn("정리 건너뜀", e); }
+
+        SERVER = clone(out); data = out;
+        store.del(DRAFT_KEY); renderAll();
+        showPublished();
+      } catch (e) {
+        console.error(e);
+        toast(ghErrorText(e));
+        if (e.status === 401 || e.status === 403 || e.status === 404) openSettings();
+      } finally {
+        btn.disabled = false; btn.textContent = "사이트에 올리기";
+      }
+    };
+    function showPublished() {
+      edit = { kind: "done" };
+      $("editor").innerHTML = `
+        <div class="ed-top"><h3>사이트에 올렸어요 💜</h3><button class="icon" data-close aria-label="닫기">${I.x}</button></div>
+        <div class="ed-body done-card">
+          <div>GitHub에 저장했어요. <b>1~2분 뒤</b> 사이트에 반영돼요.</div>
+          <div class="hint">바로 안 보이면 잠깐 기다렸다가 사이트를 새로고침해주세요.</div>
+        </div>
+        <div class="ed-foot">
+          <a class="btn btn-line" href="index.html" target="_blank" rel="noopener">사이트 보기 ↗</a>
+          <button class="btn btn-main" data-close>확인</button>
+        </div>`;
+      $("overlay").classList.add("open");
+    }
+
+    /* ---------- ⚙️ 연결 설정 ---------- */
+    $("settingsBtn").onclick = () => openSettings();
+    function openSettings(needToken) {
+      const has = !!getToken();
+      edit = { kind: "settings" };
+      $("editor").innerHTML = `
+        <div class="ed-top"><h3>GitHub 연결</h3><button class="icon" data-close aria-label="닫기">${I.x}</button></div>
+        <div class="ed-body">
+          ${needToken ? `<div class="banner" style="margin:0"><span>바로 올리려면 처음 한 번 GitHub 열쇠(토큰)를 넣어주세요.</span></div>` : ""}
+          <div class="hint" style="line-height:1.7">
+            1. <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener" style="color:var(--accent);font-weight:700">GitHub 토큰 만들기 ↗</a><br/>
+            2. Resource owner: <b>heart-notis</b> · Repository access: <b>heart-notis.github.io</b>만<br/>
+            3. Permissions → Repository → <b>Contents: Read and write</b><br/>
+            4. 만든 토큰을 아래에 붙여넣기
+          </div>
+          <label class="f">GitHub 토큰 <small>이 브라우저에만 저장돼요. 다른 사람에게 보여주지 마세요.</small>
+            <input type="password" id="tokenInput" placeholder="${has ? "저장된 토큰이 있어요 (바꾸려면 새로 붙여넣기)" : "github_pat_로 시작해요"}" autocomplete="off" />
+          </label>
+          <div class="hint" id="tokenStatus">${has ? "✅ 토큰이 저장돼 있어요" : "아직 토큰이 없어요"}</div>
+          <hr style="border:none;border-top:1px solid var(--line)" />
+          <div class="hint">예비용: GitHub 연결 없이 업데이트 파일(zip)로 받아서 Claude에게 보낼 수도 있어요.</div>
+          <button class="btn btn-ghost" id="zipBtn" style="align-self:flex-start">zip 파일로 받기</button>
+        </div>
+        <div class="ed-foot">
+          ${has ? `<button class="btn btn-danger" id="tokenDel">토큰 지우기</button>` : ""}
+          <button class="btn btn-line" id="tokenTest">연결 확인</button>
+          <button class="btn btn-main" id="tokenSave">저장</button>
+        </div>`;
+      $("overlay").classList.add("open"); document.body.style.overflow = "hidden";
+      const status = t => { $("tokenStatus").textContent = t; };
+      const saveInput = () => { const v = $("tokenInput").value.trim(); if (v) setToken(v); return v; };
+      $("tokenSave").onclick = () => { if (saveInput()) { status("✅ 저장했어요"); toast("토큰을 저장했어요"); closeEditor(); } else status("토큰을 붙여넣어주세요"); };
+      $("tokenTest").onclick = async () => {
+        saveInput();
+        if (!getToken()) { status("토큰을 붙여넣어주세요"); return; }
+        status("확인하는 중…");
+        try {
+          const repo = await gh("");
+          status(repo.permissions && repo.permissions.push ? "✅ 연결됐어요! 바로 올릴 수 있어요" : "⚠️ 연결은 됐는데 쓰기 권한이 없어요 (Contents: Read and write 확인)");
+        } catch (e) { status("❌ " + ghErrorText(e)); }
+      };
+      if ($("tokenDel")) $("tokenDel").onclick = () => { setToken(""); toast("토큰을 지웠어요"); closeEditor(); };
+      $("zipBtn").onclick = () => exportZip($("zipBtn"));
     }
 
     /* ---------- 시작 ---------- */
