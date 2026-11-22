@@ -13,7 +13,7 @@ window.SITE_DATA = {
       "id": "mwrle0z9yili",
       "title": "TEST",
       "date": "2026-11-22",
-      "pinned": false,
+      "pinned": true,
       "body": "테스트"
     }
   ],
