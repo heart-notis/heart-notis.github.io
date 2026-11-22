@@ -320,6 +320,8 @@
       padding: 5vh 16px; overflow-y: auto;
     }
     .overlay.open { display: flex; animation: fade .15s ease; }
+    .overlay { overscroll-behavior: contain; }   /* 게시물 끝까지 내려도 뒤 화면이 같이 움직이지 않게 */
+    html.modal-open, html.modal-open body { overflow: hidden; }
     @keyframes fade { from { opacity: 0; } }
     .modal {
       background: #fff; width: 100%; max-width: 600px;
@@ -418,7 +420,7 @@
       .tweet { padding: 10px 12px; gap: 10px; }
       .t-ava { width: 42px; height: 42px; }
       .overlay { padding: 0; }
-      .modal { border-radius: 0; min-height: 100%; }
+      .modal { border-radius: 0; min-height: 100%; min-height: 100dvh; }
     }
   </style>
 </head>
@@ -809,11 +811,11 @@
           </div>
         </article>` : ""}`;
       $("overlay").classList.add("open");
-      document.body.style.overflow = "hidden";
+      document.documentElement.classList.add("modal-open");
     }
     function hideTweet() {
       $("overlay").classList.remove("open");
-      document.body.style.overflow = "";
+      document.documentElement.classList.remove("modal-open");
     }
 
     /* ---- 뒤로가기: 게시물 → 목록, 탭 → 이전 탭 (사이트를 나가지 않게) ---- */
