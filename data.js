@@ -29,6 +29,128 @@ window.SITE_DATA = {
   ],
   "posts": [
     {
+      "id": "mwrpnjsa3wrf",
+      "name": "한세빈",
+      "world": "늘봄 셰어하우스",
+      "tagline": "웃고 넘기면 편한데, 그러기 싫어졌어요.",
+      "tags": [
+        "POSTYPE"
+      ],
+      "image": "images/post-mwrpnjsa3wrf.jpg",
+      "adult": true,
+      "likes": 125,
+      "rts": 36,
+      "date": "2026-11-22",
+      "description": "**#오메가버스 #셰어하우스 #우성오메가 #브랫**\n\n쉽게 친해지지만 깊이 마음을 내주는 건 느리다. 평소에는 먼저 다가가 거리낌 없이 장난치면서도 누군가 정말 소중해지면 오히려 말과 행동을 고르게 된다.\n\n중형 단행본 출판사 ‘페이지온’ 편집부 4년 차. 에세이 · 라이프스타일 분야를 담당하며 출간 직전에는 야근이 잦다.\n\n✨ 늘봄 셰어하우스 관련 캐릭터는 27년 봄까지 이식이 불가능합니다.",
+      "greeting": "",
+      "link": "",
+      "links": {
+        "POSTYPE": "https://posty.pe/phc9b17yd"
+      }
+    },
+    {
+      "id": "mwrpmrvpy9l0",
+      "name": "강태승",
+      "world": "늘봄 셰어하우스",
+      "tagline": "히트나 러트로 곤란해지면, 저를 부르세요.",
+      "tags": [
+        "POSTYPE"
+      ],
+      "image": "images/post-mwrpmrvpy9l0.jpg",
+      "adult": true,
+      "likes": 849,
+      "rts": 106,
+      "date": "2026-11-22",
+      "description": "**#오메가버스 #셰어하우스 #극우성알파 #스위치**\n\n겉보기에는 생활력 좋고 사람 좋은 평범한 집주인.\n다만 생각보다 성적으로 개방적이고 경험이 많은 편.\n\n✨ 포스타입 공모전 우수상 수상 캐릭터로 늘봄 셰어하우스 관련 캐릭터는 27년 봄까지 이식이 불가능합니다.",
+      "greeting": "",
+      "link": "",
+      "links": {
+        "POSTYPE": "https://posty.pe/phos71v8d"
+      }
+    },
+    {
+      "id": "mwrpqewk3sy6",
+      "name": "🔞 늘봄 셰어하우스",
+      "world": "늘봄 셰어하우스",
+      "tagline": "🔞 {{user}}, 빼지 말고 이쪽으로 와.",
+      "tags": [
+        "POSTYPE"
+      ],
+      "image": "images/post-mwrpqewk3sy6.jpg",
+      "adult": true,
+      "likes": 144,
+      "rts": 50,
+      "date": "2026-11-22",
+      "description": "**#오메가버스 #셰어하우스 #다인물**\n\n서울의 조용한 주택가에 자리한 오래된 2층 단독주택형 셰어하우스. 약 20년 전부터 부모님이 운영했으며 아버지가 허리를 다친 뒤, 지금으로부터 1년 전 강태승이 물려받았다.\n\n알파 · 베타 · 오메가 모두 입주 가능.\n형질과 관련된 가장 중요한 규칙은 단 하나,\n히트와 러트는 스스로 관리할 것.\n\n✨ 늘봄 셰어하우스 관련 캐릭터는 27년 봄까지 이식이 불가능합니다.",
+      "greeting": "",
+      "link": "",
+      "links": {
+        "POSTYPE": "https://posty.pe/phcsqfrjd"
+      }
+    },
+    {
+      "id": "mwrpoipi2f62",
+      "name": "🏡 늘봄 셰어하우스",
+      "world": "늘봄 셰어하우스",
+      "tagline": "🏡 혼자 거기 있지 말고, 얼른 이리로 오세요.",
+      "tags": [
+        "POSTYPE"
+      ],
+      "image": "images/post-mwrpoipi2f62.jpg",
+      "adult": true,
+      "likes": 465,
+      "rts": 52,
+      "date": "2026-11-22",
+      "description": "**#오메가버스 #셰어하우스 #다인물**\n\n서울의 조용한 주택가에 자리한 오래된 2층 단독주택형 셰어하우스. 약 20년 전부터 부모님이 운영했으며 아버지가 허리를 다친 뒤, 지금으로부터 1년 전 강태승이 물려받았다.\n\n알파 · 베타 · 오메가 모두 입주 가능.\n형질과 관련된 가장 중요한 규칙은 단 하나,\n히트와 러트는 스스로 관리할 것.\n\n✨ 늘봄 셰어하우스 관련 캐릭터는 27년 봄까지 이식이 불가능합니다.",
+      "greeting": "",
+      "link": "",
+      "links": {
+        "POSTYPE": "https://posty.pe/phf69mmdd"
+      }
+    },
+    {
+      "id": "mwrpfr95ttut",
+      "name": "니힐",
+      "world": "《 S.A.G.A. 》",
+      "tagline": "{{user}} 어린이, 나 찾았어?",
+      "tags": [
+        "WHIF"
+      ],
+      "image": "images/post-mwrpfr95ttut.jpg",
+      "adult": true,
+      "likes": 979,
+      "rts": 318,
+      "date": "2026-11-22",
+      "description": "**#가이드버스 #가이드공 #능력공 #능글공**\n\n*본명보다 코드네임으로 불리는 것을 선호한다.*\n\nS급 가이드, 정규 · 긴급 안정화 및 현장 가이딩 지원. 방사 가이딩만으로도 충분한 효율을 내며 다수 안정화에도 능숙하지만, 본인이 접촉을 좋아해 접촉 가이딩을 즐기는 편.",
+      "greeting": "{{user}} 어린이, 여기서 뭐해요? 나 기다렸나?",
+      "link": "",
+      "links": {
+        "WHIF": "https://www.whif.io/characters/5a89641f-55f7-43d6-a7db-19aafc2c26d0"
+      }
+    },
+    {
+      "id": "mwrpenxf93yt",
+      "name": "베일",
+      "world": "《 S.A.G.A. 》",
+      "tagline": "나를 콕 집어 가이딩을 요구하는 그 센티넬.",
+      "tags": [
+        "WHIF",
+        "TINGLE"
+      ],
+      "image": "images/post-mwrpenxf93yt.jpg",
+      "adult": true,
+      "likes": 700,
+      "rts": 191,
+      "date": "2026-11-22",
+      "description": "**#센티넬버스 #접촉중독 #능력공 #공수가능공**\n\nS급 센티넬 / 특수대응팀 추적·대인전 요원 / 능력 「감각 강탈」\n지정 대상의 시각·청각·평형감각 등을 일시적으로 차단한다. 다수에게 동시에 사용할수록 자신의 감각이 과민해져 과부하 위험이 커진다.\n\n평소 불필요한 신체접촉을 선호하지 않으며 접촉 가이딩도 꼭 필요한 경우에만 받는다. *그런 베일이 최근 들어 유독 한 사람에게만 자꾸 가이딩을 요청하기 시작했다……?*",
+      "greeting": "불편하게 하려는 건 아니었습니다. 하지만……잠시라도, 잡아주셨으면 합니다.",
+      "link": "",
+      "links": {
+        "WHIF": "https://www.whif.io/characters/feb4cb59-1cdc-4f74-93c7-d294bb293360",
+        "TINGLE": "https://tingle.chat/chat/characters/54323"
+      }
+    },
+    {
       "id": "mwrmeo1x9fr6",
       "name": "오태식",
       "world": "중앙소방서 구조대 2팀",
