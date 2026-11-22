@@ -416,6 +416,150 @@
       --grad-strong: linear-gradient(120deg, #9e2f4b 0%, #c2566e 55%, #e3909e 100%);
       --m-bg: #fffafb; --m-quote: #fbeef1; --m-quote-line: #c2566e; --m-glow: rgba(158,47,75,.3);
     }
+    .modal[data-theme="lavender"] {  /* 라벤더 */
+      --blue: #8a6fe0; --blue-soft: #f2eeff; --line: #e8e1fb; --page: #f7f4ff;
+      --grad-strong: linear-gradient(120deg, #a993f4 0%, #c9b6ff 50%, #e3d4ff 100%);
+      --m-bg: #fcfbff; --m-quote: #f4f0ff; --m-quote-line: #b9a2f6; --m-glow: rgba(169,147,244,.35);
+    }
+    .modal[data-theme="mint"] {  /* 민트 */
+      --blue: #2fa58f; --blue-soft: #e5f7f3; --line: #d5efe9; --page: #f0faf8;
+      --grad-strong: linear-gradient(120deg, #5fd0b6 0%, #8fe3cf 50%, #c8f2e4 100%);
+      --m-bg: #fafffd; --m-quote: #ebf8f4; --m-quote-line: #8fe3cf; --m-glow: rgba(95,208,182,.32);
+    }
+    .modal[data-theme="lemon"] {  /* 레몬 */
+      --blue: #b88d06; --blue-soft: #fff8db; --line: #f3ebc8; --page: #fffbea;
+      --grad-strong: linear-gradient(120deg, #f2c230 0%, #ffdb6e 50%, #fff0a8 100%);
+      --m-bg: #fffefa; --m-quote: #fff8de; --m-quote-line: #f2c230; --m-glow: rgba(242,194,48,.32);
+    }
+    .modal[data-theme="peach"] {  /* 피치 */
+      --blue: #e07a6a; --blue-soft: #ffeee9; --line: #f7e0da; --page: #fff5f2;
+      --grad-strong: linear-gradient(120deg, #ff9a8b 0%, #ffb8a3 50%, #ffd6c4 100%);
+      --m-bg: #fffbfa; --m-quote: #fff0ec; --m-quote-line: #ffb8a3; --m-glow: rgba(255,154,139,.35);
+    }
+    .modal[data-theme="sky"] {  /* 하늘 */
+      --blue: #3c8fe0; --blue-soft: #e8f3fe; --line: #d9e9f8; --page: #f2f8ff;
+      --grad-strong: linear-gradient(120deg, #6fb3f5 0%, #9fcdfa 50%, #cfe7ff 100%);
+      --m-bg: #fbfdff; --m-quote: #edf5fe; --m-quote-line: #9fcdfa; --m-glow: rgba(111,179,245,.32);
+    }
+    .modal[data-theme="mono"] {  /* 모노 */
+      --blue: #4a4f57; --blue-soft: #eef0f2; --line: #e3e6e9; --page: #f5f6f7;
+      --grad-strong: linear-gradient(120deg, #5b616b 0%, #8d949e 50%, #c3c8cf 100%);
+      --m-bg: #ffffff; --m-quote: #f3f4f6; --m-quote-line: #9aa1ab; --m-glow: rgba(80,86,96,.25);
+    }
+    .modal[data-theme="wine"] {  /* 와인 */
+      --blue: #f0a9bf; --blue-soft: rgba(240,169,191,.12); --line: #3a1e29; --page: #2a1520;
+      --ink: #f8e9ee; --sub: #b7919f; --heart: #f3a6c0;
+      --grad-strong: linear-gradient(120deg, #6e1f3a 0%, #9c2f55 50%, #d0607f 100%);
+      --m-bg: #1e0f16; --m-text: #f0dde4; --m-text2: #d8bfc9; --m-quote: rgba(240,169,191,.07); --m-quote-line: #9c2f55; --m-glow: rgba(156,47,85,.45);
+    }
+    .modal[data-theme="home"] {  /* 셰어하우스 */
+      --blue: #c0763a; --blue-soft: #fdf1e6; --line: #f0e2d3; --page: #fbf5ee;
+      --grad-strong: linear-gradient(120deg, #f0a868 0%, #f6c58f 50%, #fbe1b8 100%);
+      --m-bg: #fffcf7; --m-quote: #fdf3e7; --m-quote-line: #f0a868; --m-glow: rgba(240,168,104,.35);
+      --m-deco: linear-gradient(90deg, rgba(240,168,104,.07) 50%, transparent 50%), linear-gradient(rgba(240,168,104,.07) 50%, transparent 50%);
+      --m-deco-size: 28px 28px;
+    }
+    .modal[data-theme="fire"] {  /* 소방서 */
+      --blue: #d8432b; --blue-soft: #fdebe6; --line: #f6dcd4; --page: #fff4f0;
+      --grad-strong: linear-gradient(120deg, #e2412b 0%, #f26b2f 50%, #f9a23a 100%);
+      --m-bg: #fffbf9; --m-quote: #fff0ea; --m-quote-line: #f26b2f; --m-glow: rgba(226,65,43,.35);
+      --m-deco: repeating-linear-gradient(135deg, rgba(242,107,47,.05) 0 12px, transparent 12px 24px);
+      --m-deco-size: auto;
+    }
+    .modal[data-theme="police"] {  /* 경찰·수사 */
+      --blue: #1f3c88; --blue-soft: #e8edf8; --line: #dbe2f1; --page: #f1f4fa;
+      --grad-strong: linear-gradient(120deg, #1f3c88 0%, #2f58b5 50%, #c9a43a 100%);
+      --m-bg: #fbfcfe; --m-quote: #eef2fa; --m-quote-line: #c9a43a; --m-glow: rgba(31,60,136,.3);
+      --m-deco: linear-gradient(rgba(31,60,136,.035) 1px, transparent 1px);
+      --m-deco-size: 100% 18px;
+    }
+    .modal[data-theme="hospital"] {  /* 병원 */
+      --blue: #1f9d8f; --blue-soft: #e6f6f4; --line: #d8eeeb; --page: #f2faf9;
+      --grad-strong: linear-gradient(120deg, #36b7a8 0%, #7fd3c6 50%, #bfe9e1 100%);
+      --m-bg: #ffffff; --m-quote: #eef9f7; --m-quote-line: #7fd3c6; --m-glow: rgba(54,183,168,.3);
+      --m-deco: radial-gradient(circle at 50% 50%, rgba(54,183,168,.10) 0 2px, transparent 3px);
+      --m-deco-size: 26px 26px;
+    }
+    .modal[data-theme="school"] {  /* 학교 */
+      --blue: #3a7bd5; --blue-soft: #e9f1fc; --line: #dce7f6; --page: #f3f7fd;
+      --grad-strong: linear-gradient(120deg, #5b9df0 0%, #7fc3e8 50%, #a8e0c9 100%);
+      --m-bg: #fffffe; --m-quote: #eef4fd; --m-quote-line: #5b9df0; --m-glow: rgba(91,157,240,.3);
+      --m-deco: linear-gradient(transparent 27px, rgba(91,157,240,.12) 27px 28px);
+      --m-deco-size: 100% 28px;
+    }
+    .modal[data-theme="office"] {  /* 오피스 */
+      --blue: #3b5b7a; --blue-soft: #eaf0f5; --line: #dfe6ec; --page: #f4f7f9;
+      --grad-strong: linear-gradient(120deg, #3b5b7a 0%, #5d7f9f 50%, #9bb4c9 100%);
+      --m-bg: #fcfdfe; --m-quote: #eff3f7; --m-quote-line: #5d7f9f; --m-glow: rgba(59,91,122,.28);
+      --m-deco: linear-gradient(rgba(59,91,122,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(59,91,122,.05) 1px, transparent 1px);
+      --m-deco-size: 22px 22px;
+    }
+    .modal[data-theme="cafe"] {  /* 카페 */
+      --blue: #7a5236; --blue-soft: #f4ece5; --line: #e9ded4; --page: #f7f1eb;
+      --grad-strong: linear-gradient(120deg, #6f4a32 0%, #a47551 50%, #d9b48f 100%);
+      --m-bg: #fffcf9; --m-quote: #f6eee6; --m-quote-line: #a47551; --m-glow: rgba(111,74,50,.3);
+      --m-deco: radial-gradient(ellipse 5px 3.5px at 50% 50%, rgba(122,82,54,.08), transparent 80%);
+      --m-deco-size: 48px 48px;
+    }
+    .modal[data-theme="idol"] {  /* 아이돌·무대 */
+      --blue: #c0398f; --blue-soft: #fbe8f5; --line: #f3daea; --page: #fdf2f9;
+      --grad-strong: linear-gradient(120deg, #ff6fb5 0%, #c77dff 50%, #7aa8ff 100%);
+      --m-bg: #fffbfe; --m-quote: #fdf0f8; --m-quote-line: #c77dff; --m-glow: rgba(199,125,255,.38);
+      --m-deco: radial-gradient(1.6px 1.6px at 15% 25%, rgba(255,111,181,.55), transparent), radial-gradient(1.4px 1.4px at 70% 60%, rgba(199,125,255,.5), transparent), radial-gradient(1.6px 1.6px at 40% 85%, rgba(122,168,255,.5), transparent);
+      --m-deco-size: 120px 120px;
+    }
+    .modal[data-theme="palace"] {  /* 궁정·로판 */
+      --blue: #a8803a; --blue-soft: #f8f1e2; --line: #eee3cc; --page: #faf6ec;
+      --grad-strong: linear-gradient(120deg, #b8913f 0%, #d8b56a 50%, #efdca4 100%);
+      --m-bg: #fffdf7; --m-quote: #f9f3e4; --m-quote-line: #d8b56a; --m-glow: rgba(184,145,63,.32);
+      --m-deco: radial-gradient(circle at 0 0, rgba(184,145,63,.09) 0 2px, transparent 3px), radial-gradient(circle at 50% 50%, rgba(184,145,63,.09) 0 2px, transparent 3px);
+      --m-deco-size: 26px 26px;
+    }
+    .modal[data-theme="oriental"] {  /* 동양풍·무협 */
+      --blue: #9b2f2f; --blue-soft: #f5ebe4; --line: #e8ddd0; --page: #f6f0e6;
+      --grad-strong: linear-gradient(120deg, #2f2f2f 0%, #6b5d50 50%, #a8452f 100%);
+      --m-bg: #fbf7ef; --m-quote: #f3ece0; --m-quote-line: #9b2f2f; --m-glow: rgba(80,60,40,.3);
+      --m-deco: radial-gradient(ellipse 40px 2px at 30% 40%, rgba(90,70,50,.05), transparent), radial-gradient(ellipse 30px 1.5px at 75% 75%, rgba(90,70,50,.05), transparent);
+      --m-deco-size: 140px 140px;
+    }
+    .modal[data-theme="apocalypse"] {  /* 아포칼립스 */
+      --blue: #d9a441; --blue-soft: rgba(217,164,65,.12); --line: #34322a; --page: #24221c;
+      --ink: #ece6d6; --sub: #9c9583; --heart: #d9a441;
+      --grad-strong: linear-gradient(120deg, #4a4a32 0%, #7a6a3a 50%, #c4782f 100%);
+      --m-bg: #1b1a16; --m-text: #ddd6c4; --m-text2: #c2baa6; --m-quote: rgba(217,164,65,.06); --m-quote-line: #c4782f; --m-glow: rgba(196,120,47,.35);
+      --m-deco: repeating-linear-gradient(45deg, rgba(217,164,65,.035) 0 10px, transparent 10px 20px);
+      --m-deco-size: auto;
+    }
+    .modal[data-theme="cyber"] {  /* 사이버펑크 */
+      --blue: #3ff0ff; --blue-soft: rgba(63,240,255,.1); --line: #1e2440; --page: #121530;
+      --ink: #e9f6ff; --sub: #8b94c0; --heart: #ff4fd8;
+      --grad-strong: linear-gradient(120deg, #ff2fd0 0%, #8a5cff 50%, #2fe6ff 100%);
+      --m-bg: #0b0d1a; --m-text: #d6e4ff; --m-text2: #b9c6ef; --m-quote: rgba(63,240,255,.06); --m-quote-line: #ff2fd0; --m-glow: rgba(255,47,208,.45);
+      --m-deco: linear-gradient(rgba(63,240,255,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,47,208,.05) 1px, transparent 1px);
+      --m-deco-size: 32px 32px;
+    }
+    .modal[data-theme="horror"] {  /* 호러·오컬트 */
+      --blue: #e0525a; --blue-soft: rgba(216,67,75,.12); --line: #2a1d1d; --page: #171010;
+      --ink: #efe3e3; --sub: #9a8585; --heart: #e0525a;
+      --grad-strong: linear-gradient(120deg, #3a0a0f 0%, #7a1018 50%, #c0262f 100%);
+      --m-bg: #0d0a0a; --m-text: #e2d2d2; --m-text2: #c8b4b4; --m-quote: rgba(216,67,75,.06); --m-quote-line: #7a1018; --m-glow: rgba(192,38,47,.4);
+      --m-deco: radial-gradient(ellipse at 50% 0%, rgba(192,38,47,.14), transparent 60%);
+      --m-deco-size: 100% 100%;
+    }
+    .modal[data-theme="game"] {  /* 게임 */
+      --blue: #7dff9b; --blue-soft: rgba(125,255,155,.1); --line: #2b2850; --page: #1c1a3a;
+      --ink: #f3f1ff; --sub: #9a96c8; --heart: #ff6b9d;
+      --grad-strong: linear-gradient(120deg, #ff6b9d 0%, #ffb86b 50%, #7dff9b 100%);
+      --m-bg: #14122b; --m-text: #e8e6ff; --m-text2: #cfcaf5; --m-quote: rgba(125,255,155,.06); --m-quote-line: #7dff9b; --m-glow: rgba(0,0,0,0);
+      --m-deco: conic-gradient(rgba(255,255,255,.03) 25%, transparent 0 50%, rgba(255,255,255,.03) 0 75%, transparent 0);
+      --m-deco-size: 16px 16px;
+    }
+    /* 게임: 픽셀 느낌 */
+    .modal[data-theme="game"] .chat-ctas .chat-cta { border-radius: 6px; box-shadow: 4px 4px 0 #000; color: #14122b; }
+    .modal[data-theme="game"] .chat-ctas .chat-cta:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 #000; }
+    .modal[data-theme="game"] .d-tagline { border-radius: 0; border-left-width: 4px; border-left-style: dashed; }
+    .modal[data-theme="game"] .d-title::before { content: "▶"; color: var(--blue); font-size: .8em; animation: blink 1.1s steps(2) infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
     .m-top {
       display: flex; align-items: center; gap: 22px;
       padding: 8px 12px; border-bottom: 1px solid var(--line);
@@ -893,7 +1037,7 @@
     }
 
     /* ---- 상세 ---- */
-    const THEMES = ["sakura", "night", "forest", "sunset", "ocean", "cream", "noir", "rose"];
+    const THEMES = ["sakura", "night", "forest", "sunset", "ocean", "cream", "noir", "rose", "lavender","mint","lemon","peach","sky","mono","wine","home","fire","police","hospital","school","office","cafe","idol","palace","oriental","apocalypse","cyber","horror","game"];
     function showTweet(i) {
       const c = characters[i];
       if (THEMES.includes(c.theme)) $("modal").dataset.theme = c.theme; else delete $("modal").dataset.theme;
