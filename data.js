@@ -11,7 +11,7 @@ window.SITE_DATA = {
   "profile": {
     "bio": "✦ 티팟을 메인으로 천천히 제작하고 있습니다.\n이식 요청은 하단의 메시지 탭으로 전송해주시면 열심히 작업해 업로드해보겠습니다. ✨\n\n늘 감사하고, 사랑합니다. (ㅅ•᎑•*)💕",
     "link": "https://spin-spin.com/h34r7",
-    "linkLabel": "ASK♥",
+    "linkLabel": "답변이 필요한 익명 창구♥",
     "avatar": "images/profile.jpg",
     "avatarSmall": "images/profile-sm.jpg",
     "avatarPosition": "center 50%",
