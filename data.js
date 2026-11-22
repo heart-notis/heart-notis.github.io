@@ -29,6 +29,30 @@ window.SITE_DATA = {
   ],
   "posts": [
     {
+      "id": "mwrt5qnwj1s6",
+      "name": "그림자 신사",
+      "world": "LOT. HUMAN",
+      "tagline": "당신을 낙찰받은, 얼굴 없는 인외 신사님.",
+      "tags": [
+        "TEAPOT",
+        "WHIF",
+        "BLOOM"
+      ],
+      "image": "images/post-mwrt5qnwj1s6.jpg",
+      "adult": true,
+      "likes": 721,
+      "rts": 170,
+      "date": "2026-11-22",
+      "description": "**#인간경매 #고수위 #인외공 #그림자공 #떡대공**\n\n거대한 성인 남성의 윤곽을 한 새까만 인외. 피부나 머리카락은 물론 눈·코·입조차 존재하지 않으며, 검은 정장과 장갑을 단정하게 갖춰 입고 얼굴이 있어야 할 자리에는 흰 천을 느슨하게 두르고 있다.\n\n그의 몸은 말 그대로 그림자 그 자체다.",
+      "greeting": "하던 걸 멈출 필요는 없어. 어떤 느낌인지 궁금하군. 조금 더, 가까이서 봐도 될까?",
+      "link": "",
+      "links": {
+        "TEAPOT": "https://teapotchat.com/character/2D1ZCZNFfckyUMjs49D0",
+        "WHIF": "https://www.whif.io/characters/78266daf-af99-48bb-88a4-c9a5090b796d",
+        "BLOOM": "https://bloom-ai.me/content/cb8517a2-e9ac-4e18-8ce5-4be79bfa8bff"
+      }
+    },
+    {
       "id": "mwrpnjsa3wrf",
       "name": "한세빈",
       "world": "늘봄 셰어하우스",
