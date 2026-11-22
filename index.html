@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>하트 (@HEART)</title>
+  <meta name="description" content="내가 만든 AI 채팅 캐릭터 모음" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+  <style>
+    :root {
+      --blue: #8b7cf0;          /* 포인트 글자색 (연보라) */
+      --blue-dark: #7464e6;
+      --blue-soft: #f1eefe;
+      --grad: linear-gradient(120deg, #cdbdf9 0%, #b3c9f8 50%, #9ad8f6 100%);
+      --grad-strong: linear-gradient(120deg, #a993f4 0%, #8fb2f3 50%, #74c6f0 100%);
+      --ink: #14171a;
+      --sub: #657786;
+      --faint: #aab8c2;
+      --line: #e6ecf0;
+      --page: #f5f8fa;
+      --heart: #9a82f2;
+      --heart-soft: #f1eefe;
+      --rt: #17bf63;
+      --ratio: 987 / 1216;   /* 게시물 이미지 비율 (가로 987 × 세로 1216) */
+      --sans: "Pretendard Variable", "Pretendard", -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--sans);
+      background: var(--page);
+      color: var(--ink);
+      font-size: 15px; line-height: 1.5;
+      letter-spacing: -0.01em;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration: none; }
+    button { font-family: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+    svg { display: block; }
+
+    html { overflow-x: clip; scrollbar-gutter: stable; }  /* 스티커·효과가 화면 밖으로 나가도 스크롤바 안 생기게 */
+    .col {
+      overflow-x: clip;
+      max-width: 600px; margin: 0 auto;
+      background: #fff;
+      border-left: 1px solid var(--line);
+      border-right: 1px solid var(--line);
+      min-height: 100vh;
+    }
+
+    /* ---------- 상단 바 ---------- */
+    .topbar {
+      position: sticky; top: 0; z-index: 20;
+      background: rgba(255,255,255,.88);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--line);
+      padding: 6px 16px;
+      display: flex; align-items: center; gap: 22px;
+      min-height: 53px;
+    }
+    .bird { width: 26px; height: 26px; filter: drop-shadow(0 2px 4px rgba(150,130,240,.35)); }
+    .tb-name { font-weight: 800; font-size: 1.1rem; line-height: 1.2; }
+    .tb-sub { font-size: .78rem; color: var(--sub); }
+
+    /* ---------- 프로필 ---------- */
+    /* ---------- 스티커 ---------- */
+    .sticker {
+      position: absolute; z-index: 3;
+      padding: 0; background: none; border: none; cursor: pointer;
+      transform: rotate(var(--rot));
+      filter: drop-shadow(0 3px 5px rgba(90, 70, 160, .28));
+      transition: transform .3s cubic-bezier(.3, 1.6, .5, 1);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .sticker img { width: 100%; display: block; pointer-events: none; user-select: none; -webkit-user-drag: none; }
+    .sticker:hover { transform: rotate(var(--rot)) scale(1.08); }
+    .sticker.boing { animation: boing .55s ease; }
+    @keyframes boing {
+      0%   { transform: rotate(var(--rot)) scale(1); }
+      30%  { transform: rotate(calc(var(--rot) * -1.2)) scale(1.14); }
+      60%  { transform: rotate(var(--rot)) scale(.94); }
+      100% { transform: rotate(var(--rot)) scale(1); }
+    }
+    .sticker-top { top: 5px; right: 14px; width: 54px; --rot: -10deg; }
+    .sticker-banner { top: 12px; right: 14px; width: 96px; --rot: 9deg; }
+    @media (max-width: 600px) {
+      .sticker-top { width: 48px; right: 10px; }
+      .sticker-banner { width: 74px; top: 8px; right: 10px; }
+    }
+
+    .banner {
+      position: relative;
+      aspect-ratio: 3 / 1;
+      background-color: #c4c3f8;
+      background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='90'%3E%3Cg fill='%23ffffff'%3E%3Cpath opacity='.35' d='M20 30s-9-5.5-10.8-11C8 15 10.6 11 14.6 11c2.3 0 4.1 1.2 5.4 3.1 1.2-1.9 3-3.1 5.3-3.1 4 0 6.6 4 5.4 8C28.9 24.5 20 30 20 30z'/%3E%3Cpath opacity='.22' transform='translate(70 45) scale(.6)' d='M20 30s-9-5.5-10.8-11C8 15 10.6 11 14.6 11c2.3 0 4.1 1.2 5.4 3.1 1.2-1.9 3-3.1 5.3-3.1 4 0 6.6 4 5.4 8C28.9 24.5 20 30 20 30z'/%3E%3C/g%3E%3C/svg%3E"),
+        var(--grad);
+      background-size: 120px 90px, cover; background-position: center;
+    }
+    .banner.has-img { aspect-ratio: 5 / 2; position: relative; }
+    .banner.has-img::after {   /* 아래쪽을 살짝 연보라로 물들여 테마와 연결 */
+      content: ""; position: absolute; inset: 0;
+      background: linear-gradient(180deg, rgba(200,185,250,0) 55%, rgba(200,185,250,.28) 100%);
+    }
+    .p-wrap { padding: 12px 16px 0; }
+    .p-row { display: flex; justify-content: space-between; align-items: flex-start; }
+    .avatar {
+      width: 134px; height: 134px;
+      margin-top: -79px;
+      border-radius: 50%;
+      border: 4px solid #fff;
+      background: var(--blue-soft);
+      box-shadow: 0 0 0 3px #d9cdfb;
+      position: relative; z-index: 1;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 3rem; font-weight: 800; color: var(--blue);
+      overflow: hidden;
+    }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; object-position: var(--ava-pos, center 20%); }
+    .follow {
+      border: 1.5px solid var(--blue);
+      color: var(--blue);
+      font-weight: 700; font-size: .92rem;
+      padding: 7px 18px; border-radius: 999px;
+      transition: background .15s;
+    }
+    .follow:hover { background: var(--blue-soft); }
+    .follow.on { background: var(--grad-strong); border-color: transparent; color: #fff; }
+    .follow.on:hover { filter: brightness(.95); }
+    .p-name { margin-top: 10px; font-size: 1.3rem; font-weight: 800; display: flex; align-items: center; gap: 4px; line-height: 1.25; }
+    .verified { width: 19px; height: 19px; }
+    .p-handle { color: var(--sub); font-size: .95rem; }
+    .p-bio { margin-top: 10px; white-space: pre-line; }
+    .p-meta { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 4px 14px; color: var(--sub); font-size: .9rem; }
+    .p-meta span, .p-meta a { display: inline-flex; align-items: center; gap: 4px; }
+    .p-meta svg { width: 17px; height: 17px; }
+    .p-meta a { color: var(--blue); }
+    .p-meta a:hover { text-decoration: underline; }
+    .p-counts { margin: 10px 0 14px; display: flex; gap: 18px; font-size: .9rem; color: var(--sub); }
+    .p-counts b { color: var(--ink); font-weight: 700; margin-right: 3px; }
+
+    /* ---------- 탭 ---------- */
+    .tabs { display: flex; border-bottom: 1px solid var(--line); }
+    .tab {
+      flex: 1; padding: 15px 0 13px;
+      font-weight: 700; font-size: .92rem; color: var(--sub);
+      position: relative; transition: background .15s;
+    }
+    .tab:hover { background: var(--blue-soft); color: var(--blue); }
+    .tab.active { color: var(--blue); }
+    .tab.active::after {
+      content: ""; position: absolute; left: 50%; bottom: 0;
+      transform: translateX(-50%);
+      width: 56px; height: 3px; border-radius: 3px; background: var(--grad-strong);
+    }
+
+    /* ---------- 해시태그 필터 ---------- */
+    .chips-wrap { position: relative; border-bottom: 1px solid var(--line); }
+    .chips {
+      display: flex; gap: 6px; padding: 10px 16px;
+      overflow-x: auto; scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      scroll-behavior: smooth;
+      cursor: grab;
+      user-select: none; -webkit-user-select: none;
+    }
+    .chips.dragging { cursor: grabbing; scroll-behavior: auto; }
+    .chips.dragging .chip { pointer-events: none; }
+    /* 양옆 흐림 + 화살표: 더 밀 수 있을 때만 보임 */
+    .chips-wrap .edge {
+      position: absolute; top: 0; bottom: 0; width: 44px;
+      display: flex; align-items: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity .2s;
+    }
+    .chips-wrap .edge.left { left: 0; justify-content: flex-start; padding-left: 4px; background: linear-gradient(90deg, #fff 45%, rgba(255,255,255,0)); }
+    .chips-wrap .edge.right { right: 0; justify-content: flex-end; padding-right: 4px; background: linear-gradient(270deg, #fff 45%, rgba(255,255,255,0)); }
+    .chips-wrap.can-left .edge.left, .chips-wrap.can-right .edge.right { opacity: 1; pointer-events: auto; }
+    .edge button {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: #fff; color: var(--blue);
+      box-shadow: 0 1px 4px rgba(120, 100, 200, .25);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .edge svg { width: 14px; height: 14px; }
+    .chips::-webkit-scrollbar { display: none; }
+    .chip {
+      flex-shrink: 0;
+      font-size: .82rem; font-weight: 600;
+      padding: 4px 12px; border-radius: 999px;
+      border: 1px solid var(--line); color: var(--sub);
+      transition: all .15s;
+    }
+    .chip:hover { border-color: var(--blue); color: var(--blue); }
+    .chip.active { background: var(--grad-strong); border-color: transparent; color: #fff; }
+
+    /* ---------- 게시물 ---------- */
+    .tweet {
+      display: flex; gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line);
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .tweet:hover { background: #f7f9fa; }
+    .t-ava {
+      width: 48px; height: 48px; border-radius: 50%; flex-shrink: 0;
+      background: var(--blue-soft); color: var(--blue);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; overflow: hidden;
+    }
+    .t-ava img { width: 100%; height: 100%; object-fit: cover; object-position: var(--ava-pos, center 20%); }
+    .t-main { flex: 1; min-width: 0; }
+    .t-context { font-size: .8rem; font-weight: 700; color: var(--sub); margin: -2px 0 2px; display: flex; align-items: center; gap: 6px; }
+    .t-context svg { width: 14px; height: 14px; }
+    .t-head { display: flex; align-items: center; gap: 4px; font-size: .92rem; white-space: nowrap; overflow: hidden; }
+    .t-head b { font-weight: 800; overflow: hidden; text-overflow: ellipsis; }
+    .t-head .verified { width: 16px; height: 16px; flex-shrink: 0; }
+    .t-head .muted { color: var(--sub); }
+    .t-text { white-space: pre-line; font-size: .94rem; margin-top: 1px; }
+    .t-text .who { font-weight: 800; }
+    .hash { color: var(--blue); }
+    .t-media {
+      position: relative;
+      margin-top: 10px;
+      aspect-ratio: var(--ratio);
+      border-radius: 16px; overflow: hidden;
+      border: 1px solid var(--line);
+      background: var(--page);
+    }
+    .media { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .t-media.preview { aspect-ratio: 3 / 1; }
+    .t-media.preview .media { object-position: center 25%; transition: transform .4s; }  /* 25% = 위쪽(얼굴) 위주로 자르기 */
+    .tweet:hover .t-media.preview .media { transform: scale(1.03); }
+    .t-media.preview .media.ph { font-size: 2.2rem; }
+    .expand {
+      position: absolute; right: 10px; bottom: 10px;
+      font-size: .7rem; font-weight: 700; color: #fff;
+      background: rgba(0,0,0,.45); padding: 2px 8px; border-radius: 999px;
+      display: inline-flex; align-items: center; gap: 3px;
+    }
+    .media.ph {
+      display: flex; align-items: center; justify-content: center;
+      font-size: clamp(2.4rem, 8vw, 4rem); font-weight: 800;
+      color: rgba(255,255,255,.92);
+    }
+    .badge {
+      position: absolute; top: 10px; left: 10px;
+      font-size: .7rem; font-weight: 800;
+      background: rgba(0,0,0,.6); color: #fff;
+      padding: 2px 7px; border-radius: 5px;
+    }
+    .t-actions { display: flex; justify-content: space-between; max-width: 400px; margin-top: 8px; margin-left: -8px; }
+    .act {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: .8rem; color: var(--sub);
+      padding: 4px 8px; border-radius: 999px;
+      transition: color .15s, background .15s;
+    }
+    .act svg { width: 18px; height: 18px; }
+    .act.reply:hover { color: var(--blue); background: var(--blue-soft); }
+    .act.rt:hover { color: #6fb6e8; background: #e9f5fd; }
+    .act.like:hover, .act.like.liked { color: var(--heart); }
+    .act.like:hover { background: var(--heart-soft); }
+    .act.like.liked path { fill: url(#hg); stroke: url(#hg); }
+    .act.like.pop svg { animation: pop .35s ease; }
+    @keyframes pop { 50% { transform: scale(1.3); } }
+    .act.share:hover { color: var(--blue); background: var(--blue-soft); }
+
+    .notice-label {
+      display: inline-block;
+      background: var(--grad) !important; color: #fff !important;
+      font-size: .7rem; font-weight: 800;
+      color: var(--blue); background: var(--blue-soft);
+      padding: 1px 7px; border-radius: 5px; margin-right: 6px;
+      vertical-align: 1px;
+    }
+    .n-title { font-weight: 800; }
+
+    /* ---------- 미디어 탭 ---------- */
+    .media-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; padding: 2px; }
+    .m-tile { position: relative; aspect-ratio: var(--ratio); overflow: hidden; background: var(--page); }
+    .m-tile:hover .media { filter: brightness(.88); }
+    .m-tile .media { transition: filter .15s; }
+
+    .empty { text-align: center; padding: 48px 20px; color: var(--sub); font-size: .92rem; }
+    footer { text-align: center; font-size: .78rem; color: var(--faint); padding: 28px 0 40px; }
+
+    /* ---------- 상세 모달 ---------- */
+    .overlay {
+      position: fixed; inset: 0; z-index: 50;
+      background: rgba(108, 96, 160, .35);
+      display: none; align-items: flex-start; justify-content: center;
+      padding: 5vh 16px; overflow-y: auto;
+    }
+    .overlay.open { display: flex; animation: fade .15s ease; }
+    @keyframes fade { from { opacity: 0; } }
+    .modal {
+      background: #fff; width: 100%; max-width: 600px;
+      border-radius: 16px; overflow: hidden;
+    }
+    .m-top {
+      display: flex; align-items: center; gap: 22px;
+      padding: 8px 12px; border-bottom: 1px solid var(--line);
+      font-weight: 800; font-size: 1.05rem;
+    }
+    .x-btn { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--blue); }
+    .x-btn:hover { background: var(--blue-soft); }
+    .x-btn svg { width: 20px; height: 20px; }
+    .d-body { padding: 12px 16px 0; }
+    .d-head { display: flex; gap: 12px; align-items: center; }
+    .d-head .name { font-weight: 800; display: flex; align-items: center; gap: 4px; }
+    .d-head .handle { color: var(--sub); font-size: .9rem; }
+    .d-text { margin-top: 12px; font-size: 1.12rem; line-height: 1.55; white-space: pre-line; }
+    .d-text .who { font-weight: 800; }
+    .d-time { color: var(--sub); font-size: .9rem; padding: 14px 0; border-bottom: 1px solid var(--line); }
+    .d-stats { padding: 12px 0; border-bottom: 1px solid var(--line); font-size: .9rem; color: var(--sub); }
+    .d-stats b { color: var(--ink); margin-right: 3px; }
+    .d-actions { display: flex; justify-content: space-around; padding: 4px 0; border-bottom: 1px solid var(--line); }
+    .d-actions .act svg { width: 22px; height: 22px; }
+    .chat-cta {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      margin: 14px 16px;
+      padding: 12px; border-radius: 999px;
+      background: var(--grad-strong); color: #fff;
+      font-weight: 800; font-size: .95rem;
+      box-shadow: 0 4px 14px rgba(150, 140, 240, .35);
+      transition: filter .15s, transform .15s;
+    }
+    .chat-cta:hover { filter: brightness(.96); transform: translateY(-1px); }
+    .chat-cta svg { width: 18px; height: 18px; }
+    .reply-tweet { cursor: default; border-top: 1px solid var(--line); border-bottom: none; }
+    .reply-tweet:hover { background: none; }
+    .reply-to { font-size: .85rem; color: var(--sub); }
+    .reply-to span { color: var(--blue); }
+
+    .toast {
+      position: fixed; left: 50%; bottom: 28px; transform: translate(-50%, 20px);
+      background: var(--grad-strong); color: #fff;
+      padding: 10px 18px; border-radius: 999px; font-size: .88rem; font-weight: 600;
+      opacity: 0; pointer-events: none; transition: all .3s; z-index: 60;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    /* ---------- 마우스 · 터치 하트 효과 ---------- */
+    .fx-layer { position: fixed; inset: 0; pointer-events: none; z-index: 9999; overflow: hidden; }
+    .fx-heart {
+      position: absolute; left: 0; top: 0;
+      width: var(--s); height: var(--s);
+      margin: calc(var(--s) / -2) 0 0 calc(var(--s) / -2);
+      will-change: transform, opacity;
+    }
+    .fx-heart svg { width: 100%; height: 100%; filter: drop-shadow(0 1px 2px rgba(140,120,230,.3)); }
+    .fx-trail { animation: fx-float .9s ease-out forwards; }
+    @keyframes fx-float {
+      0%   { opacity: .9; transform: translate(var(--x), var(--y)) scale(.6) rotate(var(--r)); }
+      100% { opacity: 0;  transform: translate(calc(var(--x) + var(--dx)), calc(var(--y) - 28px)) scale(1) rotate(var(--r)); }
+    }
+    .fx-burst { animation: fx-pop .75s cubic-bezier(.2,.8,.3,1) forwards; }
+    @keyframes fx-pop {
+      0%   { opacity: 1; transform: translate(var(--x), var(--y)) scale(.3) rotate(0deg); }
+      70%  { opacity: 1; }
+      100% { opacity: 0; transform: translate(calc(var(--x) + var(--dx)), calc(var(--y) + var(--dy))) scale(1) rotate(var(--r)); }
+    }
+    .fx-ring {
+      position: absolute; left: 0; top: 0;
+      width: 44px; height: 44px; margin: -22px 0 0 -22px;
+      border-radius: 50%;
+      border: 2px solid #b6a6f6;
+      animation: fx-ring .5s ease-out forwards;
+    }
+    @keyframes fx-ring {
+      from { opacity: .8; transform: translate(var(--x), var(--y)) scale(.2); }
+      to   { opacity: 0;  transform: translate(var(--x), var(--y)) scale(1.2); }
+    }
+
+    @media (max-width: 600px) {
+      .col { border: none; }
+      .avatar { width: 84px; height: 84px; margin-top: -54px; font-size: 2rem; border-width: 3px; }
+      .tweet { padding: 10px 12px; gap: 10px; }
+      .t-ava { width: 42px; height: 42px; }
+      .overlay { padding: 0; }
+      .modal { border-radius: 0; min-height: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <linearGradient id="hg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#b9a2f6"/><stop offset=".55" stop-color="#9ab9f5"/><stop offset="1" stop-color="#7fcdf2"/>
+      </linearGradient>
+    </defs>
+  </svg>
+  <div class="col">
+    <header class="topbar">
+<svg class="bird" viewBox="0 0 24 24"><path fill="url(#hg)" d="M12 21.2s-8.6-5.2-10.4-10.6C.3 6.6 2.8 2.8 6.7 2.8c2.3 0 4.1 1.2 5.3 3.1 1.2-1.9 3-3.1 5.3-3.1 3.9 0 6.4 3.8 5.1 7.8C20.6 16 12 21.2 12 21.2z"/></svg>
+      <div>
+        <div class="tb-name" id="tbName"></div>
+        <div class="tb-sub" id="tbSub"></div>
+      </div>
+      <button class="sticker sticker-top" data-face="open" aria-label="스티커"><img alt="" /></button>
+    </header>
+
+    <div class="banner" id="banner">
+      <button class="sticker sticker-banner" data-face="smile" aria-label="스티커"><img alt="" /></button>
+    </div>
+    <section class="p-wrap">
+      <div class="p-row">
+        <div class="avatar" id="pAvatar"></div>
+        <button class="follow" id="followBtn">팔로우</button>
+      </div>
+      <h1 class="p-name"><span id="pName"></span>
+        <svg class="verified" viewBox="0 0 24 24"><path fill="url(#hg)" d="M12 21.5s-9-5.4-10.8-11C.1 6.4 2.7 2.5 6.7 2.5c2.3 0 4.1 1.2 5.3 3.1 1.2-1.9 3-3.1 5.3-3.1 4 0 6.6 3.9 5.5 8C21 16.1 12 21.5 12 21.5z"/><path d="M8 11.6l2.7 2.7 5.3-5.3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </h1>
+      <div class="p-handle" id="pHandle"></div>
+      <p class="p-bio" id="pBio"></p>
+      <div class="p-meta" id="pMeta"></div>
+      <div class="p-counts">
+        <span><b id="cFollowing">0</b>팔로잉</span>
+        <span><b id="cFollowers">0</b>팔로워</span>
+      </div>
+    </section>
+
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-view="tweets">게시물</button>
+      <button class="tab" data-view="media">미디어</button>
+      <button class="tab" data-view="notice">공지</button>
+    </nav>
+
+    <section id="view"></section>
+    <footer id="footer"></footer>
+  </div>
+
+  <div class="overlay" id="overlay">
+    <div class="modal" id="modal" role="dialog" aria-modal="true"></div>
+  </div>
+  <div class="toast" id="toast"></div>
+
+  <script src="data.js"></script>
+  <script>
+    /* =====================================================
+       ✏️ 1. 내 프로필
+       ===================================================== */
+    const profile = {
+      handle: "HEART",              // @ 빼고
+      name: "하트",
+      bio: "✦ 티팟을 메인으로 천천히 제작하고 있습니다.\n이식 요청은 아래의 ASK, 혹은 해당 캐릭터 댓글로 남겨주시면 시간 날 때 천천히 작업해보겠습니다.\n늘 감사하고, 사랑합니다. (ㅅ•᎑•*)💕",
+      avatar: "images/profile.jpg", // 프로필 사진 (images 폴더)
+      avatarSmall: "images/profile-sm.jpg", // 게시물 옆 작은 프로필 (없으면 avatar 사용)
+      avatarPosition: "center 50%", // 동그라미 안에 보일 위치 (두 번째 숫자: 0% 맨 위 ~ 100% 맨 아래)
+      banner: "images/header.jpg",  // 헤더 이미지 (images 폴더), 비우면("") 하트 그라데이션
+      bannerPosition: "center 28%", // 이미지에서 보일 위치 (두 번째 숫자: 0% 맨 위 ~ 100% 맨 아래)
+      link: "https://spin-spin.com/h34r7",   // 대표 링크
+      linkLabel: "ASK♥",
+      joined: "",                   // 가입일 (비우면 안 보임)
+      following: "0",
+      followers: "486"         // 4+8+6 = 사·랑·해 획수 💜
+    };
+
+    /* =====================================================
+       ✏️ 2~4. 게시물 · 공지 · 해시태그는 data.js 에 저장돼요
+       → 직접 고치지 말고 제작자 페이지(admin.html)에서 쓰면 돼요
+       ===================================================== */
+    let SITE = window.SITE_DATA || { notices: [], posts: [], tags: [] };
+    // 제작자 페이지의 "미리보기"로 열었을 때는 저장 전 초안을 보여줌
+    if (new URLSearchParams(location.search).has("preview")) {
+      try { const d = JSON.parse(localStorage.getItem("heart_admin_draft")); if (d && d.posts) SITE = d; } catch {}
+    }
+    const notices = SITE.notices || [];
+    const characters = SITE.posts || [];
+    const tagList = SITE.tags || [];
+
+    /* =====================================================
+       ✏️ 5. 스티커 — 누르거나 마우스를 올리면 표정이 바뀌어요
+       ===================================================== */
+    const stickers = {
+      smile: "images/sticker-smile.png",
+      open: "images/sticker-open.png",
+    };
+
+    /* ---------- 아래는 건드리지 않아도 돼요 ---------- */
+    const $ = id => document.getElementById(id);
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    const fmt = n => n.toLocaleString("ko-KR");
+    const store = {
+      get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
+      set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+    };
+    let liked = store.get("tw_liked", {});
+    let view = "tweets";
+    let activeTag = "전체";
+
+    // 숫자를 안 적은 게시물은 게시물마다 정해진 랜덤 숫자를 보여줘요 (새로고침해도 안 바뀜)
+    const seedNum = (str, min, max) => { let h = 2166136261; for (const ch of String(str)) { h ^= ch.codePointAt(0); h = Math.imul(h, 16777619); } return min + ((h >>> 0) % (max - min + 1)); };
+    const hasNum = v => v !== undefined && v !== null && v !== "" && !isNaN(+v);
+    characters.forEach(c => {
+      const key = c.id || c.name;
+      if (!hasNum(c.likes)) c.likes = seedNum(key + "♥", 120, 980);
+      if (!hasNum(c.rts)) c.rts = Math.max(3, Math.round(c.likes * (0.10 + seedNum(key + "↻", 0, 25) / 100)));
+      c.likes = +c.likes; c.rts = +c.rts;
+    });
+    const likeCount = c => c.likes + (liked[c.name] ? 1 : 0);
+    const shortDate = d => {
+      const dt = new Date(d); if (isNaN(dt)) return "";
+      const days = Math.floor((Date.now() - dt) / 86400000);
+      if (days < 1) return "오늘";
+      if (days < 7) return `${days}일`;
+      return dt.getFullYear() === new Date().getFullYear()
+        ? `${dt.getMonth() + 1}월 ${dt.getDate()}일`
+        : `${dt.getFullYear()}년 ${dt.getMonth() + 1}월 ${dt.getDate()}일`;
+    };
+    const longDate = d => { const dt = new Date(d); return isNaN(dt) ? "" : `${dt.getFullYear()}년 ${dt.getMonth() + 1}월 ${dt.getDate()}일`; };
+    const hashtags = c => c.tags.map(t => `<span class="hash">#${esc(t.replace(/\s/g, ""))}</span>`).join(" ");
+
+    const I = {
+      reply: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M14 4H10a7 7 0 0 0-1 13.9V21l4.5-3.5H14a7 7 0 0 0 0-14z"/></svg>`,
+      rt: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8l3-3 3 3"/><path d="M7 5v10a2 2 0 0 0 2 2h5"/><path d="M20 16l-3 3-3-3"/><path d="M17 19V9a2 2 0 0 0-2-2h-5"/></svg>`,
+      like: `<svg viewBox="0 0 24 24"><path d="M12 20.5s-7.5-4.6-9.3-9.4C1.4 7.6 3.6 4 7.2 4c2 0 3.6 1.1 4.8 2.8C13.2 5.1 14.8 4 16.8 4c3.6 0 5.8 3.6 4.5 7.1-1.8 4.8-9.3 9.4-9.3 9.4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>`,
+      share: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>`,
+      pin: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 3l5 5-3 1-3 3 1 5-2 2-4-4-5 5-1-1 5-5-4-4 2-2 5 1 3-3z"/></svg>`,
+      link: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>`,
+      cal: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>`,
+      chevL: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>`,
+      chevR: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>`,
+      back: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>`,
+      verified: `<svg class="verified" viewBox="0 0 24 24"><path fill="url(#hg)" d="M12 21.5s-9-5.4-10.8-11C.1 6.4 2.7 2.5 6.7 2.5c2.3 0 4.1 1.2 5.3 3.1 1.2-1.9 3-3.1 5.3-3.1 4 0 6.6 3.9 5.5 8C21 16.1 12 21.5 12 21.5z"/><path d="M8 11.6l2.7 2.7 5.3-5.3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+    };
+
+    const meAva = () => { const src = profile.avatarSmall || profile.avatar; return `<div class="t-ava">${src ? `<img src="${esc(src)}" alt="" />` : esc(profile.name.charAt(0))}</div>`; };
+    const charAva = c => `<div class="t-ava" style="background:${c.color || "#cfe3f3"};color:#fff">${c.image ? `<img src="${esc(c.image)}" alt="" />` : esc(c.name.charAt(0))}</div>`;
+    const mediaHTML = c => c.image
+      ? `<img class="media" src="${esc(c.image)}" alt="${esc(c.name)}" loading="lazy" />`
+      : `<div class="media ph" style="background:linear-gradient(150deg, ${c.color || "#9cc9ea"}, ${c.color || "#9cc9ea"}aa)">${esc(c.name.charAt(0))}</div>`;
+    const headHTML = d => `
+      <div class="t-head"><b>${esc(profile.name)}</b>${I.verified}<span class="muted">@${esc(profile.handle)} · ${shortDate(d)}</span></div>`;
+
+    /* ---- 프로필 ---- */
+    function renderProfile() {
+      $("tbName").textContent = profile.name;
+      $("tbSub").textContent = `게시물 ${characters.length}개`;
+      $("pName").textContent = profile.name;
+      if (profile.avatarPosition) document.documentElement.style.setProperty("--ava-pos", profile.avatarPosition);
+      $("pHandle").textContent = "@" + profile.handle;
+      $("pBio").textContent = profile.bio;
+      $("pAvatar").innerHTML = profile.avatar ? `<img src="${esc(profile.avatar)}" alt="" />` : esc(profile.name.charAt(0));
+      if (profile.banner) { const b = $("banner"); b.style.backgroundImage = `url("${profile.banner}")`; b.style.backgroundSize = "cover"; b.style.backgroundPosition = profile.bannerPosition || "center"; b.classList.add("has-img"); }
+      $("pMeta").innerHTML =
+        (profile.link ? `<a href="${esc(profile.link)}" target="_blank" rel="noopener">${I.link}${esc(profile.linkLabel || profile.link.replace(/^https?:\/\//, ""))}</a>` : "") +
+        (profile.joined ? `<span>${I.cal}가입일: ${esc(profile.joined)}</span>` : "");
+      $("cFollowing").textContent = profile.following;
+      $("cFollowers").textContent = profile.followers;
+      $("footer").textContent = `© ${new Date().getFullYear()} @${profile.handle} · made with ♡`;
+      document.title = `${profile.name} (@${profile.handle})`;
+
+      const btn = $("followBtn");
+      const set = on => { btn.classList.toggle("on", on); btn.textContent = on ? "팔로잉" : "팔로우"; };
+      set(store.get("tw_following", false));
+      btn.onmouseenter = () => { if (btn.classList.contains("on")) btn.textContent = "언팔로우"; };
+      btn.onmouseleave = () => set(store.get("tw_following", false));
+      btn.onclick = () => { const on = !store.get("tw_following", false); store.set("tw_following", on); set(on); };
+    }
+
+    /* ---- 게시물 조각 ---- */
+    function charTweet(c, i) {
+      return `
+        <article class="tweet" data-open="${i}">
+          ${meAva()}
+          <div class="t-main">
+            ${headHTML(c.date)}
+            <p class="t-text"><span class="who">${esc(c.name)}</span> — ${esc(c.tagline)}\n${hashtags(c)}</p>
+            <div class="t-media preview">${mediaHTML(c)}${c.adult ? `<span class="badge">19+</span>` : ""}<span class="expand">♡ 전체 보기</span></div>
+            <div class="t-actions">
+              <button class="act reply" data-open="${i}" aria-label="자세히">${I.reply}</button>
+              <button class="act rt" aria-label="재게시" data-share="${i}">${I.rt}${fmt(c.rts || 0)}</button>
+              <button class="act like ${liked[c.name] ? "liked" : ""}" data-like="${i}" aria-label="마음에 들어요">${I.like}<span data-likes="${i}">${fmt(likeCount(c))}</span></button>
+              <button class="act share" data-share="${i}" aria-label="공유">${I.share}</button>
+            </div>
+          </div>
+        </article>`;
+    }
+    function noticeTweet(n, pinnedCtx) {
+      return `
+        <article class="tweet" style="cursor:default">
+          ${meAva()}
+          <div class="t-main">
+            ${pinnedCtx ? `<div class="t-context">${I.pin}고정된 공지</div>` : ""}
+            ${headHTML(n.date)}
+            <p class="t-text"><span class="notice-label">공지</span><span class="n-title">${esc(n.title)}</span>\n${esc(n.body)}</p>
+          </div>
+        </article>`;
+    }
+
+    /* ---- 본문 ---- */
+    function renderView() {
+      const el = $("view");
+      if (view === "notice") {
+        const sorted = [...notices.filter(n => n.pinned), ...notices.filter(n => !n.pinned)];
+        el.innerHTML = sorted.length ? sorted.map(n => noticeTweet(n, n.pinned)).join("") : `<p class="empty">아직 공지가 없어요</p>`;
+        return;
+      }
+      if (view === "media") {
+        const withImg = characters.map((c, i) => ({ c, i })).filter(({ c }) => c.image);
+        el.innerHTML = withImg.length ? `<div class="media-grid">${withImg.map(({ c, i }) => `
+          <button class="m-tile" data-open="${i}" aria-label="${esc(c.name)}">${mediaHTML(c)}${c.adult ? `<span class="badge">19+</span>` : ""}</button>`).join("")}</div>`
+          : `<p class="empty">아직 올라간 이미지가 없어요</p>`;
+        return;
+      }
+      const tags = ["전체", ...new Set([...tagList, ...characters.flatMap(c => c.tags)])];
+      const chips = `<div class="chips-wrap"><div class="edge left"><button data-scroll="-1" aria-label="왼쪽 태그">${I.chevL}</button></div><div class="chips" id="chips">${tags.map(t => `<button class="chip ${t === activeTag ? "active" : ""}" data-tag="${esc(t)}">${t === "전체" ? "전체" : "#" + esc(t)}</button>`).join("")}</div><div class="edge right"><button data-scroll="1" aria-label="오른쪽 태그">${I.chevR}</button></div></div>`;
+      const prevScroll = $("chips")?.scrollLeft || 0;
+      const list = characters.map((c, i) => ({ c, i })).filter(({ c }) => activeTag === "전체" || c.tags.includes(activeTag));
+      el.innerHTML = chips + (list.length ? list.map(({ c, i }) => charTweet(c, i)).join("")
+        : `<p class="empty">${characters.length ? "해당 해시태그의 게시물이 없어요" : "아직 게시물이 없어요"}</p>`);
+      setupChips(prevScroll);
+    }
+
+    /* ---- 태그 줄: 손가락/마우스로 밀기 ---- */
+    function setupChips(prevScroll) {
+      const box = $("chips"); if (!box) return;
+      const wrap = box.parentElement;
+      box.style.scrollBehavior = "auto";
+      box.scrollLeft = prevScroll;
+      // 선택된 태그가 화면 밖이면 보이게
+      const act = box.querySelector(".chip.active");
+      if (act && (act.offsetLeft < box.scrollLeft || act.offsetLeft + act.offsetWidth > box.scrollLeft + box.clientWidth)) {
+        box.scrollLeft = act.offsetLeft - 40;
+      }
+      box.style.scrollBehavior = "";
+      const update = () => {
+        wrap.classList.toggle("can-left", box.scrollLeft > 4);
+        wrap.classList.toggle("can-right", box.scrollLeft + box.clientWidth < box.scrollWidth - 4);
+      };
+      update();
+      box.addEventListener("scroll", update, { passive: true });
+      window.onresize = update;
+
+      // 마우스로 잡아끌기 (PC)
+      let down = false, moved = false, startX = 0, startLeft = 0;
+      box.addEventListener("pointerdown", e => {
+        if (e.pointerType !== "mouse") return;
+        down = true; moved = false; startX = e.clientX; startLeft = box.scrollLeft;
+      });
+      box.addEventListener("pointermove", e => {
+        if (!down) return;
+        const dx = e.clientX - startX;
+        if (Math.abs(dx) > 4) { moved = true; box.classList.add("dragging"); }
+        if (moved) {
+          if (!box.hasPointerCapture(e.pointerId)) box.setPointerCapture(e.pointerId);
+          box.scrollLeft = startLeft - dx;
+        }
+      });
+      const end = () => {
+        if (!down) return;
+        down = false;
+        setTimeout(() => box.classList.remove("dragging"), 0);
+      };
+      box.addEventListener("pointerup", end);
+      box.addEventListener("pointercancel", end);
+      // 마우스 휠을 가로 스크롤로
+      box.addEventListener("wheel", e => {
+        if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && box.scrollWidth > box.clientWidth) {
+          e.preventDefault(); box.scrollLeft += e.deltaY;
+        }
+      }, { passive: false });
+    }
+
+    /* ---- 상세 ---- */
+    function openTweet(i) {
+      const c = characters[i];
+      $("modal").innerHTML = `
+        <div class="m-top"><button class="x-btn" data-close aria-label="닫기">${I.back}</button>게시물</div>
+        <div class="d-body">
+          <div class="d-head">
+            ${meAva()}
+            <div><div class="name">${esc(profile.name)}${I.verified}</div><div class="handle">@${esc(profile.handle)}</div></div>
+          </div>
+          <p class="d-text"><span class="who">${esc(c.name)}</span> — ${esc(c.tagline)}\n\n${esc(c.description)}\n${hashtags(c)}</p>
+          <div class="t-media">${mediaHTML(c)}${c.adult ? `<span class="badge">19+</span>` : ""}</div>
+          <div class="d-time">${longDate(c.date)}${c.world ? ` · ${esc(c.world)}` : ""}</div>
+          <div class="d-stats"><b>${fmt(c.rts || 0)}</b>재게시 &nbsp; <b data-likes="${i}">${fmt(likeCount(c))}</b>마음에 들어요</div>
+          <div class="d-actions">
+            <button class="act reply" aria-label="답글">${I.reply}</button>
+            <button class="act rt" data-share="${i}" aria-label="재게시">${I.rt}</button>
+            <button class="act like ${liked[c.name] ? "liked" : ""}" data-like="${i}" aria-label="마음에 들어요">${I.like}</button>
+            <button class="act share" data-share="${i}" aria-label="공유">${I.share}</button>
+          </div>
+        </div>
+        ${c.link ? `<a class="chat-cta" href="${esc(c.link)}" target="_blank" rel="noopener">${I.reply} ${esc(c.name)}와 대화하러 가기</a>` : ""}
+        ${c.greeting ? `
+        <article class="tweet reply-tweet">
+          ${charAva(c)}
+          <div class="t-main">
+            <div class="t-head"><b>${esc(c.name)}</b><span class="muted">· ${esc(c.world || "")}</span></div>
+            <div class="reply-to">답글 대상: <span>@${esc(profile.handle)}</span></div>
+            <p class="t-text">${esc(c.greeting)}</p>
+          </div>
+        </article>` : ""}`;
+      $("overlay").classList.add("open");
+      document.body.style.overflow = "hidden";
+    }
+    function closeTweet() {
+      $("overlay").classList.remove("open");
+      document.body.style.overflow = "";
+    }
+
+    function toggleLike(i) {
+      const c = characters[i];
+      liked[c.name] = !liked[c.name];
+      store.set("tw_liked", liked);
+      document.querySelectorAll(`[data-like="${i}"]`).forEach(b => {
+        b.classList.toggle("liked", liked[c.name]);
+        b.classList.remove("pop"); void b.offsetWidth; b.classList.add("pop");
+      });
+      document.querySelectorAll(`[data-likes="${i}"]`).forEach(el => el.textContent = fmt(likeCount(c)));
+    }
+    function toast(msg) {
+      const t = $("toast"); t.textContent = msg; t.classList.add("show");
+      clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("show"), 1800);
+    }
+    async function share(title) {
+      const url = location.href.split("#")[0];
+      try {
+        if (navigator.share) { await navigator.share({ title, url }); return; }
+        await navigator.clipboard.writeText(url);
+        toast("링크를 복사했어요");
+      } catch {}
+    }
+
+    document.addEventListener("click", e => {
+      const like = e.target.closest("[data-like]");
+      if (like) { e.stopPropagation(); return toggleLike(+like.dataset.like); }
+      const sh = e.target.closest("[data-share]");
+      if (sh) return share(characters[+sh.dataset.share].name);
+      const arrow = e.target.closest("[data-scroll]");
+      if (arrow) { const box = $("chips"); box.scrollBy({ left: +arrow.dataset.scroll * box.clientWidth * 0.6 }); return; }
+      const chip = e.target.closest(".chip");
+      if (chip) { activeTag = chip.dataset.tag; return renderView(); }
+      const tab = e.target.closest(".tab");
+      if (tab) {
+        view = tab.dataset.view;
+        document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t === tab));
+        return renderView();
+      }
+      if (e.target.closest("[data-close]") || e.target.id === "overlay") return closeTweet();
+      const open = e.target.closest("[data-open]");
+      if (open && !e.target.closest(".modal")) return openTweet(+open.dataset.open);
+    });
+    document.addEventListener("keydown", e => { if (e.key === "Escape") closeTweet(); });
+
+    /* =====================================================
+       💜 마우스 · 터치 하트 효과 (끄려면 false)
+       ===================================================== */
+    const heartTrail = true;   // 마우스 따라오는 하트 (PC)
+    const heartBurst = true;   // 클릭 · 터치하면 퍼지는 하트
+
+    (function heartFX() {
+      if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const layer = document.createElement("div");
+      layer.className = "fx-layer";
+      document.body.appendChild(layer);
+      const colors = ["url(#hg)", "#c9b8fa", "#a9c9f8", "#93d5f6", "#b39cf5"];
+      const heartPath = "M12 21.2s-8.6-5.2-10.4-10.6C.3 6.6 2.8 2.8 6.7 2.8c2.3 0 4.1 1.2 5.3 3.1 1.2-1.9 3-3.1 5.3-3.1 3.9 0 6.4 3.8 5.1 7.8C20.6 16 12 21.2 12 21.2z";
+      const rand = (a, b) => a + Math.random() * (b - a);
+
+      function spawn(cls, x, y, size, vars, life) {
+        if (layer.childElementCount > 80) return;
+        const el = document.createElement("span");
+        el.className = "fx-heart " + cls;
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        el.innerHTML = `<svg viewBox="0 0 24 24"><path fill="${color}" d="${heartPath}"/></svg>`;
+        el.style.cssText = `--s:${size}px;--x:${x}px;--y:${y}px;` + vars;
+        layer.appendChild(el);
+        setTimeout(() => el.remove(), life);
+      }
+
+      // 마우스 꼬리
+      let lastX = 0, lastY = 0, lastT = 0;
+      if (heartTrail) window.addEventListener("pointermove", e => {
+        if (e.pointerType !== "mouse") return;
+        const now = performance.now();
+        if (now - lastT < 45 || Math.hypot(e.clientX - lastX, e.clientY - lastY) < 16) return;
+        lastT = now; lastX = e.clientX; lastY = e.clientY;
+        spawn("fx-trail", e.clientX + rand(-4, 4), e.clientY + rand(-4, 4), rand(9, 14),
+          `--dx:${rand(-10, 10)}px;--r:${rand(-25, 25)}deg;`, 900);
+      }, { passive: true });
+
+      // 클릭 · 터치 팡!
+      if (heartBurst) window.addEventListener("pointerdown", e => {
+        const x = e.clientX, y = e.clientY;
+        const ring = document.createElement("span");
+        ring.className = "fx-ring";
+        ring.style.cssText = `--x:${x}px;--y:${y}px;`;
+        layer.appendChild(ring);
+        setTimeout(() => ring.remove(), 500);
+        const n = 7;
+        for (let i = 0; i < n; i++) {
+          const ang = (Math.PI * 2 * i) / n + rand(-.3, .3);
+          const dist = rand(34, 60);
+          spawn("fx-burst", x, y, rand(10, 17),
+            `--dx:${Math.cos(ang) * dist}px;--dy:${Math.sin(ang) * dist}px;--r:${rand(-40, 40)}deg;`, 750);
+        }
+      }, { passive: true });
+    })();
+
+    /* ---- 스티커: 표정 바꾸기 ---- */
+    document.querySelectorAll(".sticker").forEach(st => {
+      const img = st.querySelector("img");
+      const base = st.dataset.face;
+      const other = base === "smile" ? "open" : "smile";
+      const show = f => { img.src = stickers[f]; };
+      show(base);
+      Object.values(stickers).forEach(src => { const i = new Image(); i.src = src; }); // 미리 불러오기
+      st.addEventListener("pointerenter", e => { if (e.pointerType === "mouse") show(other); });
+      st.addEventListener("pointerleave", e => { if (e.pointerType === "mouse") show(base); });
+      st.addEventListener("click", e => {
+        e.stopPropagation();
+        if (!matchMedia("(hover: hover)").matches) {   // 터치: 잠깐 표정 바뀌었다 돌아오기
+          show(other); clearTimeout(st._t); st._t = setTimeout(() => show(base), 900);
+        }
+        st.classList.remove("boing"); void st.offsetWidth; st.classList.add("boing");
+      });
+    });
+
+    renderProfile();
+    renderView();
+  </script>
+</body>
+</html>
