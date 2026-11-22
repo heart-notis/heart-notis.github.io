@@ -132,7 +132,8 @@ window.SITE_DATA = {
       "link": "",
       "links": {
         "POSTYPE": "https://posty.pe/phf69mmdd"
-      }
+      },
+      "previewPos": 54
     },
     {
       "id": "mwrpfr95ttut",
