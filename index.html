@@ -443,11 +443,11 @@
         <div class="tb-name" id="tbName"></div>
         <div class="tb-sub" id="tbSub"></div>
       </div>
-      <button class="sticker sticker-top" data-face="open" aria-label="스티커"><img alt="" /></button>
+      <button class="sticker sticker-top" data-face="top" data-other="top2" aria-label="스티커"><img alt="" /></button>
     </header>
 
     <div class="banner" id="banner">
-      <button class="sticker sticker-banner" data-face="smile" aria-label="스티커"><img alt="" /></button>
+      <button class="sticker sticker-banner" data-face="smile" data-other="open" aria-label="스티커"><img alt="" /></button>
     </div>
     <section class="p-wrap">
       <div class="p-row">
@@ -524,6 +524,8 @@
     const stickers = {
       smile: "images/sticker-smile.png",
       open: "images/sticker-open.png",
+      top: "images/sticker-top.png",      // 상단바 스티커 (평소)
+      top2: "images/sticker-top2.png",    // 상단바 스티커 (눌렀을 때)
     };
 
     /* ---------- 아래는 건드리지 않아도 돼요 ---------- */
@@ -947,7 +949,7 @@
     document.querySelectorAll(".sticker").forEach(st => {
       const img = st.querySelector("img");
       const base = st.dataset.face;
-      const other = base === "smile" ? "open" : "smile";
+      const other = st.dataset.other;
       const show = f => { img.src = stickers[f]; };
       show(base);
       Object.values(stickers).forEach(src => { const i = new Image(); i.src = src; }); // 미리 불러오기
