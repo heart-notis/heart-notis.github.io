@@ -758,7 +758,7 @@
     /* ---------- 공지 편집 ---------- */
     $("newNotice").onclick = () => openNotice(-1);
     function openNotice(index) {
-      const item = index >= 0 ? clone(data.notices[index]) : { id: uid(), title: "", date: today(), pinned: false, body: "" };
+      const item = index >= 0 ? clone(data.notices[index]) : { id: uid(), title: "", date: today(), pinned: false, body: "", createdAt: new Date().toISOString() };
       if (!item.id) item.id = uid();
       edit = { kind: "notice", index, item };
       $("editor").innerHTML = `
