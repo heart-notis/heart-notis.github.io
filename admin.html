@@ -161,9 +161,13 @@
     .theme-pick .sw::after { content: ""; position: absolute; right: 6px; top: 6px; width: 34px; height: 8px; border-radius: 999px; background: var(--btn); }
     /* ---------- 목록 미리보기 위치 ---------- */
     .pv-wrap { display: flex; flex-direction: column; gap: 6px; }
-    .pv-box { width: 100%; aspect-ratio: 3 / 1; border-radius: 12px; border: 1px solid var(--line); background: var(--soft) center / cover no-repeat; cursor: ns-resize; touch-action: none; position: relative; }
-    .pv-box::after { content: "↕ 끌어서 맞추기"; position: absolute; right: 8px; bottom: 6px; font-size: .68rem; font-weight: 700; color: #fff; background: rgba(0,0,0,.45); padding: 2px 8px; border-radius: 999px; }
+    .pv-box { width: 100%; aspect-ratio: 3 / 1; border-radius: 12px; border: 1px solid var(--line); background: var(--soft); cursor: grab; touch-action: none; position: relative; overflow: hidden; }
+    .pv-box img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; user-select: none; -webkit-user-drag: none; }
+    .pv-box::after { content: "끌어서 위치 · 두 손가락/휠로 확대"; position: absolute; right: 8px; bottom: 6px; font-size: .68rem; font-weight: 700; color: #fff; background: rgba(0,0,0,.45); padding: 2px 8px; border-radius: 999px; }
     .pv-wrap input { width: 100%; accent-color: var(--accent); }
+    .pv-ctl { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 4px 10px; font-size: .78rem; font-weight: 700; color: var(--muted, #888); }
+    .pv-ctl input { min-width: 0; }
+    .pv-ctl .pv-reset { justify-self: end; grid-column: 1 / -1; }
     /* ---------- 사진 자르기 창 ---------- */
     .crop-overlay { position: fixed; inset: 0; z-index: 70; background: rgba(20, 16, 40, .78); display: none; align-items: center; justify-content: center; padding: 12px; }
     .crop-overlay.open { display: flex; }
@@ -550,9 +554,14 @@
             </div>
           </div>
           <div class="pv-wrap ${item.image ? "" : "hidden"}" id="pvWrap">
-            <label class="f" style="margin:0">목록에서 보이는 부분 <small>홈 게시물 목록에는 사진이 가로로 길게 잘려서 보여요. 끌거나 슬라이더로 위치를 맞춰주세요.</small></label>
-            <div class="pv-box" id="pvBox"></div>
-            <input type="range" min="0" max="100" id="pvPos" aria-label="목록 미리보기 위치" />
+            <label class="f" style="margin:0">목록에서 보이는 부분 <small>홈 게시물 목록에는 사진이 가로로 길게 잘려서 보여요. 끌거나 슬라이더로 위치·크기를 맞춰주세요.</small></label>
+            <div class="pv-box" id="pvBox"><img id="pvImg" alt="" /></div>
+            <div class="pv-ctl">
+              <span>🔍 확대</span><input type="range" min="1" max="3" step="0.01" id="pvZoom" aria-label="목록 미리보기 확대" />
+              <span>↕ 위아래</span><input type="range" min="0" max="100" id="pvPos" aria-label="목록 미리보기 위아래 위치" />
+              <span>↔ 좌우</span><input type="range" min="0" max="100" id="pvX" aria-label="목록 미리보기 좌우 위치" />
+              <button type="button" class="btn btn-ghost btn-sm pv-reset" id="pvReset">처음대로</button>
+            </div>
           </div>
           <label class="f">캐릭터 이름 *<input type="text" id="f_name" value="${esc(item.name)}" /></label>
           <label class="f">🎨 페이지 꾸미기 <small>게시물을 눌렀을 때 열리는 페이지의 색감이에요. "미리보기"로 확인할 수 있어요.</small>
@@ -590,26 +599,55 @@
       $("f_theme").onclick = e => { const b = e.target.closest("[data-theme-key]"); if (!b) return; document.querySelectorAll("#f_theme button").forEach(x => x.classList.toggle("on", x === b)); };
       $("f_tags").onclick = e => { const b = e.target.closest("[data-tag]"); if (!b) return; readLinkInputs(); b.classList.toggle("on"); renderLinkInputs(); };
       // 목록 미리보기(3:1) 위치: 0 = 맨 위, 100 = 맨 아래
+      // 확대(previewZoom 1~3)와 좌우(previewX)도 같이 저장해요
       if (typeof item.previewPos !== "number") item.previewPos = 25;
+      if (typeof item.previewX !== "number") item.previewX = 50;
+      if (typeof item.previewZoom !== "number") item.previewZoom = 1;
+      const clampN = (v, a, b) => Math.max(a, Math.min(b, v));
       const drawPv = () => {
-        $("pvWrap").classList.toggle("hidden", !edit.item.image);
-        $("pvBox").style.backgroundImage = edit.item.image ? `url("${edit.item.image}")` : "";
-        $("pvBox").style.backgroundPosition = `center ${edit.item.previewPos}%`;
-        $("pvPos").value = edit.item.previewPos;
+        const it = edit.item, img = $("pvImg");
+        $("pvWrap").classList.toggle("hidden", !it.image);
+        if (it.image && img.getAttribute("src") !== it.image) img.src = it.image;
+        img.style.objectPosition = `center ${it.previewPos}%`;
+        img.style.transformOrigin = `${it.previewX}% ${it.previewPos}%`;
+        img.style.transform = `scale(${it.previewZoom})`;
+        $("pvPos").value = it.previewPos; $("pvX").value = it.previewX; $("pvZoom").value = it.previewZoom;
+        $("pvX").disabled = it.previewZoom <= 1.001;
       };
       drawPv();
       $("pvPos").oninput = e => { edit.item.previewPos = +e.target.value; drawPv(); };
-      (() => {   // 미리보기를 위아래로 끌어서 맞추기
-        const box = $("pvBox"); let start = null;
-        box.onpointerdown = e => { box.setPointerCapture(e.pointerId); start = { y: e.clientY, p: edit.item.previewPos }; };
+      $("pvX").oninput = e => { edit.item.previewX = +e.target.value; drawPv(); };
+      $("pvZoom").oninput = e => { edit.item.previewZoom = Math.round(+e.target.value * 100) / 100; drawPv(); };
+      $("pvReset").onclick = () => { Object.assign(edit.item, { previewPos: 25, previewX: 50, previewZoom: 1 }); drawPv(); };
+      (() => {   // 미리보기를 끌어서 위치 맞추기 + 두 손가락/휠로 확대
+        const box = $("pvBox"); const pts = new Map(); let start = null, pinch = null;
+        const begin = () => {
+          const it = edit.item, [a, b] = [...pts.values()];
+          start = { x: a.x, y: a.y, p: it.previewPos, px: it.previewX };
+          pinch = b ? { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, z: it.previewZoom } : null;
+        };
+        box.onpointerdown = e => { box.setPointerCapture(e.pointerId); pts.set(e.pointerId, { x: e.clientX, y: e.clientY }); begin(); };
         box.onpointermove = e => {
-          if (!start) return;
-          // 사진이 보이는 칸보다 얼마나 긴지에 맞춰 이동량 계산 (손가락 따라 사진이 움직이게)
-          const bw = box.clientWidth, bh = box.clientHeight, overflow = Math.max(1, bw * IMG_H / IMG_W - bh);
-          edit.item.previewPos = Math.max(0, Math.min(100, Math.round(start.p - (e.clientY - start.y) / overflow * 100)));
+          if (!pts.has(e.pointerId) || !start) return;
+          pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+          const it = edit.item, [a, b] = [...pts.values()];
+          if (pinch && b) {
+            it.previewZoom = Math.round(clampN(pinch.z * Math.hypot(a.x - b.x, a.y - b.y) / pinch.d, 1, 3) * 100) / 100;
+          } else {
+            // 손가락 따라 사진이 움직이게 이동량 계산
+            const bw = box.clientWidth, bh = box.clientHeight, z = it.previewZoom;
+            const overflowY = Math.max(1, bw * IMG_H / IMG_W - bh) * z + bh * (z - 1);
+            it.previewPos = Math.round(clampN(start.p - (a.y - start.y) / overflowY * 100, 0, 100));
+            if (z > 1.001) it.previewX = Math.round(clampN(start.px - (a.x - start.x) / (bw * (z - 1)) * 100, 0, 100));
+          }
           drawPv();
         };
-        box.onpointerup = box.onpointercancel = () => { start = null; };
+        box.onpointerup = box.onpointercancel = e => { pts.delete(e.pointerId); pts.size ? begin() : (start = pinch = null); };
+        box.onwheel = e => {
+          e.preventDefault();
+          edit.item.previewZoom = Math.round(clampN(edit.item.previewZoom * (e.deltaY < 0 ? 1.08 : 1 / 1.08), 1, 3) * 100) / 100;
+          drawPv();
+        };
       })();
       const setPostImg = url => {
         edit.item.image = url;
