@@ -137,6 +137,12 @@
     .bottom-inner .status b { color: var(--accent); }
 
     .done-card { text-align: left; }
+    /* ---------- 페이지 꾸미기 ---------- */
+    .theme-pick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .theme-pick button { border: 2px solid var(--line); border-radius: 12px; padding: 6px; display: flex; flex-direction: column; gap: 5px; align-items: stretch; background: #fff; font-size: .76rem; font-weight: 700; color: #4a4f57; }
+    .theme-pick button.on { border-color: var(--accent); box-shadow: 0 0 0 3px var(--soft); }
+    .theme-pick .sw { height: 30px; border-radius: 8px; position: relative; overflow: hidden; }
+    .theme-pick .sw::after { content: ""; position: absolute; right: 6px; top: 6px; width: 34px; height: 8px; border-radius: 999px; background: var(--btn); }
     /* ---------- 목록 미리보기 위치 ---------- */
     .pv-wrap { display: flex; flex-direction: column; gap: 6px; }
     .pv-box { width: 100%; aspect-ratio: 3 / 1; border-radius: 12px; border: 1px solid var(--line); background: var(--soft) center / cover no-repeat; cursor: ns-resize; touch-action: none; position: relative; }
@@ -524,6 +530,9 @@
             <input type="range" min="0" max="100" id="pvPos" aria-label="목록 미리보기 위치" />
           </div>
           <label class="f">캐릭터 이름 *<input type="text" id="f_name" value="${esc(item.name)}" /></label>
+          <label class="f">🎨 페이지 꾸미기 <small>게시물을 눌렀을 때 열리는 페이지의 색감이에요. "미리보기"로 확인할 수 있어요.</small>
+            <div class="theme-pick" id="f_theme">${THEMES.map(t => `<button type="button" data-theme-key="${t.key}" class="${(item.theme || "") === t.key ? "on" : ""}"><span class="sw" style="background:${t.bg};--btn:${t.btn}"></span>${t.name}</button>`).join("")}</div>
+          </label>
           <div class="row">
             <label class="f">세계관 · 장소<input type="text" id="f_world" value="${esc(item.world)}" /></label>
             <label class="f">올린 날짜<input type="date" id="f_date" value="${esc(item.date)}" /></label>
@@ -553,6 +562,7 @@
       edit.linkVals[""] = item.link || "";
       if (item.link && !(item.links && Object.keys(item.links).length) && (item.tags || [])[0]) edit.linkVals[item.tags[0]] = item.link;
       renderLinkInputs();
+      $("f_theme").onclick = e => { const b = e.target.closest("[data-theme-key]"); if (!b) return; document.querySelectorAll("#f_theme button").forEach(x => x.classList.toggle("on", x === b)); };
       $("f_tags").onclick = e => { const b = e.target.closest("[data-tag]"); if (!b) return; readLinkInputs(); b.classList.toggle("on"); renderLinkInputs(); };
       // 목록 미리보기(3:1) 위치: 0 = 맨 위, 100 = 맨 아래
       if (typeof item.previewPos !== "number") item.previewPos = 25;
@@ -597,6 +607,18 @@
       $("savePost").onclick = savePost;
       $("f_name").focus();
     }
+    // 🎨 게시물 페이지 꾸미기 (사이트 index.html 의 THEMES 와 이름이 같아야 해요)
+    const THEMES = [
+      { key: "",       name: "기본 하트", bg: "#fff",    btn: "linear-gradient(120deg,#a993f4,#74c6f0)" },
+      { key: "sakura", name: "벚꽃",     bg: "#fffafc", btn: "linear-gradient(120deg,#f59ab8,#ffcbb8)" },
+      { key: "night",  name: "밤하늘",   bg: "#12142e", btn: "linear-gradient(120deg,#6b7bff,#d49cff)" },
+      { key: "forest", name: "숲",       bg: "#fbfefc", btn: "linear-gradient(120deg,#5fb985,#c2e3a5)" },
+      { key: "sunset", name: "노을",     bg: "#fffbf7", btn: "linear-gradient(120deg,#ff8f70,#ffd27a)" },
+      { key: "ocean",  name: "바다",     bg: "#fafdff", btn: "linear-gradient(120deg,#4aa8db,#8fe0cf)" },
+      { key: "cream",  name: "크림",     bg: "#fdfaf5", btn: "linear-gradient(120deg,#c4a07a,#e8d3b0)" },
+      { key: "noir",   name: "누아르",   bg: "#121110", btn: "linear-gradient(120deg,#3a3633,#8a7a66)" },
+      { key: "rose",   name: "장미",     bg: "#fffafb", btn: "linear-gradient(120deg,#9e2f4b,#e3909e)" }
+    ];
     const pickedTags = () => [...document.querySelectorAll("#f_tags .on")].map(b => b.dataset.tag);
     function readLinkInputs() {
       document.querySelectorAll("#f_links input").forEach(inp => { edit.linkVals[inp.dataset.tag] = inp.value; });
@@ -725,6 +747,8 @@
       it.adult = $("f_adult").checked;
       it.likes = Math.max(0, parseInt($("f_likes").value) || 0);
       it.rts = Math.max(0, parseInt($("f_rts").value) || 0);
+      const th = document.querySelector("#f_theme .on"); it.theme = th ? th.dataset.themeKey : "";
+      if (!it.theme) delete it.theme;
       const wasEdit = edit.index >= 0;
       if (wasEdit) data.posts[edit.index] = it; else data.posts.unshift(it);
       closeEditor(); saveDraft(); renderAll();

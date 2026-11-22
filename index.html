@@ -331,6 +331,59 @@
       background: #fff; width: 100%; max-width: 600px;
       border-radius: 16px; overflow: hidden;
     }
+    /* ---------- 🎨 게시물 페이지 꾸미기 (제작자 페이지에서 게시물마다 고를 수 있어요) ---------- */
+    .modal[data-theme] { background-color: var(--m-bg); background-image: var(--m-deco, none); background-size: var(--m-deco-size, auto); color: var(--ink); }
+    .modal[data-theme] .chat-ctas .chat-cta { box-shadow: 0 3px 12px var(--m-glow, rgba(150,140,240,.28)); }
+    .modal[data-theme="sakura"] {
+      --blue: #d9577f; --blue-soft: #fdecf2; --line: #f5dfe7; --page: #fff4f7;
+      --grad-strong: linear-gradient(120deg, #f59ab8 0%, #f8b7c9 50%, #ffcbb8 100%);
+      --m-bg: #fffafc; --m-quote: #fff0f5; --m-quote-line: #f59ab8; --m-glow: rgba(245,154,184,.35);
+      --m-deco: radial-gradient(circle at 20% 30%, rgba(245,154,184,.16) 0 6px, transparent 7px), radial-gradient(circle at 75% 70%, rgba(255,203,184,.18) 0 5px, transparent 6px);
+      --m-deco-size: 90px 90px;
+    }
+    .modal[data-theme="night"] {
+      --blue: #aebcff; --blue-soft: rgba(174,188,255,.14); --line: #2c3060; --page: #1b1e40;
+      --ink: #eef0ff; --sub: #9ea5da; --heart: #c6a8ff;
+      --grad-strong: linear-gradient(120deg, #6b7bff 0%, #9d8bff 55%, #d49cff 100%);
+      --m-bg: #12142e; --m-text: #dfe2ff; --m-text2: #c4c9f6; --m-quote: rgba(174,188,255,.08); --m-quote-line: #7f8cff; --m-glow: rgba(120,120,255,.45);
+      --m-deco: radial-gradient(1.2px 1.2px at 12% 18%, rgba(255,255,255,.9), transparent), radial-gradient(1px 1px at 68% 42%, rgba(255,255,255,.7), transparent), radial-gradient(1.4px 1.4px at 38% 78%, rgba(220,210,255,.85), transparent), radial-gradient(1px 1px at 88% 88%, rgba(255,255,255,.6), transparent);
+      --m-deco-size: 160px 160px;
+    }
+    .modal[data-theme="forest"] {
+      --blue: #3f9a6b; --blue-soft: #e8f6ee; --line: #dcefe3; --page: #f2faf5;
+      --grad-strong: linear-gradient(120deg, #5fb985 0%, #8ccf9c 50%, #c2e3a5 100%);
+      --m-bg: #fbfefc; --m-quote: #eef8f1; --m-quote-line: #8ccf9c; --m-glow: rgba(95,185,133,.32);
+      --m-deco: radial-gradient(ellipse 6px 3px at 30% 40%, rgba(95,185,133,.14), transparent 70%);
+      --m-deco-size: 70px 70px;
+    }
+    .modal[data-theme="sunset"] {
+      --blue: #e0703f; --blue-soft: #fff0e6; --line: #f7e3d6; --page: #fff6ef;
+      --grad-strong: linear-gradient(120deg, #ff8f70 0%, #ffad6b 50%, #ffd27a 100%);
+      --m-bg: #fffbf7; --m-quote: #fff3ea; --m-quote-line: #ffad6b; --m-glow: rgba(255,143,112,.35);
+    }
+    .modal[data-theme="ocean"] {
+      --blue: #2f8fc0; --blue-soft: #e6f4fb; --line: #d9ecf5; --page: #f0f8fc;
+      --grad-strong: linear-gradient(120deg, #4aa8db 0%, #5fc6d8 50%, #8fe0cf 100%);
+      --m-bg: #fafdff; --m-quote: #edf7fc; --m-quote-line: #5fc6d8; --m-glow: rgba(74,168,219,.32);
+      --m-deco: radial-gradient(circle at 50% 50%, rgba(95,198,216,.12) 0 3px, transparent 4px);
+      --m-deco-size: 46px 46px;
+    }
+    .modal[data-theme="cream"] {
+      --blue: #9a7650; --blue-soft: #f6efe5; --line: #ece3d6; --page: #f8f3ec;
+      --grad-strong: linear-gradient(120deg, #c4a07a 0%, #d8bb93 50%, #e8d3b0 100%);
+      --m-bg: #fdfaf5; --m-quote: #f7f0e6; --m-quote-line: #d8bb93; --m-glow: rgba(196,160,122,.32);
+    }
+    .modal[data-theme="noir"] {
+      --blue: #e9e2d0; --blue-soft: rgba(233,226,208,.1); --line: #2c2a28; --page: #1d1b1a;
+      --ink: #f3efe6; --sub: #a29d94; --heart: #e9c7c7;
+      --grad-strong: linear-gradient(120deg, #3a3633 0%, #5a524b 55%, #8a7a66 100%);
+      --m-bg: #121110; --m-text: #e7e2d8; --m-text2: #cdc7bb; --m-quote: rgba(233,226,208,.06); --m-quote-line: #8a7a66; --m-glow: rgba(0,0,0,.5);
+    }
+    .modal[data-theme="rose"] {
+      --blue: #b4455f; --blue-soft: #f9e7ec; --line: #efd9df; --page: #fbf2f4;
+      --grad-strong: linear-gradient(120deg, #9e2f4b 0%, #c2566e 55%, #e3909e 100%);
+      --m-bg: #fffafb; --m-quote: #fbeef1; --m-quote-line: #c2566e; --m-glow: rgba(158,47,75,.3);
+    }
     .m-top {
       display: flex; align-items: center; gap: 22px;
       padding: 8px 12px; border-bottom: 1px solid var(--line);
@@ -345,8 +398,8 @@
     .d-head .handle { color: var(--sub); font-size: .9rem; }
     .d-title { margin-top: 14px; font-size: 1.12rem; font-weight: 800; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; line-height: 1.3; }
     .d-world { font-size: .7rem; font-weight: 700; color: var(--blue); background: var(--blue-soft); padding: 2px 9px; border-radius: 999px; }
-    .d-tagline { margin-top: 10px; padding: 8px 12px; border-left: 3px solid #c9b8fa; background: #faf8ff; border-radius: 0 10px 10px 0; font-size: .88rem; color: #4a4f57; white-space: pre-line; }
-    .d-text { margin-top: 12px; font-size: .92rem; line-height: 1.7; white-space: pre-line; color: #2b2f35; }
+    .d-tagline { margin-top: 10px; padding: 8px 12px; border-left: 3px solid var(--m-quote-line, #c9b8fa); background: var(--m-quote, #faf8ff); border-radius: 0 10px 10px 0; font-size: .88rem; color: var(--m-text2, #4a4f57); white-space: pre-line; }
+    .d-text { margin-top: 12px; font-size: .92rem; line-height: 1.7; white-space: pre-line; color: var(--m-text, #2b2f35); }
     .d-tags { margin-top: 8px; font-size: .86rem; }
     .t-title { font-weight: 800; font-size: .98rem; margin-top: 2px; }
     .t-tagline { font-size: .88rem; color: #4a4f57; margin-top: 1px; white-space: pre-line; }
@@ -783,8 +836,10 @@
     }
 
     /* ---- 상세 ---- */
+    const THEMES = ["sakura", "night", "forest", "sunset", "ocean", "cream", "noir", "rose"];
     function showTweet(i) {
       const c = characters[i];
+      if (THEMES.includes(c.theme)) $("modal").dataset.theme = c.theme; else delete $("modal").dataset.theme;
       $("modal").innerHTML = `
         <div class="m-top"><button class="x-btn" data-close aria-label="닫기">${I.back}</button>게시물</div>
         <div class="d-body">
