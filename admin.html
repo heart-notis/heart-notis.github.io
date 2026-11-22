@@ -567,7 +567,7 @@
           <div class="hint" style="margin-bottom:-6px">✍️ 글 꾸미기: <i>*기울기*</i> · <b>**두껍게**</b></div>
           <label class="f">자세한 소개<textarea id="f_desc">${esc(item.description)}</textarea></label>
           <label class="f">첫 인사말 <small>상세 화면에서 캐릭터의 답글처럼 보여요</small><textarea id="f_greet" style="min-height:60px">${esc(item.greeting)}</textarea></label>
-          <label class="f">대화하러 가기 링크 <small>위에서 체크한 해시태그(플랫폼)마다 주소 칸이 생겨요</small><div class="links-box" id="f_links"></div></label>
+          <label class="f">대화하러 가기 링크 <small>위에서 체크한 해시태그(플랫폼)마다 주소 칸이 생겨요 · #합작은 세계관 보기 버튼이 돼요</small><div class="links-box" id="f_links"></div></label>
           <label class="check"><input type="checkbox" id="f_adult" ${item.adult ? "checked" : ""} /> 19+ 배지 달기</label>
           <div class="row" style="align-items:flex-end">
             <label class="f">마음에 들어요 수<input type="number" min="0" id="f_likes" value="${+item.likes || 0}" /></label>
@@ -654,7 +654,7 @@
       $("f_links").innerHTML = rows.map(t => `
         <div class="link-row">
           ${t ? `<span class="tag-name">${esc(t)}</span>` : ""}
-          <input type="url" data-tag="${esc(t)}" value="${esc(edit.linkVals[t] || "")}" placeholder="${t ? esc(t) + " 캐릭터 주소" : "https://"}" />
+          <input type="url" data-tag="${esc(t)}" value="${esc(edit.linkVals[t] || "")}" placeholder="${t === "합작" ? "합작 세계관 주소 (홈페이지에 '합작 세계관 보러 가기' 버튼으로 떠요)" : t ? esc(t) + " 캐릭터 주소" : "https://"}" />
         </div>`).join("");
     }
     function loadImage(file) {
