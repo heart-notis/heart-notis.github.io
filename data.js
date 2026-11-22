@@ -19,6 +19,15 @@ window.SITE_DATA = {
   },
   "notices": [
     {
+      "id": "mwrzipxtojfo",
+      "title": "♥ 신작 업로드 일정",
+      "date": "2026-11-23",
+      "pinned": false,
+      "body": "♥ **WHIF** - 가이드버스 합작 **11월 27일 금요일 21시**\n♥ **BLOOM** - 가이드버스 합작 이식 **12월 03일 목요일**\n\n이후 **포스타입** 늘봄 셰어하우스 정우진 > 윤도하 순으로 개인 캐릭터톡 제작 예정입니다 ♥",
+      "createdAt": "2026-11-22T15:21:31.601Z",
+      "onPosts": false
+    },
+    {
       "id": "mwrle0z9yili",
       "title": "제작 캐릭터 홈페이지 업데이트 중♥",
       "date": "2026-11-22",
