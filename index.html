@@ -167,9 +167,9 @@
     .hidden { display: none !important; }
     .tab-count { margin-left: 4px; font-size: .78em; font-weight: 700; color: var(--faint); }
     .tab.active .tab-count { color: var(--blue); opacity: .75; }
-    .tab-new { display: inline-flex; align-items: center; justify-content: center; margin-left: 4px; width: 16px; height: 16px; border-radius: 50%; background: linear-gradient(135deg, #ff8fb1, #e0245e); color: #fff; font-size: .6rem; font-weight: 900; vertical-align: 2px; box-shadow: 0 2px 6px rgba(224, 36, 94, .3); }
-    .new-badge { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 999px; background: linear-gradient(135deg, #ff8fb1, #e0245e); color: #fff; font-size: .64rem; font-weight: 900; letter-spacing: .04em; vertical-align: 2px; animation: newPulse 1.8s ease-in-out infinite; }
-    @keyframes newPulse { 50% { transform: scale(1.08); box-shadow: 0 0 0 4px rgba(255, 143, 177, .18); } }
+    /* 새 공지 표시: 탭 옆 작은 반짝이 점 */
+    .tab-new { display: inline-block; width: 7px; height: 7px; margin-left: 3px; border-radius: 50%; vertical-align: 9px; font-size: 0; background: linear-gradient(135deg, #c3a8ff, #7fcdf2); box-shadow: 0 0 0 2px #fff, 0 0 8px rgba(160, 140, 250, .7); }
+    .new-badge { display: inline-block; margin-left: 6px; padding: 0 7px; border-radius: 999px; border: 1px solid #ddd3fb; background: #f6f2ff; color: #7a68e6; font-size: .62rem; font-weight: 800; letter-spacing: .05em; line-height: 1.6; vertical-align: 2px; }
     .tab.active { color: var(--blue); }
     .tab.active::after {
       content: ""; position: absolute; left: 50%; bottom: 0;
@@ -552,7 +552,7 @@
     <nav class="tabs" role="tablist">
       <button class="tab active" data-view="tweets">게시물<span class="tab-count" id="cntPosts"></span></button>
       <button class="tab" data-view="media">미디어</button>
-      <button class="tab" data-view="notice">공지<span class="tab-count" id="cntNotices"></span><span class="tab-new hidden" id="newNotices">N</span></button>
+      <button class="tab" data-view="notice">공지<span class="tab-count" id="cntNotices"></span><span class="tab-new hidden" id="newNotices" aria-label="새 공지"></span></button>
       <button class="tab" data-view="message">메시지</button>
     </nav>
 
@@ -746,7 +746,7 @@
           <div class="t-main">
             ${pinnedCtx ? `<div class="t-context pin-label">${I.pin}고정된 공지</div>` : ""}
             ${headHTML(n.date)}
-            <p class="t-text"><span class="notice-label">공지</span><span class="n-title">${esc(n.title)}</span>${isNewNotice(n) ? `<span class="new-badge">NEW</span>` : ""}\n${fmtText(n.body)}</p>
+            <p class="t-text"><span class="notice-label">공지</span><span class="n-title">${esc(n.title)}</span>${isNewNotice(n) ? `<span class="new-badge">✦ NEW</span>` : ""}\n${fmtText(n.body)}</p>
           </div>
         </article>`;
     }
