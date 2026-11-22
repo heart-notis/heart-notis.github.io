@@ -326,6 +326,8 @@
       box-shadow: 0 4px 14px rgba(150, 140, 240, .35);
       transition: filter .15s, transform .15s;
     }
+    .chat-ctas { display: flex; flex-direction: column; gap: 8px; margin: 14px 16px; }
+    .chat-ctas .chat-cta { margin: 0; }
     .chat-cta:hover { filter: brightness(.96); transform: translateY(-1px); }
     .chat-cta svg { width: 18px; height: 18px; }
     .reply-tweet { cursor: default; border-top: 1px solid var(--line); border-bottom: none; }
@@ -469,6 +471,8 @@
     const notices = SITE.notices || [];
     const characters = SITE.posts || [];
     const tagList = SITE.tags || [];
+    // 제작자 페이지에서 바꾼 프로필(프사 · 헤더 · 소개글 · 링크)이 있으면 그걸로 덮어쓰기
+    Object.entries(SITE.profile || {}).forEach(([k, v]) => { if (v !== undefined && v !== null) profile[k] = v; });
 
     /* =====================================================
        ✏️ 5. 스티커 — 누르거나 마우스를 올리면 표정이 바뀌어요
@@ -499,6 +503,13 @@
       if (!hasNum(c.rts)) c.rts = Math.max(3, Math.round(c.likes * (0.10 + seedNum(key + "↻", 0, 25) / 100)));
       c.likes = +c.likes; c.rts = +c.rts;
     });
+    // 대화 링크: 체크한 플랫폼(해시태그)마다 하나씩, 없으면 기본 링크 하나
+    const chatLinks = c => {
+      const out = [];
+      if (c.links) (c.tags || []).forEach(t => { if (c.links[t]) out.push([t, c.links[t]]); });
+      if (!out.length && c.link) out.push(["", c.link]);
+      return out;
+    };
     const likeCount = c => c.likes + (liked[c.name] ? 1 : 0);
     const shortDate = d => {
       const dt = new Date(d); if (isNaN(dt)) return "";
@@ -567,7 +578,7 @@
           ${meAva()}
           <div class="t-main">
             ${headHTML(c.date)}
-            <p class="t-text"><span class="who">${esc(c.name)}</span> — ${esc(c.tagline)}\n${hashtags(c)}</p>
+            <p class="t-text"><span class="who">${esc(c.name)}</span>${c.tagline ? ` — ${esc(c.tagline)}` : ""}\n${hashtags(c)}</p>
             <div class="t-media preview">${mediaHTML(c)}${c.adult ? `<span class="badge">19+</span>` : ""}<span class="expand">♡ 전체 보기</span></div>
             <div class="t-actions">
               <button class="act reply" data-open="${i}" aria-label="자세히">${I.reply}</button>
@@ -609,7 +620,9 @@
       const chips = `<div class="chips-wrap"><div class="edge left"><button data-scroll="-1" aria-label="왼쪽 태그">${I.chevL}</button></div><div class="chips" id="chips">${tags.map(t => `<button class="chip ${t === activeTag ? "active" : ""}" data-tag="${esc(t)}">${t === "전체" ? "전체" : "#" + esc(t)}</button>`).join("")}</div><div class="edge right"><button data-scroll="1" aria-label="오른쪽 태그">${I.chevR}</button></div></div>`;
       const prevScroll = $("chips")?.scrollLeft || 0;
       const list = characters.map((c, i) => ({ c, i })).filter(({ c }) => activeTag === "전체" || c.tags.includes(activeTag));
-      el.innerHTML = chips + (list.length ? list.map(({ c, i }) => charTweet(c, i)).join("")
+      // 공지 중 "게시물 상단에 띄우기"를 체크한 것은 게시물 탭 맨 위에
+      const topNotices = activeTag === "전체" ? notices.filter(n => n.onPosts).map(n => noticeTweet(n, true)).join("") : "";
+      el.innerHTML = chips + topNotices + (list.length ? list.map(({ c, i }) => charTweet(c, i)).join("")
         : `<p class="empty">${characters.length ? "해당 해시태그의 게시물이 없어요" : "아직 게시물이 없어요"}</p>`);
       setupChips(prevScroll);
     }
@@ -674,7 +687,7 @@
             ${meAva()}
             <div><div class="name">${esc(profile.name)}${I.verified}</div><div class="handle">@${esc(profile.handle)}</div></div>
           </div>
-          <p class="d-text"><span class="who">${esc(c.name)}</span> — ${esc(c.tagline)}\n\n${esc(c.description)}\n${hashtags(c)}</p>
+          <p class="d-text"><span class="who">${esc(c.name)}</span>${c.tagline ? ` — ${esc(c.tagline)}` : ""}\n\n${esc(c.description)}\n${hashtags(c)}</p>
           <div class="t-media">${mediaHTML(c)}${c.adult ? `<span class="badge">19+</span>` : ""}</div>
           <div class="d-time">${longDate(c.date)}${c.world ? ` · ${esc(c.world)}` : ""}</div>
           <div class="d-stats"><b>${fmt(c.rts || 0)}</b>재게시 &nbsp; <b data-likes="${i}">${fmt(likeCount(c))}</b>마음에 들어요</div>
@@ -685,7 +698,7 @@
             <button class="act share" data-share="${i}" aria-label="공유">${I.share}</button>
           </div>
         </div>
-        ${c.link ? `<a class="chat-cta" href="${esc(c.link)}" target="_blank" rel="noopener">${I.reply} ${esc(c.name)}와 대화하러 가기</a>` : ""}
+        ${chatLinks(c).length ? `<div class="chat-ctas">${chatLinks(c).map(([t, url]) => `<a class="chat-cta" href="${esc(url)}" target="_blank" rel="noopener">${I.reply} ${t ? `${esc(t)}에서 대화하기` : `${esc(c.name)}와 대화하러 가기`}</a>`).join("")}</div>` : ""}
         ${c.greeting ? `
         <article class="tweet reply-tweet">
           ${charAva(c)}

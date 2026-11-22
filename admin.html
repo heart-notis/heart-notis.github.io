@@ -132,6 +132,15 @@
     .bottom-inner .status b { color: var(--accent); }
 
     .done-card { text-align: left; }
+    .prof-row { display: flex; gap: 14px; align-items: center; }
+    .ava-prev { width: 88px; height: 88px; border-radius: 50%; overflow: hidden; flex-shrink: 0; background: var(--soft); box-shadow: 0 0 0 3px #d9cdfb; }
+    .ava-prev img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .ban-prev { width: 100%; aspect-ratio: 5 / 2; border-radius: 12px; background: var(--soft) center / cover no-repeat; border: 1px solid var(--line); }
+    .links-box { display: flex; flex-direction: column; gap: 8px; }
+    .link-row { display: flex; align-items: center; gap: 8px; }
+    .link-row .tag-name { flex: 0 0 auto; min-width: 74px; font-size: .78rem; font-weight: 800; color: #fff; background: var(--grad); padding: 4px 8px; border-radius: 999px; text-align: center; }
+    .link-row input { flex: 1; min-width: 0; padding: 9px 11px; border: 1px solid var(--line); border-radius: 10px; outline: none; font-weight: 400; }
+    .link-row input:focus { border-color: var(--accent); }
     .done-card ol { padding-left: 20px; display: flex; flex-direction: column; gap: 8px; font-size: .9rem; }
     .done-card code { background: var(--soft); padding: 1px 6px; border-radius: 5px; font-size: .85rem; }
 
@@ -175,6 +184,7 @@
         <button class="tab active" data-tab="posts">게시물</button>
         <button class="tab" data-tab="notices">공지</button>
         <button class="tab" data-tab="tags">해시태그</button>
+        <button class="tab" data-tab="profile">프로필</button>
       </nav>
 
       <section id="tab-posts">
@@ -187,10 +197,37 @@
 
       <section id="tab-notices" class="hidden">
         <div class="section-head">
-          <div><h2>공지</h2><div class="hint">공지 탭에만 보여요 · 고정한 공지는 맨 위에</div></div>
+          <div><h2>공지</h2><div class="hint">📌 공지 탭 맨 위 고정 · 📣 게시물 탭 맨 위에도 표시</div></div>
           <button class="btn btn-main" id="newNotice">+ 새 공지</button>
         </div>
         <div class="list" id="noticeList"></div>
+      </section>
+
+      <section id="tab-profile" class="hidden">
+        <div class="section-head">
+          <div><h2>프로필</h2><div class="hint">프로필 사진 · 헤더 · 소개글 · 링크</div></div>
+        </div>
+        <div class="item" style="flex-direction:column;align-items:stretch;gap:16px">
+          <div class="prof-row">
+            <div class="ava-prev" id="avaPrev"></div>
+            <div class="img-side">
+              <label class="btn btn-line file-btn">프로필 사진 바꾸기<input type="file" accept="image/*" id="avaFile" /></label>
+              <div>정사각형으로 잘라서 넣어줘요.</div>
+              <div id="avaCropWrap" class="hidden">보이는 위치 조정<input type="range" min="0" max="100" value="40" id="avaCrop" /></div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div class="ban-prev" id="banPrev"></div>
+            <label class="btn btn-line file-btn">헤더 사진 바꾸기<input type="file" accept="image/*" id="banFile" /></label>
+            <label class="f" style="font-weight:600">헤더에서 보일 위치 <small>왼쪽 = 사진 위쪽 · 오른쪽 = 사진 아래쪽</small><input type="range" min="0" max="100" value="28" id="banPos" /></label>
+          </div>
+          <label class="f">소개글<textarea id="pf_bio" style="min-height:110px"></textarea></label>
+          <div class="row">
+            <label class="f">링크에 보일 글자<input type="text" id="pf_linkLabel" placeholder="예: ASK♥" /></label>
+            <label class="f">링크 주소<input type="url" id="pf_link" placeholder="https://" /></label>
+          </div>
+          <button class="btn btn-line" id="saveProfile" style="align-self:flex-end">프로필 저장</button>
+        </div>
       </section>
 
       <section id="tab-tags" class="hidden">
@@ -270,9 +307,9 @@
 
     /* ---------- 데이터 ---------- */
     let SERVER = clone(window.SITE_DATA || { tags: [], notices: [], posts: [] });
-    SERVER.tags = SERVER.tags || []; SERVER.notices = SERVER.notices || []; SERVER.posts = SERVER.posts || [];
+    SERVER.tags = SERVER.tags || []; SERVER.notices = SERVER.notices || []; SERVER.posts = SERVER.posts || []; SERVER.profile = SERVER.profile || {};
     let data = clone(SERVER);
-    const sameAsServer = d => JSON.stringify({ t: d.tags, n: d.notices, p: d.posts }) === JSON.stringify({ t: SERVER.tags, n: SERVER.notices, p: SERVER.posts });
+    const sameAsServer = d => JSON.stringify({ t: d.tags, n: d.notices, p: d.posts, f: d.profile || {} }) === JSON.stringify({ t: SERVER.tags, n: SERVER.notices, p: SERVER.posts, f: SERVER.profile || {} });
 
     function saveDraft() {
       if (sameAsServer(data)) { store.del(DRAFT_KEY); }
@@ -288,6 +325,7 @@
       cmp(data.posts, SERVER.posts); cmp(SERVER.posts, data.posts);
       cmp(data.notices, SERVER.notices); cmp(SERVER.notices, data.notices);
       if (JSON.stringify(data.tags) !== JSON.stringify(SERVER.tags)) n++;
+      if (JSON.stringify(data.profile || {}) !== JSON.stringify(SERVER.profile || {})) n++;
       return n || 1;
     }
     function renderStatus() {
@@ -315,7 +353,7 @@
     document.querySelectorAll(".tab").forEach(b => b.onclick = () => {
       tab = b.dataset.tab;
       document.querySelectorAll(".tab").forEach(x => x.classList.toggle("active", x === b));
-      ["posts", "notices", "tags"].forEach(t => $("tab-" + t).classList.toggle("hidden", t !== tab));
+      ["posts", "notices", "tags", "profile"].forEach(t => $("tab-" + t).classList.toggle("hidden", t !== tab));
     });
 
     function initApp() {
@@ -326,14 +364,14 @@
         b.innerHTML = `<span>💜 아직 사이트에 안 올린 작업이 있어요. 이어서 할까요?</span>
           <button class="btn btn-main" id="useDraft">이어서 하기</button>
           <button class="btn btn-ghost" id="dropDraft">버리기</button>`;
-        $("useDraft").onclick = () => { data = draft; b.classList.add("hidden"); renderAll(); };
+        $("useDraft").onclick = () => { data = draft; if (!data.profile) data.profile = clone(SERVER.profile); b.classList.add("hidden"); renderAll(); };
         $("dropDraft").onclick = () => { if (confirmBox("저장 안 한 작업을 버릴까요? 되돌릴 수 없어요.")) { store.del(DRAFT_KEY); b.classList.add("hidden"); renderAll(); } };
       } else if (draft) { store.del(DRAFT_KEY); }
       renderAll();
     }
     function confirmBox(msg) { return window.confirm(msg); }
 
-    function renderAll() { renderPosts(); renderNotices(); $("tagInput").value = data.tags.join(", "); renderStatus(); }
+    function renderAll() { renderPosts(); renderNotices(); renderProfile(); $("tagInput").value = data.tags.join(", "); renderStatus(); }
 
     const isNew = (item, list) => !SERVER[list].some(x => x.id && x.id === item.id);
 
@@ -362,7 +400,7 @@
       el.innerHTML = data.notices.map((n, i) => `
         <div class="item">
           <div class="item-main">
-            <div class="item-title">${n.pinned ? "📌 " : ""}${esc(n.title || "(제목 없음)")}${isNew(n, "notices") ? `<span class="badge new">NEW</span>` : ""}</div>
+            <div class="item-title">${n.pinned ? "📌 " : ""}${n.onPosts ? "📣 " : ""}${esc(n.title || "(제목 없음)")}${isNew(n, "notices") ? `<span class="badge new">NEW</span>` : ""}</div>
             <div class="item-sub">${esc(n.date || "")} · ${esc((n.body || "").split("\n")[0])}</div>
           </div>
           <div class="item-actions">
@@ -422,7 +460,7 @@
           <label class="f">해시태그<div class="tag-pick" id="f_tags">${data.tags.map(t => `<button type="button" class="${(item.tags || []).includes(t) ? "on" : ""}" data-tag="${esc(t)}">#${esc(t)}</button>`).join("") || `<small>해시태그 탭에서 먼저 태그를 만들어주세요</small>`}</div></label>
           <label class="f">자세한 소개<textarea id="f_desc">${esc(item.description)}</textarea></label>
           <label class="f">첫 인사말 <small>상세 화면에서 캐릭터의 답글처럼 보여요</small><textarea id="f_greet" style="min-height:60px">${esc(item.greeting)}</textarea></label>
-          <label class="f">대화하러 가기 링크<input type="url" id="f_link" value="${esc(item.link)}" placeholder="https://" /></label>
+          <label class="f">대화하러 가기 링크 <small>위에서 체크한 해시태그(플랫폼)마다 주소 칸이 생겨요</small><div class="links-box" id="f_links"></div></label>
           <label class="check"><input type="checkbox" id="f_adult" ${item.adult ? "checked" : ""} /> 19+ 배지 달기</label>
           <div class="row" style="align-items:flex-end">
             <label class="f">마음에 들어요 수<input type="number" min="0" id="f_likes" value="${+item.likes || 0}" /></label>
@@ -437,7 +475,12 @@
       $("overlay").classList.add("open"); document.body.style.overflow = "hidden";
 
       $("dice").onclick = () => { const r = randomCounts(); $("f_likes").value = r.likes; $("f_rts").value = r.rts; };
-      $("f_tags").onclick = e => { const b = e.target.closest("[data-tag]"); if (b) b.classList.toggle("on"); };
+      // 대화 링크 칸: 체크한 태그마다 하나씩, 아무것도 안 체크하면 기본 칸 하나
+      edit.linkVals = { ...(item.links || {}) };
+      edit.linkVals[""] = item.link || "";
+      if (item.link && !(item.links && Object.keys(item.links).length) && (item.tags || [])[0]) edit.linkVals[item.tags[0]] = item.link;
+      renderLinkInputs();
+      $("f_tags").onclick = e => { const b = e.target.closest("[data-tag]"); if (!b) return; readLinkInputs(); b.classList.toggle("on"); renderLinkInputs(); };
       $("imgFile").onchange = async e => {
         const f = e.target.files[0]; if (!f) return;
         try {
@@ -450,6 +493,19 @@
       if ($("imgRemove")) $("imgRemove").onclick = () => { edit.item.image = ""; edit.srcImg = null; $("imgPrev").innerHTML = "이미지<br/>없음"; $("imgRemove").remove(); };
       $("savePost").onclick = savePost;
       $("f_name").focus();
+    }
+    const pickedTags = () => [...document.querySelectorAll("#f_tags .on")].map(b => b.dataset.tag);
+    function readLinkInputs() {
+      document.querySelectorAll("#f_links input").forEach(inp => { edit.linkVals[inp.dataset.tag] = inp.value; });
+    }
+    function renderLinkInputs() {
+      const tags = pickedTags();
+      const rows = tags.length ? tags : [""];
+      $("f_links").innerHTML = rows.map(t => `
+        <div class="link-row">
+          ${t ? `<span class="tag-name">${esc(t)}</span>` : ""}
+          <input type="url" data-tag="${esc(t)}" value="${esc(edit.linkVals[t] || "")}" placeholder="${t ? esc(t) + " 캐릭터 주소" : "https://"}" />
+        </div>`).join("");
     }
     function loadImage(file) {
       return new Promise((res, rej) => {
@@ -484,7 +540,10 @@
       it.tags = [...document.querySelectorAll("#f_tags .on")].map(b => b.dataset.tag);
       it.description = $("f_desc").value.trim();
       it.greeting = $("f_greet").value.trim();
-      it.link = $("f_link").value.trim();
+      readLinkInputs();
+      it.links = {};
+      it.tags.forEach(t => { const v = (edit.linkVals[t] || "").trim(); if (v) it.links[t] = v; });
+      it.link = it.tags.length ? "" : (edit.linkVals[""] || "").trim();
       it.adult = $("f_adult").checked;
       it.likes = Math.max(0, parseInt($("f_likes").value) || 0);
       it.rts = Math.max(0, parseInt($("f_rts").value) || 0);
@@ -507,6 +566,7 @@
           <label class="f">날짜<input type="date" id="n_date" value="${esc(item.date)}" /></label>
           <label class="f">내용<textarea id="n_body" style="min-height:140px">${esc(item.body)}</textarea></label>
           <label class="check"><input type="checkbox" id="n_pin" ${item.pinned ? "checked" : ""} /> 📌 공지 탭 맨 위에 고정</label>
+          <label class="check"><input type="checkbox" id="n_onposts" ${item.onPosts ? "checked" : ""} /> 📣 게시물 탭 맨 위에도 띄우기</label>
         </div>
         <div class="ed-foot">
           <button class="btn btn-ghost" data-close>취소</button>
@@ -520,6 +580,7 @@
         it.date = $("n_date").value || today();
         it.body = $("n_body").value.trim();
         it.pinned = $("n_pin").checked;
+        it.onPosts = $("n_onposts").checked;
         if (edit.index >= 0) data.notices[edit.index] = it; else data.notices.unshift(it);
         closeEditor(); saveDraft(); renderAll(); toast("공지를 저장했어요");
       };
@@ -527,6 +588,63 @@
     }
     document.addEventListener("click", e => { if (e.target.closest("[data-close]")) closeEditor(); });
     document.addEventListener("keydown", e => { if (e.key === "Escape" && edit) closeEditor(); });
+
+    /* ---------- 프로필 ---------- */
+    let profImg = { ava: null, avaPos: 40 };
+    function renderProfile() {
+      const f = data.profile || (data.profile = {});
+      $("avaPrev").innerHTML = f.avatar ? `<img src="${esc(f.avatar)}" alt="" style="object-position:${esc(f.avatarPosition || "center")}" />` : "";
+      $("banPrev").style.backgroundImage = f.banner ? `url("${f.banner}")` : "linear-gradient(120deg,#cdbdf9,#9ad8f6)";
+      $("banPrev").style.backgroundPosition = f.bannerPosition || "center";
+      $("banPos").value = parseInt(String(f.bannerPosition || "center 28%").split(" ")[1]) || 28;
+      $("pf_bio").value = f.bio || "";
+      $("pf_link").value = f.link || "";
+      $("pf_linkLabel").value = f.linkLabel || "";
+      $("avaCropWrap").classList.add("hidden");
+    }
+    function cropTo(img, W, H, posPct) {
+      const c = document.createElement("canvas"); c.width = W; c.height = H;
+      const g = c.getContext("2d");
+      const sc = Math.max(W / img.naturalWidth, H / img.naturalHeight);
+      const w = img.naturalWidth * sc, h = img.naturalHeight * sc, p = posPct / 100;
+      g.imageSmoothingQuality = "high"; g.fillStyle = "#fff"; g.fillRect(0, 0, W, H);
+      g.drawImage(img, (W - w) * (w > W + 1 ? p : .5), (H - h) * (h > H + 1 ? p : .5), w, h);
+      return c.toDataURL("image/jpeg", 0.9);
+    }
+    function drawAvatar() {
+      const f = data.profile;
+      f.avatar = cropTo(profImg.ava, 400, 400, profImg.avaPos);
+      f.avatarSmall = cropTo(profImg.ava, 144, 144, profImg.avaPos);
+      f.avatarPosition = "center";
+      $("avaPrev").innerHTML = `<img src="${f.avatar}" alt="" />`;
+    }
+    $("avaFile").onchange = async e => {
+      const file = e.target.files[0]; if (!file) return;
+      try { profImg.ava = await loadImage(file); $("avaCropWrap").classList.remove("hidden"); drawAvatar(); saveDraft(); }
+      catch { toast("이 사진은 열 수 없어요"); }
+    };
+    $("avaCrop").oninput = e => { profImg.avaPos = +e.target.value; if (profImg.ava) { drawAvatar(); saveDraft(); } };
+    $("banFile").onchange = async e => {
+      const file = e.target.files[0]; if (!file) return;
+      try {
+        const img = await loadImage(file);
+        const W = Math.min(1600, img.naturalWidth), H = Math.round(img.naturalHeight * W / img.naturalWidth);
+        data.profile.banner = cropTo(img, W, H, 50);
+        renderProfile(); saveDraft(); toast("헤더 사진을 바꿨어요");
+      } catch { toast("이 사진은 열 수 없어요"); }
+    };
+    $("banPos").oninput = e => {
+      data.profile.bannerPosition = `center ${e.target.value}%`;
+      $("banPrev").style.backgroundPosition = data.profile.bannerPosition;
+    };
+    $("banPos").onchange = () => saveDraft();
+    $("saveProfile").onclick = () => {
+      const f = data.profile;
+      f.bio = $("pf_bio").value.trim();
+      f.link = $("pf_link").value.trim();
+      f.linkLabel = $("pf_linkLabel").value.trim();
+      saveDraft(); renderAll(); toast("프로필을 저장했어요 💜");
+    };
 
     /* ---------- 해시태그 ---------- */
     $("saveTags").onclick = () => {
@@ -579,26 +697,37 @@
       return new Uint8Array(await r.arrayBuffer());
     }
 
+    // 새로 넣은 사진(data:)을 파일 경로로 바꾸고, 올릴 파일 목록을 돌려줘요
+    function materialize(out) {
+      const files = [];
+      const stamp = Date.now().toString(36);
+      for (const p of out.posts) {
+        if (p.image && p.image.startsWith("data:")) {
+          const path = `images/post-${p.id}.jpg`;
+          files.push({ path, bytes: dataUrlBytes(p.image), label: `사진 추가: ${p.name}` });
+          p.image = path;
+        }
+      }
+      const f = out.profile || {};
+      [["avatar", `images/profile-${stamp}.jpg`, "프로필 사진 변경"], ["avatarSmall", `images/profile-sm-${stamp}.jpg`, "프로필 사진(작은) 변경"], ["banner", `images/header-${stamp}.jpg`, "헤더 사진 변경"]]
+        .forEach(([k, path, label]) => { if (f[k] && f[k].startsWith("data:")) { files.push({ path, bytes: dataUrlBytes(f[k]), label }); f[k] = path; } });
+      return files;
+    }
+    const referenced = out => new Set([...out.posts.map(p => p.image), ...["avatar", "avatarSmall", "banner"].map(k => (out.profile || {})[k])].filter(src => src && !src.startsWith("http") && !src.startsWith("data:")));
+    const siteJs = out => "/* 이 파일은 제작자 페이지(admin.html)가 자동으로 만들어요. 직접 고치지 않아도 돼요. */\nwindow.SITE_DATA = " + JSON.stringify({ tags: out.tags, profile: out.profile || {}, notices: out.notices, posts: out.posts }, null, 2) + ";\n";
+
     async function exportZip(btn) {
       const label = btn.textContent;
       btn.disabled = true; btn.textContent = "만드는 중…";
       try {
         const out = clone(data);
-        const files = [], used = new Set();
-        // 새로 넣은 사진 → images/post-<id>.jpg 파일로
-        for (const p of out.posts) {
-          if (p.image && p.image.startsWith("data:")) {
-            const path = `images/post-${p.id}.jpg`;
-            files.push({ name: path, bytes: dataUrlBytes(p.image) });
-            p.image = path; used.add(path);
-          }
-        }
+        const fresh = materialize(out);
+        const files = fresh.map(x => ({ name: x.path, bytes: x.bytes }));
+        const freshPaths = new Set(fresh.map(x => x.path));
         // 이미 사이트에 있는 파일들
-        const keep = [...FIXED_FILES, ...out.posts.map(p => p.image).filter(src => src && !used.has(src) && !src.startsWith("http"))];
+        const keep = [...FIXED_FILES, ...referenced(out)].filter(path => !freshPaths.has(path));
         for (const path of [...new Set(keep)]) files.push({ name: path, bytes: await fetchBytes(path) });
-        // data.js
-        const js = "/* 이 파일은 제작자 페이지(admin.html)가 자동으로 만들어요. 직접 고치지 않아도 돼요. */\nwindow.SITE_DATA = " + JSON.stringify({ tags: out.tags, notices: out.notices, posts: out.posts }, null, 2) + ";\n";
-        files.push({ name: "data.js", bytes: new TextEncoder().encode(js) });
+        files.push({ name: "data.js", bytes: new TextEncoder().encode(siteJs(out)) });
 
         const blob = makeZip(files);
         const a = document.createElement("a");
@@ -675,28 +804,21 @@
       const step = t => { btn.textContent = t; };
       try {
         const out = clone(data);
-        const uploads = [];
-        for (const p of out.posts) {
-          if (p.image && p.image.startsWith("data:")) {
-            const path = `images/post-${p.id}.jpg`;
-            uploads.push({ path, bytes: dataUrlBytes(p.image), name: p.name });
-            p.image = path;
-          }
-        }
+        const uploads = materialize(out);
         let n = 0;
-        for (const u of uploads) { step(`사진 올리는 중 (${++n}/${uploads.length})`); await putFile(u.path, u.bytes, `사진 추가: ${u.name}`); }
+        for (const u of uploads) { step(`사진 올리는 중 (${++n}/${uploads.length})`); await putFile(u.path, u.bytes, u.label); }
 
         step("글 저장하는 중…");
-        const js = "/* 이 파일은 제작자 페이지(admin.html)가 자동으로 만들어요. 직접 고치지 않아도 돼요. */\nwindow.SITE_DATA = " + JSON.stringify({ tags: out.tags, notices: out.notices, posts: out.posts }, null, 2) + ";\n";
-        await putFile("data.js", new TextEncoder().encode(js), "게시물 · 공지 업데이트");
+        await putFile("data.js", new TextEncoder().encode(siteJs(out)), "게시물 · 공지 · 프로필 업데이트");
 
         // 지운 게시물의 사진 정리
         step("정리하는 중…");
         try {
-          const used = new Set(out.posts.map(p => p.image));
+          const used = referenced(out);
           const list = await gh(`/contents/images?ref=${BRANCH}`);
           for (const f of list) {
-            if (/^post-.*\.jpg$/.test(f.name) && !used.has(f.path)) {
+            // 지운 게시물 사진, 바꾸기 전 프로필/헤더 사진만 정리 (처음 넣은 기본 사진은 안 지워요)
+            if (/^(post-.+|profile-[a-z0-9]{6,}|profile-sm-[a-z0-9]{6,}|header-[a-z0-9]{6,})\.jpg$/.test(f.name) && !used.has(f.path)) {
               await gh(`/contents/${f.path}`, { method: "DELETE", body: JSON.stringify({ message: `사진 정리: ${f.name}`, sha: f.sha, branch: BRANCH }) });
             }
           }
