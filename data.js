@@ -62,7 +62,7 @@ window.SITE_DATA = {
         "TINGLE": "https://tingle.chat/chat/characters/53922",
         "합작": "https://www.whif.io/universes/7f9e2f76-569c-4d3c-ae0d-4577f7760b1d"
       },
-      "theme": "noir",
+      "theme": "horror",
       "previewX": 50,
       "previewZoom": 1
     },
