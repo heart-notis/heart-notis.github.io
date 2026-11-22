@@ -653,16 +653,20 @@
       return out;
     };
     const likeCount = c => c.likes + (liked[c.name] ? 1 : 0);
+    // "2026-11-22" 같은 날짜를 한국 시간 그 날짜로 읽어요 (그냥 읽으면 오전 9시 기준이 돼서 어긋나요)
+    const toDay = d => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(d || ""); return m ? new Date(+m[1], m[2] - 1, +m[3]) : new Date(d); };
     const shortDate = d => {
-      const dt = new Date(d); if (isNaN(dt)) return "";
-      const days = Math.floor((Date.now() - dt) / 86400000);
+      const dt = toDay(d); if (isNaN(dt)) return "";
+      const now = new Date(), today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const days = Math.round((today - new Date(dt.getFullYear(), dt.getMonth(), dt.getDate())) / 86400000);
       if (days < 1) return "오늘";
+      if (days === 1) return "어제";
       if (days < 7) return `${days}일`;
       return dt.getFullYear() === new Date().getFullYear()
         ? `${dt.getMonth() + 1}월 ${dt.getDate()}일`
         : `${dt.getFullYear()}년 ${dt.getMonth() + 1}월 ${dt.getDate()}일`;
     };
-    const longDate = d => { const dt = new Date(d); return isNaN(dt) ? "" : `${dt.getFullYear()}년 ${dt.getMonth() + 1}월 ${dt.getDate()}일`; };
+    const longDate = d => { const dt = toDay(d); return isNaN(dt) ? "" : `${dt.getFullYear()}년 ${dt.getMonth() + 1}월 ${dt.getDate()}일`; };
     const hashtags = c => c.tags.map(t => `<span class="hash">#${esc(t.replace(/\s/g, ""))}</span>`).join(" ");
 
     const I = {
