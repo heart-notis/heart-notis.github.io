@@ -1077,6 +1077,27 @@
     renderView();
 
     // 처음 들어왔을 때: 주소 끝(#media, #post-…)에 맞춰 열고, 뒤로가기하면 홈으로 오게 기록
+    // 폰에서 탭을 다시 열었을 때 예전 화면이 그대로 남아있는 경우가 있어서,
+    // 돌아올 때마다 최신 data.js를 확인하고 바뀌었으면 새로고침해요 (메시지 쓰는 중이면 건너뜀)
+    (function keepFresh() {
+      const snap = JSON.stringify(window.SITE_DATA || {});
+      let busy = false, last = Date.now();
+      const typing = () => [...document.querySelectorAll("input, textarea")].some(el => el.value && el.type !== "hidden");
+      async function check() {
+        if (busy || document.hidden || typing() || Date.now() - last < 5000) return;
+        busy = true; last = Date.now();
+        try {
+          const txt = await (await fetch("data.js?v=" + Date.now(), { cache: "no-store" })).text();
+          const box = {}; new Function("window", txt)(box);
+          if (box.SITE_DATA && JSON.stringify(box.SITE_DATA) !== snap) location.reload();
+        } catch {}
+        busy = false;
+      }
+      window.addEventListener("pageshow", e => { if (e.persisted) check(); });
+      document.addEventListener("visibilitychange", check);
+      window.addEventListener("focus", check);
+    })();
+
     (function initHistory() {
       const h = decodeURIComponent(location.hash.slice(1));
       const postIdx = h.startsWith("post-") ? characters.findIndex((c, i) => (c.id || String(i)) === h.slice(5)) : -1;
