@@ -133,6 +133,25 @@
     .bottom-inner .status b { color: var(--accent); }
 
     .done-card { text-align: left; }
+    /* ---------- 사진 자르기 창 ---------- */
+    .crop-overlay { position: fixed; inset: 0; z-index: 70; background: rgba(20, 16, 40, .78); display: none; align-items: center; justify-content: center; padding: 12px; }
+    .crop-overlay.open { display: flex; }
+    .crop-box { background: #fff; border-radius: 18px; width: 100%; max-width: 460px; max-height: 96vh; overflow: auto; }
+    .crop-stage-wrap { background: #1c1a24; padding: 14px; display: flex; justify-content: center; }
+    .crop-stage { position: relative; overflow: hidden; border-radius: 4px; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
+    .crop-stage.dragging { cursor: grabbing; }
+    .crop-stage canvas { display: block; width: 100%; height: 100%; border-radius: 4px; }
+    .crop-stage .guide { position: absolute; inset: 0; pointer-events: none; border: 1.5px solid rgba(255,255,255,.85); border-radius: 4px;
+      background-image: linear-gradient(rgba(255,255,255,.28) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.28) 1px, transparent 1px);
+      background-size: 33.333% 33.333%; background-position: -1px -1px; opacity: 0; transition: opacity .2s; }
+    .crop-stage.dragging .guide, .crop-stage:hover .guide { opacity: 1; }
+    .crop-stage .round { position: absolute; inset: 0; pointer-events: none; border-radius: 50%; box-shadow: 0 0 0 999px rgba(20, 16, 40, .55); }
+    .crop-tools { padding: 14px 16px 4px; display: flex; flex-direction: column; gap: 10px; }
+    .zoom-row { display: flex; align-items: center; gap: 10px; }
+    .zoom-row input { flex: 1; accent-color: var(--accent); }
+    .zoom-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--soft); color: var(--accent); font-size: 1.2rem; font-weight: 800; flex-shrink: 0; }
+    .nudge { display: flex; gap: 6px; justify-content: center; }
+    .nudge button { width: 38px; height: 32px; border-radius: 10px; background: #eef1f4; font-weight: 800; color: #4a4f57; }
     .prof-row { display: flex; gap: 14px; align-items: center; }
     .ava-prev { width: 88px; height: 88px; border-radius: 50%; overflow: hidden; flex-shrink: 0; background: var(--soft); box-shadow: 0 0 0 3px #d9cdfb; }
     .ava-prev img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -223,13 +242,15 @@
             <div class="img-side">
               <label class="btn btn-line file-btn">프로필 사진 바꾸기<input type="file" accept="image/*" id="avaFile" /></label>
               <div>정사각형으로 잘라서 넣어줘요.<br/>🔒 사진 정보(EXIF)는 자동으로 지워져요.</div>
-              <div id="avaCropWrap" class="hidden">보이는 위치 조정<input type="range" min="0" max="100" value="40" id="avaCrop" /></div>
+              <button class="btn btn-ghost" id="avaRecrop" style="align-self:flex-start">✂️ 다시 자르기</button>
             </div>
           </div>
           <div style="display:flex;flex-direction:column;gap:8px">
             <div class="ban-prev" id="banPrev"></div>
-            <label class="btn btn-line file-btn">헤더 사진 바꾸기<input type="file" accept="image/*" id="banFile" /></label>
-            <label class="f" style="font-weight:600">헤더에서 보일 위치 <small>왼쪽 = 사진 위쪽 · 오른쪽 = 사진 아래쪽</small><input type="range" min="0" max="100" value="28" id="banPos" /></label>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <label class="btn btn-line file-btn">헤더 사진 바꾸기<input type="file" accept="image/*" id="banFile" /></label>
+              <button class="btn btn-ghost" id="banRecrop">✂️ 다시 자르기</button>
+            </div>
           </div>
           <label class="f">소개글<textarea id="pf_bio" style="min-height:110px"></textarea></label>
           <div class="row">
@@ -265,6 +286,31 @@
   <!-- 편집 창 -->
   <div class="overlay" id="overlay">
     <div class="editor" id="editor"></div>
+  </div>
+  <div class="crop-overlay" id="cropOverlay">
+    <div class="crop-box">
+      <div class="ed-top"><h3 id="cropTitle">사진 자르기</h3><button class="icon" id="cropCancelX" aria-label="닫기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+      <div class="crop-stage-wrap"><div class="crop-stage" id="cropStage"><canvas id="cropCanvas"></canvas><div class="guide"></div></div></div>
+      <div class="crop-tools">
+        <div class="hint" style="text-align:center">손가락이나 마우스로 <b>끌어서 위치</b>를 옮기고, 두 손가락(또는 휠)으로 <b>확대·축소</b>해요</div>
+        <div class="zoom-row">
+          <button class="zoom-btn" id="zoomOut" aria-label="축소">−</button>
+          <input type="range" id="zoomRange" min="0" max="1000" value="0" aria-label="확대·축소" />
+          <button class="zoom-btn" id="zoomIn" aria-label="확대">+</button>
+        </div>
+        <div class="nudge">
+          <button data-nudge="-1,0" aria-label="왼쪽으로">←</button>
+          <button data-nudge="0,-1" aria-label="위로">↑</button>
+          <button data-nudge="0,1" aria-label="아래로">↓</button>
+          <button data-nudge="1,0" aria-label="오른쪽으로">→</button>
+          <button id="cropReset" style="width:auto;padding:0 12px;font-size:.8rem">처음대로</button>
+        </div>
+      </div>
+      <div class="ed-foot">
+        <button class="btn btn-ghost" id="cropCancel">취소</button>
+        <button class="btn btn-main" id="cropDone">완료</button>
+      </div>
+    </div>
   </div>
   <div class="toast" id="toast"></div>
 
@@ -450,7 +496,7 @@
         ...randomCounts(), date: today(), description: "", greeting: "", link: ""
       };
       if (!item.id) item.id = uid();
-      edit = { kind: "post", index, item, srcImg: null, cropPos: 30 };
+      edit = { kind: "post", index, item };
       $("editor").innerHTML = `
         <div class="ed-top"><h3>${index >= 0 ? "게시물 수정" : "새 게시물"}</h3><button class="icon" data-close aria-label="닫기">${I.x}</button></div>
         <div class="ed-body">
@@ -459,7 +505,7 @@
             <div class="img-side">
               <label class="btn btn-line file-btn">사진 고르기<input type="file" accept="image/*" id="imgFile" /></label>
               <div>사진은 987×1216 비율로 자동으로 잘라서 넣어줘요.<br/>🔒 사진 정보(EXIF · 위치 · 기기)는 자동으로 지워져요.</div>
-              <div id="cropWrap" class="hidden">보이는 위치 조정<input type="range" min="0" max="100" value="30" id="cropPos" /></div>
+              ${item.image ? `<button class="btn btn-ghost" id="imgRecrop" style="align-self:flex-start">✂️ 다시 자르기</button>` : ""}
               ${item.image ? `<button class="btn btn-ghost" id="imgRemove" style="align-self:flex-start">사진 빼기</button>` : ""}
             </div>
           </div>
@@ -494,16 +540,23 @@
       if (item.link && !(item.links && Object.keys(item.links).length) && (item.tags || [])[0]) edit.linkVals[item.tags[0]] = item.link;
       renderLinkInputs();
       $("f_tags").onclick = e => { const b = e.target.closest("[data-tag]"); if (!b) return; readLinkInputs(); b.classList.toggle("on"); renderLinkInputs(); };
-      $("imgFile").onchange = async e => {
-        const f = e.target.files[0]; if (!f) return;
-        try {
-          edit.srcImg = await loadImage(f);
-          $("cropWrap").classList.remove("hidden");
-          drawCrop();
-        } catch { toast("이 사진은 열 수 없어요. 다른 사진을 골라주세요."); }
+      const setPostImg = url => {
+        edit.item.image = url;
+        $("imgPrev").innerHTML = `<img src="${url}" alt="" />`;
+        if (!$("imgRecrop")) $("imgFile").closest(".img-side").insertAdjacentHTML("beforeend", `<button class="btn btn-ghost" id="imgRecrop" style="align-self:flex-start">✂️ 다시 자르기</button>`);
+        $("imgRecrop").onclick = recrop;
       };
-      $("cropPos").oninput = e => { edit.cropPos = +e.target.value; drawCrop(); };
-      if ($("imgRemove")) $("imgRemove").onclick = () => { edit.item.image = ""; edit.srcImg = null; $("imgPrev").innerHTML = "이미지<br/>없음"; $("imgRemove").remove(); };
+      const recrop = async () => {
+        try { const url = await cropImage(await loadImage(edit.item.image), { W: IMG_W, H: IMG_H, title: "게시물 사진 자르기" }); if (url) setPostImg(url); }
+        catch { toast("사진을 다시 열 수 없어요. 새로 골라주세요."); }
+      };
+      $("imgFile").onchange = async e => {
+        const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+        try { const url = await cropImage(await loadImage(f), { W: IMG_W, H: IMG_H, title: "게시물 사진 자르기" }); if (url) setPostImg(url); }
+        catch { toast("이 사진은 열 수 없어요. 다른 사진을 골라주세요."); }
+      };
+      if ($("imgRecrop")) $("imgRecrop").onclick = recrop;
+      if ($("imgRemove")) $("imgRemove").onclick = () => { edit.item.image = ""; if ($("imgRecrop")) $("imgRecrop").remove(); $("imgPrev").innerHTML = "이미지<br/>없음"; $("imgRemove").remove(); };
       $("savePost").onclick = savePost;
       $("f_name").focus();
     }
@@ -522,26 +575,101 @@
     }
     function loadImage(file) {
       return new Promise((res, rej) => {
-        const url = URL.createObjectURL(file);
+        const url = typeof file === "string" ? file : URL.createObjectURL(file);
         const img = new Image();
         img.onload = () => res(img);
         img.onerror = rej;
         img.src = url;
       });
     }
-    function drawCrop() {
-      const img = edit.srcImg; if (!img) return;
-      const c = document.createElement("canvas"); c.width = IMG_W; c.height = IMG_H;
-      const g = c.getContext("2d");
-      const scale = Math.max(IMG_W / img.naturalWidth, IMG_H / img.naturalHeight);
-      const w = img.naturalWidth * scale, h = img.naturalHeight * scale;
-      const p = edit.cropPos / 100;
-      const x = (IMG_W - w) * (w > IMG_W + 1 ? p : .5), y = (IMG_H - h) * (h > IMG_H + 1 ? p : .5);
-      g.imageSmoothingQuality = "high";
-      g.fillStyle = "#fff"; g.fillRect(0, 0, IMG_W, IMG_H);
-      g.drawImage(img, x, y, w, h);
-      edit.item.image = c.toDataURL("image/jpeg", 0.88);
-      $("imgPrev").innerHTML = `<img src="${edit.item.image}" alt="" />`;
+    /* ---------- ✂️ 사진 자르기 창 (확대 · 축소 · 이동) ----------
+       cropImage(img, { W, H, round, title }) → 자른 사진(data URL) 또는 취소하면 null
+       결과는 다시 그린 사진이라 EXIF(위치·기기 정보)는 남지 않아요 */
+    function cropImage(img, opt) {
+      return new Promise(resolve => {
+        const { W, H } = opt;
+        const iw = img.naturalWidth, ih = img.naturalHeight;
+        const cover = Math.max(W / iw, H / ih), contain = Math.min(W / iw, H / ih);
+        const minZ = contain / cover, maxZ = 5;          // 1 = 꽉 채우기, minZ = 사진 전체 보이기
+        let z = 1, x = 0, y = 0;                          // x, y = 사진 왼쪽 위 위치 (결과 사진 기준 px)
+        const cv = $("cropCanvas"), stage = $("cropStage"), g = cv.getContext("2d");
+        cv.width = W; cv.height = H;
+        // 화면에 맞는 크기로 보여주기
+        const maxW = Math.min(420, window.innerWidth - 52), maxH = Math.min(window.innerHeight * 0.52, 520);
+        const k = Math.min(maxW / W, maxH / H);
+        stage.style.width = Math.round(W * k) + "px"; stage.style.height = Math.round(H * k) + "px";
+        stage.querySelector(".round")?.remove();
+        if (opt.round) stage.insertAdjacentHTML("beforeend", `<div class="round"></div>`);
+        $("cropTitle").textContent = opt.title || "사진 자르기";
+
+        const dw = () => iw * cover * z, dh = () => ih * cover * z;
+        const clamp = () => {
+          const w = dw(), h = dh();
+          x = w >= W ? Math.min(0, Math.max(W - w, x)) : Math.max(0, Math.min(W - w, x));
+          y = h >= H ? Math.min(0, Math.max(H - h, y)) : Math.max(0, Math.min(H - h, y));
+        };
+        const reset = () => { z = 1; x = (W - dw()) / 2; y = (H - dh()) / 2; clamp(); draw(); };
+        const zToRange = v => Math.round(Math.log(v / minZ) / Math.log(maxZ / minZ) * 1000);
+        const rangeToZ = r => minZ * Math.pow(maxZ / minZ, r / 1000);
+        function draw(final) {
+          g.imageSmoothingQuality = "high";
+          g.fillStyle = "#fff"; g.fillRect(0, 0, W, H);
+          if (dw() < W - 0.5 || dh() < H - 0.5) {          // 사진보다 틀이 크면 흐린 배경으로 채우기
+            g.save(); g.filter = "blur(28px) brightness(0.95)";
+            const s2 = Math.max(W / iw, H / ih) * 1.1;
+            g.drawImage(img, (W - iw * s2) / 2, (H - ih * s2) / 2, iw * s2, ih * s2); g.restore();
+          }
+          g.drawImage(img, x, y, dw(), dh());
+          if (!final) $("zoomRange").value = zToRange(z);
+        }
+        function zoomAt(nz, cx, cy) {                       // cx, cy: 결과 사진 기준 확대 중심
+          nz = Math.max(minZ, Math.min(maxZ, nz));
+          const r = nz / z; x = cx - (cx - x) * r; y = cy - (cy - y) * r; z = nz; clamp(); draw();
+        }
+        const toCanvas = (clientX, clientY) => { const b = cv.getBoundingClientRect(); return [(clientX - b.left) * W / b.width, (clientY - b.top) * H / b.height]; };
+
+        // 끌기 · 두 손가락 확대
+        const pts = new Map(); let pinch = null;
+        const onDown = e => { stage.setPointerCapture(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]); stage.classList.add("dragging");
+          if (pts.size === 2) { const [a, b] = [...pts.values()]; pinch = { d: Math.hypot(a[0] - b[0], a[1] - b[1]), z }; } };
+        const onMove = e => {
+          if (!pts.has(e.pointerId)) return;
+          const prev = pts.get(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]);
+          if (pts.size === 1) {
+            const b = cv.getBoundingClientRect();
+            x += (e.clientX - prev[0]) * W / b.width; y += (e.clientY - prev[1]) * H / b.height; clamp(); draw();
+          } else if (pts.size === 2 && pinch) {
+            const [a, b] = [...pts.values()];
+            const d = Math.hypot(a[0] - b[0], a[1] - b[1]);
+            const [cx, cy] = toCanvas((a[0] + b[0]) / 2, (a[1] + b[1]) / 2);
+            zoomAt(pinch.z * d / pinch.d, cx, cy);
+          }
+        };
+        const onUp = e => { pts.delete(e.pointerId); if (pts.size < 2) pinch = null; if (!pts.size) stage.classList.remove("dragging"); };
+        const onWheel = e => { e.preventDefault(); const [cx, cy] = toCanvas(e.clientX, e.clientY); zoomAt(z * Math.exp(-e.deltaY * 0.0015), cx, cy); };
+        stage.onpointerdown = onDown; stage.onpointermove = onMove; stage.onpointerup = onUp; stage.onpointercancel = onUp;
+        stage.onwheel = onWheel;
+        $("zoomRange").oninput = e => zoomAt(rangeToZ(+e.target.value), W / 2, H / 2);
+        $("zoomIn").onclick = () => zoomAt(z * 1.15, W / 2, H / 2);
+        $("zoomOut").onclick = () => zoomAt(z / 1.15, W / 2, H / 2);
+        document.querySelectorAll("[data-nudge]").forEach(b => b.onclick = () => {
+          const [dx, dy] = b.dataset.nudge.split(",").map(Number); const step = Math.round(Math.max(W, H) * 0.02);
+          x += dx * step; y += dy * step; clamp(); draw();
+        });
+        $("cropReset").onclick = reset;
+
+        const finish = ok => {
+          $("cropOverlay").classList.remove("open");
+          stage.onpointerdown = stage.onpointermove = stage.onpointerup = stage.onpointercancel = stage.onwheel = null;
+          if (!ok) return resolve(null);
+          draw(true);
+          resolve(opt.raw ? cv : cv.toDataURL("image/jpeg", 0.9));
+        };
+        $("cropDone").onclick = () => finish(true);
+        $("cropCancel").onclick = $("cropCancelX").onclick = () => finish(false);
+        $("cropOverlay").classList.add("open");
+        reset();
+      });
     }
     function savePost() {
       const it = edit.item;
@@ -674,54 +802,40 @@
     });
 
     /* ---------- 프로필 ---------- */
-    let profImg = { ava: null, avaPos: 40 };
     function renderProfile() {
       const f = data.profile || (data.profile = {});
       $("avaPrev").innerHTML = f.avatar ? `<img src="${esc(f.avatar)}" alt="" style="object-position:${esc(f.avatarPosition || "center")}" />` : "";
       $("banPrev").style.backgroundImage = f.banner ? `url("${f.banner}")` : "linear-gradient(120deg,#cdbdf9,#9ad8f6)";
       $("banPrev").style.backgroundPosition = f.bannerPosition || "center";
-      $("banPos").value = parseInt(String(f.bannerPosition || "center 28%").split(" ")[1]) || 28;
       $("pf_bio").value = f.bio || "";
       $("pf_link").value = f.link || "";
       $("pf_linkLabel").value = f.linkLabel || "";
-      $("avaCropWrap").classList.add("hidden");
+      $("avaRecrop").classList.toggle("hidden", !f.avatar);
+      $("banRecrop").classList.toggle("hidden", !f.banner);
     }
-    function cropTo(img, W, H, posPct) {
-      const c = document.createElement("canvas"); c.width = W; c.height = H;
-      const g = c.getContext("2d");
-      const sc = Math.max(W / img.naturalWidth, H / img.naturalHeight);
-      const w = img.naturalWidth * sc, h = img.naturalHeight * sc, p = posPct / 100;
-      g.imageSmoothingQuality = "high"; g.fillStyle = "#fff"; g.fillRect(0, 0, W, H);
-      g.drawImage(img, (W - w) * (w > W + 1 ? p : .5), (H - h) * (h > H + 1 ? p : .5), w, h);
-      return c.toDataURL("image/jpeg", 0.9);
-    }
-    function drawAvatar() {
+    // 프사: 정사각형으로 자르고 큰 것(400) · 작은 것(144) 두 장 만들기
+    async function setAvatarFrom(src) {
+      const cv = await cropImage(await loadImage(src), { W: 400, H: 400, round: true, title: "프로필 사진 자르기", raw: true });
+      if (!cv) return;
       const f = data.profile;
-      f.avatar = cropTo(profImg.ava, 400, 400, profImg.avaPos);
-      f.avatarSmall = cropTo(profImg.ava, 144, 144, profImg.avaPos);
+      f.avatar = cv.toDataURL("image/jpeg", 0.92);
+      const sm = document.createElement("canvas"); sm.width = sm.height = 144;
+      const sg = sm.getContext("2d"); sg.imageSmoothingQuality = "high"; sg.drawImage(cv, 0, 0, 144, 144);
+      f.avatarSmall = sm.toDataURL("image/jpeg", 0.92);
       f.avatarPosition = "center";
-      $("avaPrev").innerHTML = `<img src="${f.avatar}" alt="" />`;
+      renderProfile(); saveDraft(); toast("프로필 사진을 바꿨어요");
     }
-    $("avaFile").onchange = async e => {
-      const file = e.target.files[0]; if (!file) return;
-      try { profImg.ava = await loadImage(file); $("avaCropWrap").classList.remove("hidden"); drawAvatar(); saveDraft(); }
-      catch { toast("이 사진은 열 수 없어요"); }
-    };
-    $("avaCrop").oninput = e => { profImg.avaPos = +e.target.value; if (profImg.ava) { drawAvatar(); saveDraft(); } };
-    $("banFile").onchange = async e => {
-      const file = e.target.files[0]; if (!file) return;
-      try {
-        const img = await loadImage(file);
-        const W = Math.min(1600, img.naturalWidth), H = Math.round(img.naturalHeight * W / img.naturalWidth);
-        data.profile.banner = cropTo(img, W, H, 50);
-        renderProfile(); saveDraft(); toast("헤더 사진을 바꿨어요");
-      } catch { toast("이 사진은 열 수 없어요"); }
-    };
-    $("banPos").oninput = e => {
-      data.profile.bannerPosition = `center ${e.target.value}%`;
-      $("banPrev").style.backgroundPosition = data.profile.bannerPosition;
-    };
-    $("banPos").onchange = () => saveDraft();
+    // 헤더: 사이트 헤더 비율(5:2)로 자르기
+    async function setBannerFrom(src) {
+      const url = await cropImage(await loadImage(src), { W: 1600, H: 640, title: "헤더 사진 자르기" });
+      if (!url) return;
+      data.profile.banner = url; data.profile.bannerPosition = "center";
+      renderProfile(); saveDraft(); toast("헤더 사진을 바꿨어요");
+    }
+    $("avaFile").onchange = e => { const file = e.target.files[0]; e.target.value = ""; if (file) setAvatarFrom(file).catch(() => toast("이 사진은 열 수 없어요")); };
+    $("avaRecrop").onclick = () => setAvatarFrom(data.profile.avatar).catch(() => toast("사진을 다시 열 수 없어요. 새로 골라주세요."));
+    $("banFile").onchange = e => { const file = e.target.files[0]; e.target.value = ""; if (file) setBannerFrom(file).catch(() => toast("이 사진은 열 수 없어요")); };
+    $("banRecrop").onclick = () => setBannerFrom(data.profile.banner).catch(() => toast("사진을 다시 열 수 없어요. 새로 골라주세요."));
     $("saveProfile").onclick = () => {
       const f = data.profile;
       f.bio = $("pf_bio").value.trim();
