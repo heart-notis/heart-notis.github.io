@@ -1025,7 +1025,7 @@
       const stamp = Date.now().toString(36);
       for (const p of out.posts) {
         if (p.image && p.image.startsWith("data:")) {
-          const path = `images/post-${p.id}.jpg`;
+          const path = `images/post-${p.id}-${stamp}.jpg`;   // 사진 바꿀 때마다 이름이 달라져서 폰에 예전 사진이 남지 않아요
           files.push({ path, bytes: dataUrlBytes(p.image), label: `사진 추가: ${p.name}` });
           p.image = path;
         }
