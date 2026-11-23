@@ -272,6 +272,15 @@
     .prof-row .img-side { min-width: 0; gap: 6px; }
     .ava-prev { width: 72px; height: 72px; border-radius: 50%; overflow: hidden; flex-shrink: 0; background: var(--soft); box-shadow: 0 0 0 3px #d9cdfb; }
     .ava-prev img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .share-box { display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 14px; background: #faf9ff; border: 1px dashed #ddd3fb; }
+    .sb-head { font-weight: 800; font-size: .88rem; }
+    .sb-head small { font-weight: 500; color: var(--sub); font-size: .74rem; margin-left: 4px; }
+    .sb-card { display: flex; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: #fff; }
+    .sb-card img { width: 42%; aspect-ratio: 1200 / 630; object-fit: cover; background: var(--soft); flex-shrink: 0; }
+    .sb-card div { padding: 8px 10px; min-width: 0; display: flex; flex-direction: column; gap: 2px; justify-content: center; }
+    .sb-card b { font-size: .82rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sb-card span { font-size: .72rem; color: #4b5563; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .sb-card em { font-style: normal; font-size: .66rem; color: var(--sub); }
     .ban-prev { width: 100%; aspect-ratio: 5 / 2; border-radius: 12px; background: var(--soft) center / cover no-repeat; border: 1px solid var(--line); }
     .links-box { display: flex; flex-direction: column; gap: 8px; }
     .link-row { display: flex; align-items: center; gap: 8px; }
@@ -382,6 +391,18 @@
           <div class="row">
             <label class="f">링크에 보일 글자<input type="text" id="pf_linkLabel" placeholder="예: ASK♥" /></label>
             <label class="f">링크 주소<input type="url" id="pf_link" placeholder="https://" /></label>
+          </div>
+          <div class="share-box">
+            <div class="sb-head">🔗 공유 카드 <small>사이트 링크를 붙였을 때 뜨는 카드예요</small></div>
+            <div class="sb-card"><img id="shImg" alt="" /><div><b id="shTitlePrev"></b><span id="shDescPrev"></span><em>heart-notis.github.io</em></div></div>
+            <label class="f">카드 제목<input type="text" id="sh_title" placeholder="하트 (@HEART)" /></label>
+            <label class="f">카드 소개 문구<input type="text" id="sh_desc" placeholder="이식 요청, 문의는 편하게 메시지 남겨주세요 💙" /></label>
+            <label class="check"><input type="checkbox" id="sh_auto" /> 프로필 사진 · 헤더를 바꾸면 공유 이미지도 자동으로 새로 만들기</label>
+            <div class="btn-row" style="flex-wrap:wrap">
+              <button type="button" class="btn btn-line btn-sm" id="shRegen">✨ 지금 프로필로 다시 만들기</button>
+              <label class="btn btn-ghost btn-sm file-btn">📷 직접 올리기<input type="file" accept="image/*" id="shFile" /></label>
+            </div>
+            <div class="tiny">이미지는 1200×630으로 만들어져요 · 이미 붙여둔 링크는 앱이 예전 카드를 기억하고 있어서 늦게 바뀔 수 있어요</div>
           </div>
           <button class="btn btn-main btn-sm" id="saveProfile" style="align-self:flex-end;padding:8px 18px">프로필 저장</button>
         </div>
@@ -1296,6 +1317,83 @@
       $("pf_linkLabel").value = f.linkLabel || "";
       $("avaRecrop").classList.toggle("hidden", !f.avatar);
       $("banRecrop").classList.toggle("hidden", !f.banner);
+      const sh = shareOf(f);
+      $("sh_title").value = sh.title; $("sh_desc").value = sh.desc; $("sh_auto").checked = sh.auto !== false;
+      drawSharePrev();
+    }
+    /* ---------- 🔗 공유 카드 (링크 미리보기) ---------- */
+    const SHARE_DEFAULT = { title: "하트 (@HEART)", desc: "이식 요청, 문의는 편하게 메시지 남겨주세요 💙", image: "og-2.jpg", auto: true };
+    const shareOf = f => Object.assign({}, SHARE_DEFAULT, (f || {}).share || {});
+    function drawSharePrev() {
+      const sh = shareOf(data.profile);
+      $("shImg").src = sh.image;
+      $("shTitlePrev").textContent = $("sh_title").value || sh.title;
+      $("shDescPrev").textContent = $("sh_desc").value || sh.desc;
+    }
+    $("sh_title").oninput = $("sh_desc").oninput = drawSharePrev;
+    const setShare = patch => { const f = data.profile; f.share = Object.assign(shareOf(f), patch); };
+    // 지금 프로필 사진 · 헤더 · 이름으로 공유 이미지(1200×630) 그리기
+    async function makeShareImage() {
+      const f = data.profile, W = 1200, H = 630;
+      const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+      const g = cv.getContext("2d"); g.imageSmoothingQuality = "high";
+      try { await document.fonts.load('700 64px "Pretendard Variable"'); await document.fonts.load('500 30px "Pretendard Variable"'); } catch {}
+      const font = '"Pretendard Variable", Pretendard, sans-serif';
+      // 헤더 (사이트와 같은 위치로)
+      try {
+        const ban = await loadImage(f.banner || "images/header.jpg");
+        const sc = Math.max(W / ban.width, H / ban.height), bw = ban.width * sc, bh = ban.height * sc;
+        const py = parseFloat(String(f.bannerPosition || "center 50%").split(" ")[1]) || 50;
+        g.drawImage(ban, (W - bw) / 2, (H - bh) * py / 100, bw, bh);
+      } catch { g.fillStyle = "#cdbdf9"; g.fillRect(0, 0, W, H); }
+      const fade = g.createLinearGradient(0, 250, 0, H);
+      fade.addColorStop(0, "rgba(244,241,255,0)"); fade.addColorStop(.55, "rgba(244,241,255,.86)"); fade.addColorStop(1, "rgba(240,244,255,.97)");
+      g.fillStyle = fade; g.fillRect(0, 0, W, H);
+      // 스티커
+      try { const st = await loadImage("images/sticker-top.png"); const sw = 175, shh = st.height / st.width * sw; g.drawImage(st, W - sw - 60, 40, sw, shh); } catch {}
+      // 프사 (그라데이션 테두리)
+      const cx = 155, cy = 482, r = 86;
+      const ring = g.createLinearGradient(cx - r, cy - r, cx + r, cy + r); ring.addColorStop(0, "#b9a2f6"); ring.addColorStop(1, "#7fcdf2");
+      g.beginPath(); g.arc(cx, cy, r + 8, 0, Math.PI * 2); g.fillStyle = ring; g.fill();
+      g.beginPath(); g.arc(cx, cy, r + 3, 0, Math.PI * 2); g.fillStyle = "#fff"; g.fill();
+      try {
+        const av = await loadImage(f.avatar || "images/profile.jpg");
+        g.save(); g.beginPath(); g.arc(cx, cy, r, 0, Math.PI * 2); g.clip();
+        const s2 = Math.max(2 * r / av.width, 2 * r / av.height); g.drawImage(av, cx - av.width * s2 / 2, cy - av.height * s2 / 2, av.width * s2, av.height * s2); g.restore();
+      } catch {}
+      // 이름 + 하트
+      const name = "하트", handle = "@HEART", x = 272;
+      g.fillStyle = "#1f1d2b"; g.font = `800 66px ${font}`; g.textBaseline = "alphabetic"; g.fillText(name, x, 462);
+      const nw = g.measureText(name).width;
+      g.save(); g.translate(x + nw + 14, 412); g.scale(2.1, 2.1);
+      const hg = g.createLinearGradient(0, 0, 24, 24); hg.addColorStop(0, "#b9a2f6"); hg.addColorStop(1, "#7fcdf2"); g.fillStyle = hg;
+      g.fill(new Path2D("M12 21.2s-8.6-5.2-10.4-10.6C.3 6.6 2.8 2.8 6.7 2.8c2.3 0 4.1 1.2 5.3 3.1 1.2-1.9 3-3.1 5.3-3.1 3.9 0 6.4 3.8 5.1 7.8C20.6 16 12 21.2 12 21.2z")); g.restore();
+      g.fillStyle = "#6b7280"; g.font = `500 30px ${font}`; g.fillText(handle, x, 508);
+      // 주소 알약
+      const url = "heart-notis.github.io"; g.font = `700 23px ${font}`;
+      const pw = g.measureText(url).width + 46, ph = 46, py2 = 527;
+      const pill = g.createLinearGradient(x, 0, x + pw, 0); pill.addColorStop(0, "#a993f4"); pill.addColorStop(1, "#74c6f0");
+      g.beginPath(); g.roundRect(x, py2, pw, ph, 23); g.fillStyle = pill; g.fill();
+      g.fillStyle = "#fff"; g.fillText(url, x + 23, py2 + 31);
+      return cv.toDataURL("image/jpeg", 0.9);
+    }
+    $("shRegen").onclick = async () => {
+      const b = $("shRegen"); b.disabled = true; b.textContent = "만드는 중…";
+      try { setShare({ image: await makeShareImage() }); saveDraft(); drawSharePrev(); toast("공유 이미지를 새로 만들었어요"); }
+      catch (e) { console.error(e); toast("이미지를 만들지 못했어요"); }
+      b.disabled = false; b.textContent = "✨ 지금 프로필로 다시 만들기";
+    };
+    $("shFile").onchange = async e => {
+      const file = e.target.files[0]; e.target.value = ""; if (!file) return;
+      try { const cv = await cropImage(await loadImage(file), { W: 1200, H: 630, title: "공유 이미지 자르기", raw: true }); if (!cv) return;
+        setShare({ image: cv.toDataURL("image/jpeg", 0.9), auto: false }); $("sh_auto").checked = false; saveDraft(); drawSharePrev(); toast("공유 이미지를 바꿨어요"); }
+      catch { toast("이 사진은 열 수 없어요. 다른 사진을 골라주세요."); }
+    };
+    $("sh_auto").onchange = () => { setShare({ auto: $("sh_auto").checked }); saveDraft(); };
+    // 프사·헤더를 바꾸면 (자동 켜져 있을 때) 공유 이미지도 새로
+    async function autoShare() {
+      if (shareOf(data.profile).auto === false) return;
+      try { setShare({ image: await makeShareImage() }); saveDraft(); drawSharePrev(); } catch (e) { console.warn(e); }
     }
     // 프사: 정사각형으로 자르고 큰 것(400) · 작은 것(144) 두 장 만들기
     async function setAvatarFrom(src) {
@@ -1307,14 +1405,14 @@
       const sg = sm.getContext("2d"); sg.imageSmoothingQuality = "high"; sg.drawImage(cv, 0, 0, 144, 144);
       f.avatarSmall = encodeImg(sm, 0.92);
       f.avatarPosition = "center";
-      renderProfile(); saveDraft(); toast("프로필 사진을 바꿨어요");
+      renderProfile(); saveDraft(); toast("프로필 사진을 바꿨어요"); autoShare();
     }
     // 헤더: 사이트 헤더 비율(5:2)로 자르기
     async function setBannerFrom(src) {
       const url = await cropImage(await loadImage(src), { W: 1600, H: 640, title: "헤더 사진 자르기" });
       if (!url) return;
       data.profile.banner = url; data.profile.bannerPosition = "center";
-      renderProfile(); saveDraft(); toast("헤더 사진을 바꿨어요");
+      renderProfile(); saveDraft(); toast("헤더 사진을 바꿨어요"); autoShare();
     }
     $("avaFile").onchange = e => { const file = e.target.files[0]; e.target.value = ""; if (file && !isImgFile(file)) return toast("사진 파일만 고를 수 있어요"); if (file) setAvatarFrom(file).catch(() => toast("이 사진은 열 수 없어요")); };
     $("avaRecrop").onclick = () => setAvatarFrom(data.profile.avatar).catch(() => toast("사진을 다시 열 수 없어요. 새로 골라주세요."));
@@ -1325,6 +1423,7 @@
       f.bio = $("pf_bio").value.trim();
       f.link = $("pf_link").value.trim();
       f.linkLabel = $("pf_linkLabel").value.trim();
+      setShare({ title: $("sh_title").value.trim() || SHARE_DEFAULT.title, desc: $("sh_desc").value.trim() || SHARE_DEFAULT.desc, auto: $("sh_auto").checked });
       saveDraft(); renderAll(); toast("프로필을 저장했어요 💜");
     };
 
@@ -1393,9 +1492,12 @@
       const f = out.profile || {};
       [["avatar", `images/profile-${stamp}`, "프로필 사진 변경"], ["avatarSmall", `images/profile-sm-${stamp}`, "프로필 사진(작은) 변경"], ["banner", `images/header-${stamp}`, "헤더 사진 변경"]]
         .forEach(([k, base, label]) => { if (f[k] && f[k].startsWith("data:")) { const path = `${base}.${imgExt(f[k])}`; files.push({ path, bytes: dataUrlBytes(f[k]), label }); f[k] = path; } });
+      if (f.share && f.share.image && f.share.image.startsWith("data:")) {
+        const path = `images/og-${stamp}.jpg`; files.push({ path, bytes: dataUrlBytes(f.share.image), label: "공유 이미지 변경" }); f.share.image = path;
+      }
       return files;
     }
-    const referenced = out => new Set([...out.posts.map(p => p.image), ...["avatar", "avatarSmall", "banner"].map(k => (out.profile || {})[k])].filter(src => src && !src.startsWith("http") && !src.startsWith("data:")));
+    const referenced = out => new Set([...out.posts.map(p => p.image), ...["avatar", "avatarSmall", "banner"].map(k => (out.profile || {})[k]), ((out.profile || {}).share || {}).image].filter(src => src && !src.startsWith("http") && !src.startsWith("data:")));
     const siteJs = out => "/* 이 파일은 제작자 페이지(admin.html)가 자동으로 만들어요. 직접 고치지 않아도 돼요. */\nwindow.SITE_DATA = " + JSON.stringify({ tags: out.tags, profile: out.profile || {}, notices: out.notices, posts: out.posts }, null, 2) + ";\n";
 
     async function exportZip(btn) {
@@ -1487,6 +1589,16 @@
       return "인터넷 연결을 확인하고 다시 시도해주세요.";
     }
 
+    // 사이트(index.html)의 공유 카드 정보 바꾸기
+    function patchShareMeta(html, sh) {
+      const a = v => String(v).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      const img = /^https?:/.test(sh.image) ? sh.image : "https://heart-notis.github.io/" + sh.image.replace(/^\//, "");
+      const set = (attr, val) => { html = html.replace(new RegExp(`(<meta ${attr} content=")[^"]*(")`), (m, p1, p2) => p1 + a(val) + p2); };
+      set('property="og:title"', sh.title); set('name="twitter:title"', sh.title);
+      set('property="og:description"', sh.desc); set('name="twitter:description"', sh.desc); set('name="description"', sh.desc);
+      set('property="og:image"', img); set('name="twitter:image"', img);
+      return html;
+    }
     // 여러 파일을 커밋 하나로 올리기 (Git Data API)
     async function commitAll(files, used, message, progress) {
       for (let attempt = 0; ; attempt++) {
@@ -1505,7 +1617,7 @@
           const uploading = new Set(files.map(f => f.path));
           for (const f of all) {
             const name = f.path.replace(/^images\//, "");
-            if (f.type === "blob" && f.path.startsWith("images/") && /^(post-.+|profile-[a-z0-9]{6,}|profile-sm-[a-z0-9]{6,}|header-[a-z0-9]{6,})\.(jpg|webp)$/.test(name) && !used.has(f.path) && !uploading.has(f.path))
+            if (f.type === "blob" && f.path.startsWith("images/") && /^(post-.+|profile-[a-z0-9]{6,}|profile-sm-[a-z0-9]{6,}|header-[a-z0-9]{6,}|og-[a-z0-9]{6,})\.(jpg|webp)$/.test(name) && !used.has(f.path) && !uploading.has(f.path))
               tree.push({ path: f.path, mode: "100644", type: "blob", sha: null });
           }
         } catch (e) { console.warn("정리 건너뜀", e); }
@@ -1532,7 +1644,13 @@
           if (choice !== "force") return;
         }
         const out = clone(data); delete out._base;
+        const shareChanged = JSON.stringify((out.profile || {}).share || null) !== JSON.stringify((SERVER.profile || {}).share || null);
         const uploads = materialize(out);
+        if (shareChanged && out.profile.share) {
+          step("공유 카드 바꾸는 중…");
+          const html = new TextDecoder().decode(b64Bytes(await fileB64("index.html", BRANCH)));
+          uploads.push({ path: "index.html", bytes: new TextEncoder().encode(patchShareMeta(html, shareOf(out.profile))), label: "공유 카드" });
+        }
         uploads.push({ path: "data.js", bytes: new TextEncoder().encode(siteJs(out)), label: "data" });
         const np = uploads.length - 1;
         // 📦 사진 + 글 + 정리를 "한 번에" 올려요 → 사이트가 한 번만 새로 만들어져서 훨씬 빨리 반영돼요
