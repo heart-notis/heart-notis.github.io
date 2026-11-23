@@ -53,7 +53,7 @@ window.SITE_DATA = {
         "WHIF",
         "BLOOM"
       ],
-      "image": "images/post-mwspzf0v78ao-mwsq1tzb.webp",
+      "image": "images/post-mwspzf0v78ao-mwt41224.webp",
       "adult": false,
       "likes": 652,
       "rts": 163,
@@ -68,7 +68,8 @@ window.SITE_DATA = {
       "spoiler": true,
       "theme": "rose",
       "releaseDate": "2026-11-27",
-      "releaseTime": "21:00"
+      "releaseTime": "21:00",
+      "wm": true
     },
     {
       "id": "mwso99e36g7y",
@@ -78,7 +79,7 @@ window.SITE_DATA = {
       "tags": [
         "WHIF"
       ],
-      "image": "images/post-mwso99e36g7y-mwsodfw5.webp",
+      "image": "images/post-mwso99e36g7y-mwt41224.webp",
       "adult": true,
       "likes": 740,
       "rts": 100,
@@ -92,7 +93,8 @@ window.SITE_DATA = {
       "links": {
         "WHIF": "https://whif.io/characters/f8aab9a9-4bba-4ab2-ab3d-95c18b79a0f2"
       },
-      "theme": "palace"
+      "theme": "palace",
+      "wm": true
     },
     {
       "id": "mwso6b62mp9u",
@@ -102,7 +104,7 @@ window.SITE_DATA = {
       "tags": [
         "WHIF"
       ],
-      "image": "images/post-mwso6b62mp9u-mwsodfw5.webp",
+      "image": "images/post-mwso6b62mp9u-mwt41224.webp",
       "adult": true,
       "likes": 966,
       "rts": 129,
@@ -116,7 +118,8 @@ window.SITE_DATA = {
       "links": {
         "WHIF": "https://whif.io/characters/f4d01670-b937-4ee2-b0a4-28850d533e8a"
       },
-      "theme": "palace"
+      "theme": "palace",
+      "wm": true
     },
     {
       "id": "mwso5ft3do6j",
@@ -126,7 +129,7 @@ window.SITE_DATA = {
       "tags": [
         "WHIF"
       ],
-      "image": "images/post-mwso5ft3do6j-mwsodfw5.webp",
+      "image": "images/post-mwso5ft3do6j-mwt41224.webp",
       "adult": true,
       "likes": 143,
       "rts": 48,
@@ -140,7 +143,8 @@ window.SITE_DATA = {
       "links": {
         "WHIF": "https://whif.io/characters/6b3b497f-cb25-4a9f-b54a-2cba2f67bec6"
       },
-      "theme": "palace"
+      "theme": "palace",
+      "wm": true
     },
     {
       "id": "mwso58cyjlaa",
@@ -150,7 +154,7 @@ window.SITE_DATA = {
       "tags": [
         "WHIF"
       ],
-      "image": "images/post-mwso58cyjlaa-mwsodfw5.webp",
+      "image": "images/post-mwso58cyjlaa-mwt41224.webp",
       "adult": true,
       "likes": 563,
       "rts": 89,
@@ -164,7 +168,8 @@ window.SITE_DATA = {
       "links": {
         "WHIF": "https://whif.io/characters/15940134-9ba4-4b9e-a64d-80727673b6ed"
       },
-      "theme": "palace"
+      "theme": "palace",
+      "wm": true
     },
     {
       "id": "mwsnp9gdcf8e",
@@ -174,7 +179,7 @@ window.SITE_DATA = {
       "tags": [
         "WHIF"
       ],
-      "image": "images/post-mwsnp9gdcf8e-mwsodfw5.webp",
+      "image": "images/post-mwsnp9gdcf8e-mwt41224.webp",
       "adult": true,
       "likes": 752,
       "rts": 134,
@@ -187,7 +192,8 @@ window.SITE_DATA = {
       "previewZoom": 1,
       "links": {
         "WHIF": "https://whif.io/characters/9fc590b5-7519-4bd0-8a63-c8decfd92458"
-      }
+      },
+      "wm": true
     },
     {
       "id": "mwso3ed29b5n",
@@ -197,7 +203,7 @@ window.SITE_DATA = {
       "tags": [
         "WHIF"
       ],
-      "image": "images/post-mwso3ed29b5n-mwsodfw5.webp",
+      "image": "images/post-mwso3ed29b5n-mwt41224.webp",
       "adult": true,
       "likes": 533,
       "rts": 59,
@@ -210,7 +216,8 @@ window.SITE_DATA = {
       "previewZoom": 1,
       "links": {
         "WHIF": "https://whif.io/characters/cfea7f3a-cee4-48d0-8743-d8cd54ccea7f"
-      }
+      },
+      "wm": true
     },
     {
       "id": "mwso3tm7vxda",
@@ -220,7 +227,7 @@ window.SITE_DATA = {
       "tags": [
         "WHIF"
       ],
-      "image": "images/post-mwso3tm7vxda-mwsodfw5.webp",
+      "image": "images/post-mwso3tm7vxda-mwt41224.webp",
       "adult": true,
       "likes": 664,
       "rts": 207,
@@ -233,7 +240,8 @@ window.SITE_DATA = {
       "previewZoom": 1,
       "links": {
         "WHIF": "https://whif.io/characters/6b89ff45-e02a-44cd-96e0-de22a8fb1456"
-      }
+      },
+      "wm": true
     },
     {
       "id": "mwso42vhuaf6",
@@ -244,7 +252,7 @@ window.SITE_DATA = {
         "WHIF",
         "합작"
       ],
-      "image": "images/post-mwso42vhuaf6-mwsodfw5.webp",
+      "image": "images/post-mwso42vhuaf6-mwt41224.webp",
       "adult": true,
       "likes": 359,
       "rts": 121,
@@ -258,7 +266,8 @@ window.SITE_DATA = {
       "links": {
         "WHIF": "https://whif.io/characters/5ecc97db-9f4c-4d28-a068-2cf19e7659c4",
         "합작": "https://whif.io/universes/0065d43a-760d-4621-80c8-fcb58b4328fe"
-      }
+      },
+      "wm": true
     },
     {
       "id": "mwso4qng640u",
@@ -266,7 +275,7 @@ window.SITE_DATA = {
       "world": "",
       "tagline": "",
       "tags": [],
-      "image": "images/post-mwso4qng640u-mwsodfw5.webp",
+      "image": "images/post-mwso4qng640u-mwt41224.webp",
       "adult": true,
       "likes": 793,
       "rts": 80,
@@ -278,7 +287,8 @@ window.SITE_DATA = {
       "previewX": 50,
       "previewZoom": 1,
       "links": {},
-      "hidden": true
+      "hidden": true,
+      "wm": true
     },
     {
       "id": "mwso4a155q12",
@@ -288,7 +298,7 @@ window.SITE_DATA = {
       "tags": [
         "WHIF"
       ],
-      "image": "images/post-mwso4a155q12-mwsodfw5.webp",
+      "image": "images/post-mwso4a155q12-mwt41224.webp",
       "adult": true,
       "likes": 915,
       "rts": 186,
@@ -301,7 +311,8 @@ window.SITE_DATA = {
       "previewZoom": 1,
       "links": {
         "WHIF": "https://whif.io/characters/3e675efa-0b5a-491b-bb1d-43319710762d"
-      }
+      },
+      "wm": true
     },
     {
       "id": "mwrzr4dyeaev",
@@ -313,7 +324,7 @@ window.SITE_DATA = {
         "TINGLE",
         "합작"
       ],
-      "image": "images/post-mwrzr4dyeaev.jpg",
+      "image": "images/post-mwrzr4dyeaev-mwt41224.webp",
       "adult": true,
       "likes": 442,
       "rts": 70,
@@ -329,7 +340,8 @@ window.SITE_DATA = {
       },
       "theme": "horror",
       "previewX": 50,
-      "previewZoom": 1
+      "previewZoom": 1,
+      "wm": true
     },
     {
       "id": "mwrtiya3dc2d",
@@ -342,7 +354,7 @@ window.SITE_DATA = {
         "POSTYPE",
         "BLOOM"
       ],
-      "image": "images/post-mwrtiya3dc2d.jpg",
+      "image": "images/post-mwrtiya3dc2d-mwt41224.webp",
       "adult": true,
       "likes": 139,
       "rts": 20,
@@ -355,7 +367,8 @@ window.SITE_DATA = {
         "WHIF": "https://www.whif.io/characters/805c5315-1918-4259-bfa1-81f08e46b6d1",
         "POSTYPE": "https://posty.pe/phpwnh2mc",
         "BLOOM": "https://bloom-ai.me/content/c507c1b6-c632-421a-9a04-ec2f2a53dc7e"
-      }
+      },
+      "wm": true
     },
     {
       "id": "mwrpnjsa3wrf",
@@ -365,7 +378,7 @@ window.SITE_DATA = {
       "tags": [
         "POSTYPE"
       ],
-      "image": "images/post-mwrpnjsa3wrf.jpg",
+      "image": "images/post-mwrpnjsa3wrf-mwt41224.webp",
       "adult": true,
       "likes": 125,
       "rts": 36,
@@ -379,7 +392,8 @@ window.SITE_DATA = {
       "previewPos": 29,
       "previewX": 50,
       "previewZoom": 1,
-      "theme": "home"
+      "theme": "home",
+      "wm": true
     },
     {
       "id": "mwrpmrvpy9l0",
@@ -389,7 +403,7 @@ window.SITE_DATA = {
       "tags": [
         "POSTYPE"
       ],
-      "image": "images/post-mwrpmrvpy9l0.jpg",
+      "image": "images/post-mwrpmrvpy9l0-mwt41224.webp",
       "adult": true,
       "likes": 849,
       "rts": 106,
@@ -403,7 +417,8 @@ window.SITE_DATA = {
       "previewPos": 33,
       "previewX": 50,
       "previewZoom": 1,
-      "theme": "home"
+      "theme": "home",
+      "wm": true
     },
     {
       "id": "mwrpqewk3sy6",
@@ -413,7 +428,7 @@ window.SITE_DATA = {
       "tags": [
         "POSTYPE"
       ],
-      "image": "images/post-mwrpqewk3sy6.jpg",
+      "image": "images/post-mwrpqewk3sy6-mwt41224.webp",
       "adult": true,
       "likes": 144,
       "rts": 50,
@@ -427,7 +442,8 @@ window.SITE_DATA = {
       "previewPos": 25,
       "previewX": 50,
       "previewZoom": 1,
-      "theme": "home"
+      "theme": "home",
+      "wm": true
     },
     {
       "id": "mwrpoipi2f62",
@@ -437,7 +453,7 @@ window.SITE_DATA = {
       "tags": [
         "POSTYPE"
       ],
-      "image": "images/post-mwrpoipi2f62.jpg",
+      "image": "images/post-mwrpoipi2f62-mwt41224.webp",
       "adult": true,
       "likes": 465,
       "rts": 52,
@@ -451,7 +467,8 @@ window.SITE_DATA = {
       "previewPos": 54,
       "previewX": 50,
       "previewZoom": 1,
-      "theme": "home"
+      "theme": "home",
+      "wm": true
     },
     {
       "id": "mwrpfr95ttut",
@@ -461,7 +478,7 @@ window.SITE_DATA = {
       "tags": [
         "WHIF"
       ],
-      "image": "images/post-mwrpfr95ttut.jpg",
+      "image": "images/post-mwrpfr95ttut-mwt41224.webp",
       "adult": true,
       "likes": 979,
       "rts": 318,
@@ -474,7 +491,8 @@ window.SITE_DATA = {
       },
       "previewPos": 22,
       "previewX": 50,
-      "previewZoom": 1
+      "previewZoom": 1,
+      "wm": true
     },
     {
       "id": "mwrpenxf93yt",
@@ -485,7 +503,7 @@ window.SITE_DATA = {
         "WHIF",
         "TINGLE"
       ],
-      "image": "images/post-mwrpenxf93yt.jpg",
+      "image": "images/post-mwrpenxf93yt-mwt41224.webp",
       "adult": true,
       "likes": 700,
       "rts": 191,
@@ -496,7 +514,8 @@ window.SITE_DATA = {
       "links": {
         "WHIF": "https://www.whif.io/characters/feb4cb59-1cdc-4f74-93c7-d294bb293360",
         "TINGLE": "https://tingle.chat/chat/characters/54323"
-      }
+      },
+      "wm": true
     },
     {
       "id": "mwsj5mvjzgsf",
@@ -506,7 +525,7 @@ window.SITE_DATA = {
       "tags": [
         "WHIF"
       ],
-      "image": "images/post-mwsj5mvjzgsf-mwsj8xtm.jpg",
+      "image": "images/post-mwsj5mvjzgsf-mwt41224.webp",
       "adult": true,
       "likes": 721,
       "rts": 198,
@@ -520,7 +539,8 @@ window.SITE_DATA = {
       "links": {
         "WHIF": "https://www.whif.io/characters/adcd0db5-f77c-482f-9808-cb4f825b136d"
       },
-      "theme": "fire"
+      "theme": "fire",
+      "wm": true
     },
     {
       "id": "mwrmeo1x9fr6",
@@ -531,7 +551,7 @@ window.SITE_DATA = {
         "WHIF",
         "TINGLE"
       ],
-      "image": "images/post-mwrmeo1x9fr6.jpg",
+      "image": "images/post-mwrmeo1x9fr6-mwt41224.webp",
       "adult": true,
       "likes": 883,
       "rts": 157,
@@ -546,7 +566,8 @@ window.SITE_DATA = {
       "previewPos": 16,
       "previewX": 50,
       "previewZoom": 1,
-      "theme": "fire"
+      "theme": "fire",
+      "wm": true
     },
     {
       "id": "mwrmb1hcvuhk",
@@ -557,7 +578,7 @@ window.SITE_DATA = {
         "WHIF",
         "TINGLE"
       ],
-      "image": "images/post-mwrmb1hcvuhk.jpg",
+      "image": "images/post-mwrmb1hcvuhk-mwt41224.webp",
       "adult": true,
       "likes": 429,
       "rts": 93,
@@ -572,7 +593,8 @@ window.SITE_DATA = {
       "previewPos": 25,
       "previewX": 50,
       "previewZoom": 1,
-      "theme": "fire"
+      "theme": "fire",
+      "wm": true
     },
     {
       "id": "mwrlmy5purob",
@@ -584,7 +606,7 @@ window.SITE_DATA = {
         "WHIF",
         "TINGLE"
       ],
-      "image": "images/post-mwrlmy5purob.jpg",
+      "image": "images/post-mwrlmy5purob-mwt41224.webp",
       "adult": true,
       "likes": 944,
       "rts": 243,
@@ -600,7 +622,8 @@ window.SITE_DATA = {
       "previewPos": 25,
       "previewX": 50,
       "previewZoom": 1,
-      "theme": "fire"
+      "theme": "fire",
+      "wm": true
     }
   ]
 };
