@@ -84,7 +84,8 @@ window.SITE_DATA = {
       "previewZoom": 1,
       "links": {
         "WHIF": "https://whif.io/characters/f8aab9a9-4bba-4ab2-ab3d-95c18b79a0f2"
-      }
+      },
+      "theme": "palace"
     },
     {
       "id": "mwso6b62mp9u",
@@ -107,7 +108,8 @@ window.SITE_DATA = {
       "previewZoom": 1,
       "links": {
         "WHIF": "https://whif.io/characters/f4d01670-b937-4ee2-b0a4-28850d533e8a"
-      }
+      },
+      "theme": "palace"
     },
     {
       "id": "mwso5ft3do6j",
@@ -130,7 +132,8 @@ window.SITE_DATA = {
       "previewZoom": 1,
       "links": {
         "WHIF": "https://whif.io/characters/6b3b497f-cb25-4a9f-b54a-2cba2f67bec6"
-      }
+      },
+      "theme": "palace"
     },
     {
       "id": "mwso58cyjlaa",
@@ -153,7 +156,8 @@ window.SITE_DATA = {
       "previewZoom": 1,
       "links": {
         "WHIF": "https://whif.io/characters/15940134-9ba4-4b9e-a64d-80727673b6ed"
-      }
+      },
+      "theme": "palace"
     },
     {
       "id": "mwsnp9gdcf8e",
