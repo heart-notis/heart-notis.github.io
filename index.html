@@ -171,6 +171,29 @@
     .upd-note { font-size: .74rem; font-weight: 700; color: #7353d6; }
     @keyframes updPulse { 50% { box-shadow: 0 2px 12px rgba(140,120,240,.6); } }
     html.dark .upd-note { color: #c4b5fd; }
+    /* 💍 새 게시물 링 */
+    .ava-ring { position: absolute; z-index: 0; border-radius: 50%; background: conic-gradient(#b9a2f6, #7fcdf2, #f3a6d6, #b9a2f6); animation: ringSpin 4s linear infinite; }
+    .p-row > .avatar { position: relative; z-index: 1; }
+    @keyframes ringSpin { to { transform: rotate(360deg); } }
+    .ava-new { position: absolute; z-index: 3; padding: 1px 7px; border-radius: 999px; font-size: .62rem; font-weight: 900; letter-spacing: .06em; color: #fff; background: linear-gradient(120deg, #a98cf3, #7fb5f2); border: 2px solid #fff; box-shadow: 0 2px 6px rgba(140,120,240,.35); animation: none; }
+    html.dark .ava-new { border-color: #15151e; }
+    /* ⬆ 맨 위로 */
+    .to-top { position: fixed; right: 16px; bottom: calc(20px + env(safe-area-inset-bottom)); z-index: 60; width: 50px; height: 50px; border-radius: 50%; background: #fff; box-shadow: 0 6px 18px rgba(110,90,220,.3); display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transform: translateY(14px) scale(.8); pointer-events: none; transition: opacity .25s, transform .3s cubic-bezier(.3,1.4,.5,1); }
+    .to-top.show { opacity: 1; transform: none; pointer-events: auto; }
+    .to-top svg { width: 20px; height: 20px; }
+    .to-top b { font-size: .52rem; font-weight: 900; color: #7353d6; letter-spacing: .05em; margin-top: -1px; }
+    html.dark .to-top { background: #1d1b2b; }
+    /* 🎂 생일 */
+    .bday-tag { display: inline-flex; align-items: center; gap: 3px; margin-left: 7px; padding: 1px 8px; border-radius: 999px; font-size: .68rem; font-weight: 800; color: #c0498a; background: #ffeef6; border: 1px solid #ffc6e1; vertical-align: 2px; }
+    html.dark .bday-tag { background: #3a1f30; border-color: #6b2f52; color: #ffb3d6; }
+    .tweet.bday { position: relative; background: linear-gradient(90deg, #fff4fa 0%, #fbf6ff 60%, #fff 100%); }
+    html.dark .tweet.bday { background: linear-gradient(90deg, #2a1d2c 0%, #211d33 60%, #15151e 100%); }
+    .bday-petals { position: absolute; inset: 0; overflow: hidden; pointer-events: none; container-type: size; }
+    .bday-petals i { position: absolute; top: -12px; width: calc(11px * var(--sz)); height: calc(8px * var(--sz)); border-radius: 70% 0 70% 0; background: linear-gradient(135deg, #ffd9ea, #f3a6c8); opacity: .75; animation: petalFall linear infinite; --drift: 30px; --spin: 300deg; }
+    .cd .cake { position: absolute; left: 3px; bottom: 3px; font-size: .7rem; line-height: 1; }
+    .cd.has-bd { box-shadow: inset 0 0 0 1.5px #ffc6e1; }
+    .cs-day.bd { background: #fff2f8; }
+    html.dark .cs-day.bd { background: #2a1d2c; }
     /* 💬 상태 메시지 */
     .p-row { position: relative; }
     .p-status { position: absolute; left: 92px; top: -50px; z-index: 3; max-width: calc(100% - 140px); background: #fff; border: 1.5px solid #ddd3fb; border-radius: 16px 16px 16px 4px; padding: 6px 12px; font-size: .8rem; font-weight: 700; color: #4b3f8f; box-shadow: 0 4px 12px rgba(140,120,240,.2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; animation: popIn .5s cubic-bezier(.2,1.3,.4,1) both .3s; }
@@ -262,11 +285,11 @@
     .tab-new { display: inline-block; width: 7px; height: 7px; margin-left: 3px; border-radius: 50%; vertical-align: 9px; font-size: 0; background: linear-gradient(135deg, #c3a8ff, #7fcdf2); box-shadow: 0 0 0 2px #fff, 0 0 8px rgba(160, 140, 250, .7); }
     .new-badge { display: inline-block; margin-left: 6px; padding: 0 7px; border-radius: 999px; border: 1px solid #ddd3fb; background: #f6f2ff; color: #7a68e6; font-size: .62rem; font-weight: 800; letter-spacing: .05em; line-height: 1.6; vertical-align: 2px; }
     .tab.active { color: var(--blue); }
-    .tab.active::after {
-      content: ""; position: absolute; left: 50%; bottom: 0;
-      transform: translateX(-50%);
-      width: 56px; height: 3px; border-radius: 3px; background: var(--grad-strong);
-    }
+    .tabs { position: relative; }
+    .tab-heart { position: absolute; left: 0; bottom: -9px; z-index: 2; width: 18px; height: 18px; pointer-events: none; transition: transform .45s cubic-bezier(.3, 1.4, .5, 1); filter: drop-shadow(0 2px 4px rgba(140,120,240,.4)); }
+    .tab-heart svg { width: 100%; height: 100%; }
+    .tab-heart.hop svg { animation: hop .45s ease; }
+    @keyframes hop { 40% { transform: translateY(-6px) scale(1.15); } }
 
     /* ---------- 해시태그 필터 ---------- */
     .filter-row { display: flex; align-items: center; border-bottom: 1px solid var(--line); }
@@ -989,6 +1012,7 @@
     </div>
     <section class="p-wrap">
       <div class="p-row">
+        <div class="ava-ring hidden" id="avaRing" aria-hidden="true"></div><span class="ava-new hidden" id="avaNew">NEW</span>
         <div class="avatar" id="pAvatar"></div>
         <div class="p-status hidden" id="pStatus"></div>
         <div class="p-btns">
@@ -1008,7 +1032,7 @@
       </div>
     </section>
 
-    <nav class="tabs" role="tablist">
+    <nav class="tabs" role="tablist"><span class="tab-heart" id="tabHeart" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="url(#hg)" d="M12 21.2s-8.6-5.2-10.4-10.6C.3 6.6 2.8 2.8 6.7 2.8c2.3 0 4.1 1.2 5.3 3.1 1.2-1.9 3-3.1 5.3-3.1 3.9 0 6.4 3.8 5.1 7.8C20.6 16 12 21.2 12 21.2z"/></svg></span>
       <button class="tab active" data-view="tweets">게시물<span class="tab-count" id="cntPosts"></span></button>
       <button class="tab" data-view="media">미디어</button>
       <button class="tab" data-view="notice">공지<span class="tab-count" id="cntNotices"></span><span class="tab-new hidden" id="newNotices" aria-label="새 공지"></span></button>
@@ -1184,6 +1208,9 @@
       ? `<img class="media" src="${esc(c.image)}" alt="${esc(c.name)}" loading="lazy" decoding="async" />`
       : `<div class="media ph" style="background:linear-gradient(150deg, ${c.color || "#9cc9ea"}, ${c.color || "#9cc9ea"}aa)">${esc(c.name.charAt(0))}</div>`;
     // ✦ 24시간 안에 설정이 바뀐 캐릭터: "UPDATE" (+ 오늘 적은 업데이트 기록이 있으면 그 내용)
+    // 🎂 생일 (birthday: "MM-DD")
+    const mmdd = d => `${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    const isBday = c => !!(c && c.birthday && c.birthday === mmdd(new Date()));
     const isUpdated = c => { const t = Date.parse(c.updatedAt || ""); return !isNaN(t) && Date.now() - t < 86400000; };
     const updBadge = c => {
       if (!isUpdated(c)) return "";
@@ -1246,6 +1273,41 @@
         sb.innerHTML = `${escH(st)}${ago ? `<small>${ago}</small>` : ""}`;
       }
     }
+
+    /* ---- 💜 탭 아래 하트가 미끄러져 따라가요 ---- */
+    function moveTabHeart() {
+      const h = $("tabHeart"), t = document.querySelector(".tab.active"); if (!h || !t) return;
+      h.style.transform = `translateX(${t.offsetLeft + t.offsetWidth / 2 - 9}px)`;
+      h.classList.remove("hop"); void h.offsetWidth; h.classList.add("hop");
+    }
+    addEventListener("resize", moveTabHeart);
+    requestAnimationFrame(() => { const h = $("tabHeart"); if (h) { h.style.transition = "none"; moveTabHeart(); h.offsetWidth; h.style.transition = ""; } });
+
+    /* ---- 💍 24시간 안에 새 게시물이 있으면 프사에 링 + NEW ---- */
+    (function newRing() {
+      const fresh = characters.some(c => !isSpoiler(c) && !c.hidden && (() => {
+        const t = Date.parse(c.createdAt || ""); if (!isNaN(t)) return Date.now() - t < 86400000;
+        const d = new Date(); return c.date === `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      })());
+      const r = $("avaRing"), a = $("pAvatar"); if (!r || !a || !fresh) return;
+      const nw = $("avaNew");
+      const place = () => {
+        r.style.left = a.offsetLeft - 6 + "px"; r.style.top = a.offsetTop - 6 + "px"; r.style.width = r.style.height = a.offsetWidth + 12 + "px";
+        // NEW 딱지: 원 테두리 오른쪽 아래에 걸쳐서 (사진은 안 가리게)
+        nw.style.left = a.offsetLeft + a.offsetWidth * .84 + "px"; nw.style.top = a.offsetTop + a.offsetHeight * .88 + "px";
+      };
+      r.classList.remove("hidden"); nw.classList.remove("hidden"); place(); addEventListener("resize", place);
+    })();
+
+    /* ---- ⬆ 맨 위로 하트 버튼 ---- */
+    (function toTop() {
+      const b = document.createElement("button"); b.className = "to-top"; b.setAttribute("aria-label", "맨 위로");
+      b.innerHTML = `<svg viewBox="0 0 24 24"><path fill="url(#hg)" d="M12 21.2s-8.6-5.2-10.4-10.6C.3 6.6 2.8 2.8 6.7 2.8c2.3 0 4.1 1.2 5.3 3.1 1.2-1.9 3-3.1 5.3-3.1 3.9 0 6.4 3.8 5.1 7.8C20.6 16 12 21.2 12 21.2z"/></svg><b>TOP</b>`;
+      b.onclick = () => scrollTo({ top: 0, behavior: "smooth" });
+      document.body.appendChild(b);
+      const upd = () => b.classList.toggle("show", scrollY > 700 && !document.documentElement.classList.contains("modal-open"));
+      addEventListener("scroll", upd, { passive: true }); upd();
+    })();
 
     /* ---- ✨ 프사를 누르면 반짝반짝 후광 ---- */
     function avatarSparkle() {
@@ -1330,11 +1392,11 @@
     function charTweet(c, i) {
       if (isLocked(c)) return lockedTweet(c);
       return `
-        <article class="tweet" data-open="${i}">
+        <article class="tweet${isBday(c) ? " bday" : ""}" data-open="${i}">${isBday(c) ? `<div class="bday-petals" aria-hidden="true">${Array.from({ length: 10 }, (_, k) => `<i style="left:${(k * 37 + 7) % 96}%;animation-duration:${7 + (k * 7) % 5}s;animation-delay:-${(k * 1.7) % 7}s;--sz:${.55 + ((k * 13) % 5) / 10}"></i>`).join("")}</div>` : ""}
           ${meAva()}
           <div class="t-main">
             ${headHTML(isReleased(c) ? c.releaseDate : c.date)}${updBadge(c)}
-            <p class="t-title">${escH(c.name)}</p>
+            <p class="t-title">${escH(c.name)}${isBday(c) ? `<span class="bday-tag">🎂 생일</span>` : ""}</p>
             ${c.tagline ? `<p class="t-tagline">${fmtText(c.tagline)}</p>` : ""}
             <p class="t-tags">${hashtags(c)}</p>
             <div class="t-media preview" style="--pv:${typeof c.previewPos === "number" ? c.previewPos : 25}%;--px:${typeof c.previewX === "number" ? c.previewX : 50}%;--pz:${typeof c.previewZoom === "number" ? c.previewZoom : 1}">${mediaHTML(c)}${c.adult ? `<span class="badge">19+</span>` : ""}${allImgs(c).length > 1 ? `<span class="many">${I.photos}${allImgs(c).length}</span>` : ""}<span class="expand">♡ 전체 보기</span></div>
@@ -1499,7 +1561,8 @@
       if (searchOpen) list = q ? list.filter(({ c }) => matchPost(c, q)) : list;
       else list = list.filter(({ c }) => activeTag === "전체" || c.tags.includes(activeTag));
       // 맨 위: 방금 공개된 스포일러(최근 공개 순) → 아직 스포일러 → 나머지 (원래 순서 유지)
-      const rank = c => isReleased(c) ? 0 : isSpoiler(c) ? 1 : 2;
+      // 맨 위: 🎂 오늘 생일 → 방금 공개된 스포일러 → 아직 스포일러 → 나머지 (원래 순서 유지)
+      const rank = c => isBday(c) && !isSpoiler(c) ? -1 : isReleased(c) ? 0 : isSpoiler(c) ? 1 : 2;
       list.sort((a, b) => rank(a.c) - rank(b.c) || (rank(a.c) === 0 ? releaseAt(b.c) - releaseAt(a.c) : 0));
       // 공지 중 "게시물 상단에 띄우기"를 체크한 것은 게시물 탭 맨 위에 (검색 중엔 숨김)
       const topNotices = !searchOpen && activeTag === "전체" ? notices.filter(n => n.onPosts).map(n => noticeTweet(n, true)).join("") : "";
@@ -1571,7 +1634,7 @@
             ${meAva()}
             <div><div class="name">${esc(profile.name)}${I.verified}</div><div class="handle">@${esc(profile.handle)}</div></div>
           </div>
-          <div class="d-title">${escH(c.name)}${c.world ? `<span class="d-world" data-world-go="${esc(c.world)}" role="button" title="이 세계관 캐릭터 모아보기">${escH(c.world)}<em class="dw-go">›</em></span>` : ""}</div>
+          <div class="d-title">${escH(c.name)}${isBday(c) ? `<span class="bday-tag">🎂 생일</span>` : ""}${c.world ? `<span class="d-world" data-world-go="${esc(c.world)}" role="button" title="이 세계관 캐릭터 모아보기">${escH(c.world)}<em class="dw-go">›</em></span>` : ""}</div>
           ${c.tagline ? `<div class="d-tagline">${fmtText(c.tagline)}</div>` : ""}
           ${Array.isArray(c.lines) && c.lines.length ? `<div class="lines" data-lines="${i}"><button class="line-btn" data-line-next>💬 한마디 더 듣기 <span class="line-cnt"></span></button><div class="line-bub" aria-live="polite"></div></div>` : ""}
           ${c.description ? `<p class="d-text">${fmtText(c.description)}</p>` : ""}
@@ -1625,19 +1688,22 @@
       });
       const y = calMonth.getFullYear(), m = calMonth.getMonth(), first = new Date(y, m, 1).getDay(), last = new Date(y, m + 1, 0).getDate();
       const todayK = ymd(new Date());
+      const bdOf = d => characters.map((c, i) => ({ c, i })).filter(({ c }) => c.birthday === `${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}` && !isSpoiler(c));
       let g = "";
       for (let k = 0; k < first; k++) g += `<div class="cd mute"></div>`;
       for (let d = 1; d <= last; d++) {
-        const k = ymd(new Date(y, m, d)), ps = byDay[k] || [], sp = spDay[k];
-        g += `<button class="cd ${k === todayK ? "today" : ""} ${k === calSel ? "sel" : ""} ${sp ? "spo" : ""}" ${ps.length ? `data-cal-day="${k}"` : "disabled"}><span class="n">${d}</span>${ps.length && !sp ? `<span class="cnt">${ps.length}</span><span class="th">${ps.slice(0, 3).map(({ c }) => c.image ? `<img src="${esc(c.image)}" alt="" />` : "").join("")}</span>` : ""}${sp ? `<span class="star"><em>✦</em>${esc(sp[0].releaseTime || "")}</span>` : ""}</button>`;
+        const k = ymd(new Date(y, m, d)), ps = byDay[k] || [], sp = spDay[k], bd = bdOf(d);
+        g += `<button class="cd ${k === todayK ? "today" : ""} ${k === calSel ? "sel" : ""} ${sp ? "spo" : ""} ${bd.length ? "has-bd" : ""}" ${ps.length || bd.length ? `data-cal-day="${k}"` : "disabled"}>${bd.length ? `<span class="cake" title="${esc(bd.map(x => x.c.name).join(", "))} 생일">🎂</span>` : ""}<span class="n">${d}</span>${ps.length && !sp ? `<span class="cnt">${ps.length}</span><span class="th">${ps.slice(0, 3).map(({ c }) => c.image ? `<img src="${esc(c.image)}" alt="" />` : "").join("")}</span>` : ""}${sp ? `<span class="star"><em>✦</em>${esc(sp[0].releaseTime || "")}</span>` : ""}</button>`;
       }
       const selList = calSel && byDay[calSel] ? byDay[calSel] : null;
       const sd = calSel ? toDay(calSel) : null;
+      const selBd = sd ? bdOf(sd.getDate()).filter(() => sd.getMonth() === m) : [];
       const up = upcoming();
       const now = new Date(), today0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       return `
         <div class="cs-wk">${"일월화수목금토".split("").map(x => `<span>${x}</span>`).join("")}</div>
         <div class="cs-gr">${g}</div>
+        ${selBd.length ? `<div class="cs-day bd"><h5>🎂 ${sd.getMonth() + 1}월 ${sd.getDate()}일 생일</h5><div class="row">${selBd.map(({ c, i }) => `<button data-cal-open="${i}">${c.image ? `<img src="${esc(c.image)}" alt="" />` : ""}${escH(c.name)}</button>`).join("")}</div></div>` : ""}
         ${selList ? `<div class="cs-day"><h5>${sd.getMonth() + 1}월 ${sd.getDate()}일 <small>게시물 ${selList.length}개 · 누르면 열려요</small></h5><div class="row">${selList.map(({ c, i }) => `<button data-cal-open="${i}">${c.image ? `<img src="${esc(c.image)}" alt="" />` : ""}${escH(c.name)}</button>`).join("")}</div></div>` : ""}
         <div class="cs-sec">✦ 공개 예정 <small>스포일러만 모아봤어요</small></div>
         <div class="cs-tl">
@@ -1714,6 +1780,7 @@
       if (!document.querySelector(`.tab[data-view="${v}"]`)) v = "tweets";
       view = v;
       document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.view === v));
+      moveTabHeart();
       renderView();
       if (push) history.pushState({ heart: "tab", view: v }, "", baseUrl() + (v === "tweets" ? "" : "#" + v));
     }

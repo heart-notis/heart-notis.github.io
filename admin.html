@@ -217,10 +217,12 @@
     .status-box small { font-size: .74rem; color: var(--sub); }
     .badge.st { background: #fff4e0; color: #b4690e; }
     .badge.hid { background: #eceef1; color: #5b6470; }
+    .badge.bd { background: #ffeef6; color: #c0498a; }
     .rel-row { margin-left: 26px; }
     .rel-in { display: flex; gap: 6px; align-items: center; }
     .rel-in input { flex: 1; min-width: 0; }
     .rel-in input[type=date] { flex: 1 1 130px; }
+    .rel-in select { flex: 1 1 80px; padding: 9px 10px; border: 1px solid var(--line); border-radius: 10px; background: #fff; font-weight: 500; }
     .rel-in input[type=time] { flex: 1 1 110px; }
     .rel-in { flex-wrap: wrap; }
     .log-add #logText { flex: 1 1 100%; order: 3; }
@@ -807,7 +809,7 @@
           ${selMode ? `<span class="pick" aria-hidden="true">✓</span>` : ""}
           ${p.image ? `<img class="thumb" src="${esc(p.image)}" alt="" draggable="false" onerror="${rawFallback}" />` : `<div class="thumb">${esc((p.name || "?").charAt(0))}</div>`}
           <div class="item-main">
-            <div class="item-title"><span class="nm">${esc(p.name || "(이름 없음)")}</span>${p.hidden ? `<span class="badge hid">🙈 비공개</span>` : ""}${p.spoiler ? (spoilerOpened(p) ? `<span class="badge spo">✦ 공개됨</span>` : `<span class="badge spo">✦ 스포</span>`) : ""}${p.adult ? `<span class="badge">19+</span>` : ""}${p.status === "asset" ? `<span class="badge st">🔧 교체중</span>` : p.status === "renewal" ? `<span class="badge st re">✨ 리뉴얼</span>` : ""}${isNew(p, "posts") ? `<span class="badge new">NEW</span>` : ""}</div>
+            <div class="item-title"><span class="nm">${esc(p.name || "(이름 없음)")}</span>${p.hidden ? `<span class="badge hid">🙈 비공개</span>` : ""}${p.spoiler ? (spoilerOpened(p) ? `<span class="badge spo">✦ 공개됨</span>` : `<span class="badge spo">✦ 스포</span>`) : ""}${p.birthday ? `<span class="badge bd">🎂 ${+p.birthday.split("-")[0]}/${+p.birthday.split("-")[1]}</span>` : ""}${p.adult ? `<span class="badge">19+</span>` : ""}${p.status === "asset" ? `<span class="badge st">🔧 교체중</span>` : p.status === "renewal" ? `<span class="badge st re">✨ 리뉴얼</span>` : ""}${isNew(p, "posts") ? `<span class="badge new">NEW</span>` : ""}</div>
             <div class="item-sub">${esc(p.date || "")} · ${(p.tags || []).map(t => "#" + esc(t)).join(" ") || "태그 없음"}</div>
             <div class="item-sub">${esc(p.tagline || "")}</div>
           </div>
@@ -922,6 +924,10 @@
             <label class="f">세계관 · 장소<input type="text" id="f_world" value="${esc(item.world)}" /></label>
             <label class="f">올린 날짜<input type="date" id="f_date" value="${esc(item.date)}" /></label>
           </div>
+          <div class="f">🎂 생일 <small>적어두면 그날 하루 "생일" 표시 · 꽃잎 · 맨 위로 올라오고 달력에도 표시돼요 · 비워두면 지금처럼</small>
+            <div class="rel-in"><select id="f_bm"><option value="">월</option>${Array.from({ length: 12 }, (_, k) => `<option ${+(item.birthday || "").split("-")[0] === k + 1 ? "selected" : ""} value="${k + 1}">${k + 1}월</option>`).join("")}</select>
+            <select id="f_bd"><option value="">일</option>${Array.from({ length: 31 }, (_, k) => `<option ${+(item.birthday || "").split("-")[1] === k + 1 ? "selected" : ""} value="${k + 1}">${k + 1}일</option>`).join("")}</select>
+            <button type="button" class="btn btn-ghost btn-sm" id="f_bclr">지우기</button></div></div>
           <label class="f">한 줄 소개<input type="text" id="f_tagline" value="${esc(item.tagline)}" /></label>
           <label class="f">💬 명대사 더 넣기 <small>한 줄에 하나씩 · 적으면 상세 화면에 "한마디 더 듣기" 버튼이 생겨요 · 비워두면 지금처럼</small><textarea id="f_lines" style="min-height:70px" placeholder="짐의 곁에 남겠다면, 그 정도 각오는 하고 온 거겠지.&#10;…">${esc((item.lines || []).join("\n"))}</textarea></label>
           <label class="f">해시태그<div class="tag-pick" id="f_tags">${data.tags.map(t => `<button type="button" class="${(item.tags || []).includes(t) ? "on" : ""}" data-tag="${esc(t)}">#${esc(t)}</button>`).join("") || `<small>해시태그 탭에서 먼저 태그를 만들어주세요</small>`}</div></label>
@@ -1107,6 +1113,7 @@
         row.addEventListener("touchmove", e => { if (from !== null) e.preventDefault(); }, { passive: false });
       })();
       drawEx();
+      $("f_bclr").onclick = () => { $("f_bm").value = ""; $("f_bd").value = ""; };
       $("savePost").onclick = savePost;
       // 폰에선 키보드가 갑자기 올라오지 않게, 컴퓨터에서 새로 쓸 때만 이름 칸에 커서를 둬요
       if (index < 0 && isDesktop()) $("f_name").focus();
@@ -1290,6 +1297,9 @@
       it.world = $("f_world").value.trim();
       it.date = $("f_date").value || today();
       it.tagline = $("f_tagline").value.trim();
+      const bm = $("f_bm").value, bd = $("f_bd").value;
+      if (bm && bd) it.birthday = `${String(bm).padStart(2, "0")}-${String(bd).padStart(2, "0")}`; else delete it.birthday;
+      if (!it.createdAt && edit.index < 0) it.createdAt = new Date().toISOString();
       it.tags = [...document.querySelectorAll("#f_tags .on")].map(b => b.dataset.tag);
       it.description = $("f_desc").value.trim();
       it.greeting = $("f_greet").value.trim();
