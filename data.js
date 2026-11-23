@@ -94,7 +94,8 @@ window.SITE_DATA = {
         "WHIF": "https://whif.io/characters/f8aab9a9-4bba-4ab2-ab3d-95c18b79a0f2"
       },
       "theme": "palace",
-      "wm": true
+      "wm": true,
+      "birthday": "10-24"
     },
     {
       "id": "mwso6b62mp9u",
@@ -119,7 +120,8 @@ window.SITE_DATA = {
         "WHIF": "https://whif.io/characters/f4d01670-b937-4ee2-b0a4-28850d533e8a"
       },
       "theme": "palace",
-      "wm": true
+      "wm": true,
+      "birthday": "01-30"
     },
     {
       "id": "mwso5ft3do6j",
@@ -144,7 +146,8 @@ window.SITE_DATA = {
         "WHIF": "https://whif.io/characters/6b3b497f-cb25-4a9f-b54a-2cba2f67bec6"
       },
       "theme": "palace",
-      "wm": true
+      "wm": true,
+      "birthday": "05-03"
     },
     {
       "id": "mwso58cyjlaa",
@@ -169,7 +172,8 @@ window.SITE_DATA = {
         "WHIF": "https://whif.io/characters/15940134-9ba4-4b9e-a64d-80727673b6ed"
       },
       "theme": "palace",
-      "wm": true
+      "wm": true,
+      "birthday": "05-07"
     },
     {
       "id": "mwsnp9gdcf8e",
@@ -312,7 +316,8 @@ window.SITE_DATA = {
       "links": {
         "WHIF": "https://whif.io/characters/3e675efa-0b5a-491b-bb1d-43319710762d"
       },
-      "wm": true
+      "wm": true,
+      "birthday": "10-14"
     },
     {
       "id": "mwrzr4dyeaev",
@@ -368,7 +373,11 @@ window.SITE_DATA = {
         "POSTYPE": "https://posty.pe/phpwnh2mc",
         "BLOOM": "https://bloom-ai.me/content/c507c1b6-c632-421a-9a04-ec2f2a53dc7e"
       },
-      "wm": true
+      "wm": true,
+      "previewPos": 25,
+      "previewX": 50,
+      "previewZoom": 1,
+      "birthday": "08-15"
     },
     {
       "id": "mwrpnjsa3wrf",
@@ -492,7 +501,8 @@ window.SITE_DATA = {
       "previewPos": 22,
       "previewX": 50,
       "previewZoom": 1,
-      "wm": true
+      "wm": true,
+      "birthday": "12-24"
     },
     {
       "id": "mwrpenxf93yt",
@@ -515,7 +525,11 @@ window.SITE_DATA = {
         "WHIF": "https://www.whif.io/characters/feb4cb59-1cdc-4f74-93c7-d294bb293360",
         "TINGLE": "https://tingle.chat/chat/characters/54323"
       },
-      "wm": true
+      "wm": true,
+      "previewPos": 25,
+      "previewX": 50,
+      "previewZoom": 1,
+      "birthday": "07-08"
     },
     {
       "id": "mwsj5mvjzgsf",
@@ -567,7 +581,13 @@ window.SITE_DATA = {
       "previewX": 50,
       "previewZoom": 1,
       "theme": "fire",
-      "wm": true
+      "wm": true,
+      "birthday": "02-07",
+      "lines": [
+        "야! 송재현이, 똥강아지!",
+        "또 사고치고 있어 저것들이…….",
+        "뭘 봐."
+      ]
     },
     {
       "id": "mwrmb1hcvuhk",
@@ -594,7 +614,13 @@ window.SITE_DATA = {
       "previewX": 50,
       "previewZoom": 1,
       "theme": "fire",
-      "wm": true
+      "wm": true,
+      "birthday": "08-14",
+      "lines": [
+        "저랑 만나주실래요?",
+        "보고 싶다.",
+        "혹시 시간 비어요?"
+      ]
     },
     {
       "id": "mwrlmy5purob",
@@ -623,7 +649,13 @@ window.SITE_DATA = {
       "previewX": 50,
       "previewZoom": 1,
       "theme": "fire",
-      "wm": true
+      "wm": true,
+      "birthday": "05-25",
+      "lines": [
+        "……시끄러워.",
+        "밥은 먹었어?",
+        "괜히 돌아다니지 말고 앉아서 쉬기나 해."
+      ]
     }
   ]
 };
