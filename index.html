@@ -7,6 +7,11 @@
   <link rel="icon" href="favicon-64.png" type="image/png" sizes="64x64" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
   <meta name="theme-color" content="#b9a2f6" />
+  <link rel="manifest" href="manifest.json" />
+  <script>
+    // 🌙 다크 모드: 저장한 설정이 있으면 그걸, 없으면 폰/컴 설정을 따라가요 (깜빡임 없게 제일 먼저)
+    (function () { try { const m = localStorage.getItem("heart_theme"); if (m === "dark" || (!m && matchMedia("(prefers-color-scheme: dark)").matches)) document.documentElement.classList.add("dark"); } catch {} })();
+  </script>
   <!-- 링크 공유할 때 뜨는 미리보기 (카톡 · 트위터 · 디스코드 등) -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="하트 (@HEART)" />
@@ -486,6 +491,8 @@
     /* ---------- 🎨 게시물 페이지 꾸미기 (제작자 페이지에서 게시물마다 고를 수 있어요) ---------- */
     .modal[data-theme] { background-color: var(--m-bg); background-image: var(--m-deco, none); background-size: var(--m-deco-size, auto); color: var(--ink); }
     .modal[data-theme] .chat-ctas .chat-cta { box-shadow: 0 3px 12px var(--m-glow, rgba(150,140,240,.28)); }
+    /* 다크 모드에서도 밝은 테마 게시물은 원래 색 그대로 (어두운 테마는 아래에서 다시 정해요) */
+    :where(html.dark) .modal[data-theme]:not([data-theme=""]) { --ink: #14171a; --sub: #657786; --faint: #aab8c2; --line: #e6ecf0; --page: #f5f8fa; --blue-soft: #f1eefe; color-scheme: light; }
     .modal[data-theme="sakura"] {
       --blue: #d9577f; --blue-soft: #fdecf2; --line: #f5dfe7; --page: #fff4f7;
       --grad-strong: linear-gradient(120deg, #f59ab8 0%, #f8b7c9 50%, #ffcbb8 100%);
@@ -804,6 +811,60 @@
       .overlay { padding: 0; }
       .modal { border-radius: 0; min-height: 100%; min-height: 100dvh; }
     }
+    /* ---------- 🌙 다크 모드 ---------- */
+    .tb-mode { margin-left: auto; margin-right: 58px; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--blue); background: var(--blue-soft); flex-shrink: 0; transition: transform .2s; }
+    .tb-mode:active { transform: scale(.9) rotate(-15deg); }
+    .tb-mode svg { width: 17px; height: 17px; }
+    .tb-mode .sun { display: none; } html.dark .tb-mode .sun { display: block; } html.dark .tb-mode .moon { display: none; }
+    html.dark { color-scheme: dark; --ink: #ececf4; --sub: #9b9cb3; --faint: #64657a; --line: #272735; --page: #0d0d14; --blue: #a993f4; --blue-soft: #252040; --heart-soft: #252040; }
+    html.dark body { background: var(--page); }
+    html.dark .col { background: #15151e; }
+    html.dark .topbar { background: rgba(21,21,30,.86); }
+    html.dark .tweet:hover { background: #1a1a25; }
+    html.dark .chip, html.dark .srch-x, html.dark .cal-btn, html.dark .edge button, html.dark .new-badge { background: #1d1b2b; border-color: #3a3456; }
+    html.dark .chips-wrap .edge.left { background: linear-gradient(90deg, #15151e 45%, rgba(21,21,30,0)); }
+    html.dark .chips-wrap .edge.right { background: linear-gradient(270deg, #15151e 45%, rgba(21,21,30,0)); }
+    html.dark .srch-btn { background: #252040; }
+    html.dark .srch-box { background: #1d1b2b; border-color: #3a3456; }
+    html.dark .srch-box:focus-within { background: #201d30; }
+    html.dark .tweet.pinned { background: linear-gradient(90deg, #221d38 0%, #1b2234 60%, #15151e 100%); }
+    html.dark .tweet.pinned:hover { background: linear-gradient(90deg, #262041 0%, #1e263b 60%, #191924 100%); }
+    html.dark .tweet.spoiler { background: linear-gradient(90deg, #1b2234 0%, #221d38 60%, #15151e 100%); }
+    html.dark .t-context.pin-label { background: #1d1b2b; border-color: #3a3456; }
+    html.dark .msg-card { background: linear-gradient(180deg, #1c1a2a, #15151e 60%); }
+    html.dark .msg-card input, html.dark .msg-card textarea { background: #1b1b26; }
+    html.dark .modal:not([data-theme]), html.dark .modal[data-theme=""] { background: #17171f; }
+    html.dark .modal[data-theme=""], html.dark .modal:not([data-theme]) { --m-quote: #1f1b31; --m-text: #dedfea; --m-text2: #cfd0e0; --m-quote-line: #8b74ea; }
+    html.dark .cs { background: #17171f; }
+    html.dark .cd { background: #1d1c28; color: #c9cad8; }
+    html.dark .cd.today { background: #262040; }
+    html.dark .cd.spo { background: linear-gradient(135deg, #2a2346, #1d2a40, #36223a); }
+    html.dark .cs-nav button, html.dark .cs-day { background: #222033; }
+    html.dark .cs-sp { background: linear-gradient(90deg, #1b2234, #221d38); }
+    html.dark .cs-hdl { background: #3a3650; }
+    html.dark .cs-sec { border-top-color: #2a2838; }
+    html.dark .spoil-bubble, html.dark .spoil-typing, html.dark .lock-veil span { background: rgba(28,26,40,.94); color: #ececf4; }
+    html.dark .lock-note { background: #241f1a; }
+    html.dark .st-renewal .lock-note, html.dark .lock-note:where(.st-renewal *) { background: #221d38; }
+    html.dark .lock-veil { --st-veil: rgba(13,13,20,.45); }
+    html.dark .avatar { box-shadow: 0 0 0 3px #3a3456; }
+
+    /* ---------- 🔔 공개 알림 버튼 ---------- */
+    .spoil-tag { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .notify-btn { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 999px; font-size: .72rem; font-weight: 800; color: #7353d6; background: #fff; border: 1px solid #ddd3fb; box-shadow: 0 2px 8px rgba(140,120,240,.15); transition: transform .15s; }
+    .notify-btn:active { transform: scale(.94); }
+    .notify-btn.on { color: #fff; background: linear-gradient(120deg, #a98cf3, #7fb5f2); border-color: transparent; }
+    .notify-btn .bell { display: inline-block; transform-origin: 50% 10%; }
+    .notify-btn:not(.on) .bell { animation: ring 2.8s ease-in-out infinite; }
+    @keyframes ring { 0%, 70%, 100% { transform: rotate(0); } 74% { transform: rotate(14deg); } 80% { transform: rotate(-12deg); } 86% { transform: rotate(8deg); } 92% { transform: rotate(-4deg); } }
+    html.dark .notify-btn:not(.on) { background: #1d1b2b; border-color: #3a3456; color: #c4b5fd; }
+    .ios-guide { position: fixed; inset: 0; z-index: 120; display: flex; align-items: flex-end; justify-content: center; background: rgba(40,32,80,.32); animation: fade .2s; }
+    .ios-guide .g { width: min(560px, 100%); background: #fff; border-radius: 22px 22px 0 0; padding: 20px 20px calc(20px + env(safe-area-inset-bottom)); animation: up .35s cubic-bezier(.2,.9,.25,1); }
+    html.dark .ios-guide .g { background: #17171f; }
+    @keyframes up { from { transform: translateY(100%); } }
+    .ios-guide h4 { font-size: 1rem; margin-bottom: 10px; }
+    .ios-guide ol { padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: .88rem; }
+    .ios-guide button { margin-top: 16px; width: 100%; height: 44px; border-radius: 14px; background: var(--grad-strong); color: #fff; font-weight: 800; }
   </style>
 </head>
 <body>
@@ -821,6 +882,7 @@
         <div class="tb-name" id="tbName"></div>
         <div class="tb-sub" id="tbSub"></div>
       </div>
+      <button class="tb-mode" id="modeBtn" aria-label="다크 모드 바꾸기"><svg class="moon" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 14.6A8.5 8.5 0 0 1 9.4 3.5a8.5 8.5 0 1 0 11.1 11.1z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2" fill="currentColor"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg></button>
       <button class="sticker sticker-top" data-face="top" data-other="top2" aria-label="스티커"><img alt="" /></button>
     </header>
 
@@ -917,6 +979,7 @@
       get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
       set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
     };
+    var pushSubs = store.get("push_subs", {});   // 🔔 공개 알림 신청한 스포일러 {게시물 id: 알림 주소}
     let liked = store.get("tw_liked", {});
     let view = "tweets";
     let activeTag = "전체";
@@ -1044,10 +1107,10 @@
       : (() => { const [ic, t] = STATUS[c.status]; return `<div class="lock-veil st-${c.status}"><span>${ic} ${t}</span></div>`; })();
     function spoilerTweet(c) {
       return `
-        <article class="tweet locked spoiler" aria-disabled="true">
+        <article class="tweet locked spoiler">
           ${meAva()}
           <div class="t-main">
-            <div class="spoil-tag"><span>✦ SPOILER</span></div>
+            <div class="spoil-tag"><span>✦ SPOILER</span>${c.releaseDate && c.id ? `<button class="notify-btn ${pushSubs[c.id] ? "on" : ""}" data-notify="${esc(c.id)}"><span class="bell">🔔</span>${pushSubs[c.id] ? "알림 신청됨" : "공개 알림"}</button>` : ""}</div>
             ${headHTML(c.date, releaseLabel(c.releaseDate, c.releaseTime))}
             <p class="t-title">${escH(c.name)}</p>
             <p class="t-tags">${hashtags(c)}</p>
@@ -1138,6 +1201,12 @@
         fetch(MSG_API, { method: "POST", headers: { "content-type": "text/plain" }, body: JSON.stringify({ action: "visit", src }), keepalive: true }).catch(() => {});
       } catch {}
     })();
+    // 💜 캐릭터 반응 세기 (조회 · 하트 · 대화 버튼) — 제작자 기기와 미리보기는 빼요
+    const isMe = (() => { try { return !!(localStorage.getItem("heart_me") || localStorage.getItem("heart_gh_token")) || new URLSearchParams(location.search).has("preview"); } catch { return false; } })();
+    function track(action, extra) {
+      if (isMe) return;
+      try { fetch(MSG_API, { method: "POST", headers: { "content-type": "text/plain" }, body: JSON.stringify({ action, ...extra }), keepalive: true }).catch(() => {}); } catch {}
+    }
     const MSG_MAX = 1000, MSG_COOLDOWN = 30;   // 글자 수 제한, 연속 전송 막기(초)
     let msgDraft = { nick: "", body: "" }, msgSent = false;
     function renderMessage(el) {
@@ -1317,7 +1386,7 @@
             <span class="act share deco" aria-hidden="true">${I.share}</span>
           </div>
         </div>
-        ${chatLinks(c).length ? `<div class="chat-ctas">${chatLinks(c).map(([t, url]) => `<a class="chat-cta" href="${esc(url)}" target="_blank" rel="noopener">${isCollab(t) ? `${I.world} ${c.world ? `${escH(c.world)} 보러 가기` : "합작 세계관 보러 가기"}` : `${I.reply} ${t ? `${esc(t)}에서 대화하기` : `${escH(c.name)}와 대화하러 가기`}`}</a>`).join("")}</div>` : ""}
+        ${chatLinks(c).length ? `<div class="chat-ctas">${chatLinks(c).map(([t, url]) => `<a class="chat-cta" href="${esc(url)}" target="_blank" rel="noopener" data-cta="${esc(isCollab(t) ? "합작" : t || "link")}">${isCollab(t) ? `${I.world} ${c.world ? `${escH(c.world)} 보러 가기` : "합작 세계관 보러 가기"}` : `${I.reply} ${t ? `${esc(t)}에서 대화하기` : `${escH(c.name)}와 대화하러 가기`}`}</a>`).join("")}</div>` : ""}
         ${c.greeting ? `
         <article class="tweet reply-tweet">
           ${charAva(c)}
@@ -1430,6 +1499,7 @@
     const postKey = i => characters[i] && (characters[i].id || String(i));
     function openTweet(i) {
       if (isLocked(characters[i])) return;
+      try { const k = "heart_seen_" + postKey(i); if (!sessionStorage.getItem(k)) { sessionStorage.setItem(k, "1"); track("view", { post: postKey(i) }); } } catch {}
       showTweet(i);
       history.pushState({ heart: "post", i, view }, "", baseUrl() + "#post-" + postKey(i));
     }
@@ -1458,6 +1528,7 @@
       const c = characters[i];
       liked[c.name] = !liked[c.name];
       store.set("tw_liked", liked);
+      track("like", { post: postKey(i), on: !!liked[c.name] });
       document.querySelectorAll(`[data-like="${i}"]`).forEach(b => {
         b.classList.toggle("liked", liked[c.name]);
         b.classList.remove("pop"); void b.offsetWidth; b.classList.add("pop");
@@ -1485,6 +1556,11 @@
       const arrow = e.target.closest("[data-scroll]");
       if (arrow) { const box = $("chips"); box.scrollBy({ left: +arrow.dataset.scroll * box.clientWidth * 0.6 }); return; }
       if (e.target.closest("#calBtn")) return openCal();
+      if (e.target.closest("#modeBtn")) return toggleMode();
+      const nb = e.target.closest("[data-notify]");
+      if (nb) { e.stopPropagation(); return toggleNotify(nb.dataset.notify); }
+      const cta = e.target.closest(".chat-cta[data-cta]");
+      if (cta && $("overlay").classList.contains("open")) { const ci = history.state && history.state.heart === "post" ? history.state.i : -1; if (ci >= 0) track("click", { post: postKey(ci), to: cta.dataset.cta }); }
       // ✦ 스포일러 사진을 누르면 한마디 말풍선이 톡 (다른 곳 누르면 닫혀요)
       const talk = e.target.closest(".tweet.spoiler .t-media.can-talk");
       document.querySelectorAll(".t-media.talk").forEach(m => { if (m !== talk) m.classList.remove("talk"); });
@@ -1587,6 +1663,56 @@
     // 폰에서 탭을 다시 열었을 때 예전 화면이 그대로 남아있는 경우가 있어서,
     // 돌아올 때마다 최신 data.js를 확인하고 바뀌었으면 새로고침해요 (메시지 쓰는 중이면 건너뜀)
     // 페이지를 열어둔 채로 공개 시간이 지나면 바로 다시 그려요
+    /* ---- 🌙 다크 모드 ---- */
+    function toggleMode() {
+      const dark = document.documentElement.classList.toggle("dark");
+      try { localStorage.setItem("heart_theme", dark ? "dark" : "light"); } catch {}
+      document.querySelector('meta[name="theme-color"]').content = dark ? "#15151e" : "#b9a2f6";
+    }
+    if (document.documentElement.classList.contains("dark")) document.querySelector('meta[name="theme-color"]').content = "#15151e";
+
+    /* ---- 🔔 스포일러 공개 알림 (웹 푸시) ---- */
+    const VAPID_KEY = "BEkBdgYVbmYjSvwvvGwCNqa8oZYsYC426SqcIe8zy_qNxnvMecuyn03zvrUB-0A2hT0656wQ7IV2N8uBYtsHYlY";
+    const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const isStandalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+    const inAppBrowser = /KAKAOTALK|Instagram|FBAN|FBAV|Line\/|Twitter|NAVER\(inapp|DaumApps|everytimeApp|Whale\/.*inapp/i.test(navigator.userAgent);
+    const b64u = s => { const p = "=".repeat((4 - s.length % 4) % 4), b = atob((s + p).replace(/-/g, "+").replace(/_/g, "/")); return Uint8Array.from(b, ch => ch.charCodeAt(0)); };
+    function refreshNotify() {
+      document.querySelectorAll("[data-notify]").forEach(b => {
+        const on = !!pushSubs[b.dataset.notify];
+        b.classList.toggle("on", on);
+        b.innerHTML = `<span class="bell">🔔</span>${on ? "알림 신청됨" : "공개 알림"}`;
+      });
+    }
+    function iosGuide() {
+      const el = document.createElement("div"); el.className = "ios-guide";
+      el.innerHTML = `<div class="g"><h4>🔔 아이폰은 홈 화면에 추가하면 알림을 받을 수 있어요</h4>
+        <ol><li>사파리 아래쪽 <b>공유 버튼(□↑)</b>을 눌러요</li><li><b>홈 화면에 추가</b>를 눌러요</li><li>홈 화면에 생긴 <b>하트 아이콘</b>으로 열고, 다시 <b>🔔 공개 알림</b>을 눌러주세요</li></ol>
+        <button>알겠어요</button></div>`;
+      el.onclick = e => { if (e.target === el || e.target.tagName === "BUTTON") el.remove(); };
+      document.body.appendChild(el);
+    }
+    async function toggleNotify(id) {
+      if (pushSubs[id]) {   // 취소
+        fetch(MSG_API, { method: "POST", headers: { "content-type": "text/plain" }, body: JSON.stringify({ action: "push-unsub", post: id, endpoint: pushSubs[id] }) }).catch(() => {});
+        delete pushSubs[id]; store.set("push_subs", pushSubs); refreshNotify(); return toast("알림 신청을 취소했어요");
+      }
+      if (inAppBrowser) return toast("앱 안 화면에선 알림을 못 받아요 · 크롬/사파리로 열어주세요");
+      if (isIOS && !isStandalone) return iosGuide();
+      if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) return toast("이 브라우저는 알림을 지원하지 않아요");
+      try {
+        const perm = await Notification.requestPermission();
+        if (perm !== "granted") return toast("알림이 꺼져 있어요 · 브라우저 설정에서 허용해주세요");
+        const reg = await navigator.serviceWorker.register("sw.js");
+        await navigator.serviceWorker.ready;
+        const sub = (await reg.pushManager.getSubscription()) || (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64u(VAPID_KEY) }));
+        const r = await fetch(MSG_API, { method: "POST", headers: { "content-type": "text/plain" }, body: JSON.stringify({ action: "push-sub", post: id, sub: sub.toJSON() }) });
+        if (!r.ok) throw new Error("server");
+        pushSubs[id] = sub.endpoint; store.set("push_subs", pushSubs); refreshNotify();
+        toast("🔔 공개되면 알려드릴게요!");
+      } catch (e) { console.warn(e); toast("알림 신청이 안 됐어요. 잠시 뒤 다시 눌러주세요"); }
+    }
+
     updateCalDot();
     (function watchRelease() {
       const opened = () => characters.filter(isReleased).map(c => c.id).join();

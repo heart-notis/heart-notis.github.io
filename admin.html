@@ -107,6 +107,15 @@
     .ref-bar { height: 8px; background: #f1eefb; border-radius: 4px; overflow: hidden; }
     .ref-bar i { display: block; height: 100%; background: var(--grad); border-radius: 4px; }
     .ref-row b { text-align: right; color: var(--accent); }
+    .rk-row { display: flex; align-items: center; gap: 9px; padding: 6px 0; border-bottom: 1px solid var(--line); }
+    .rk-row:last-child { border-bottom: 0; }
+    .rk-n { width: 18px; text-align: center; font-size: .74rem; font-weight: 800; color: var(--sub); }
+    .rk-row:nth-child(-n+3) .rk-n { color: var(--accent); }
+    .rk-row img, .rk-ph { width: 36px; height: 44px; border-radius: 8px; object-fit: cover; flex-shrink: 0; background: var(--soft); }
+    .rk-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+    .rk-main b { font-size: .82rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .rk-main small { font-size: .68rem; color: var(--sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .rk-row em { font-style: normal; font-weight: 800; color: var(--accent); font-size: .9rem; min-width: 28px; text-align: right; }
     .vs-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
     .vs-cards div { background: var(--soft); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 2px; }
     .vs-cards small { font-size: .72rem; color: var(--sub); font-weight: 700; }
@@ -481,7 +490,7 @@
 
     /* 사이트에 항상 들어가는 파일들 */
     const FIXED_FILES = [
-      "index.html", "admin.html", "favicon.svg", "favicon-64.png", "apple-touch-icon.png", "og.jpg", "og-2.jpg",
+      "index.html", "admin.html", "favicon.svg", "favicon-64.png", "apple-touch-icon.png", "og.jpg", "og-2.jpg", "sw.js", "manifest.json",
       "images/header.jpg", "images/profile.jpg", "images/profile-sm.jpg",
       "images/sticker-smile.png", "images/sticker-open.png", "images/sticker-top.png", "images/sticker-top2.png"
     ];
@@ -1253,6 +1262,11 @@
             <div id="refList"></div>
             <div class="hint" style="margin-top:6px">💡 링크 끝에 <b>?from=이름</b>을 붙여서 올리면 정확히 구분돼요. 예: heart-notis.github.io/?from=티팟</div>
           </div>
+          <div class="vs-ref">
+            <div class="vs-ref-top"><b>💜 캐릭터 반응</b><div class="vs-seg">${[["v", "조회"], ["l", "하트"], ["c", "대화"], ["s", "알림"]].map(([k, t], n) => `<button data-rk="${k}" class="${n === 0 ? "on" : ""}">${t}</button>`).join("")}</div></div>
+            <div id="rankList"></div>
+            <div class="hint" style="margin-top:6px">조회 = 게시물을 열어본 횟수 · 하트 = 지금 하트 눌러둔 사람 · 대화 = 대화하기 버튼 누른 횟수 · 알림 = 스포일러 공개 알림 신청</div>
+          </div>
           <div class="hint">방문 = 그날 들어온 사람 수 (같은 사람은 하루 1번) · 조회 = 사이트를 연 횟수<br/>제작자 페이지를 연 기기의 방문은 세지 않아요. 세기 시작한 날부터 쌓여요.</div>
         </div>`;
       $("overlay").classList.add("open");
@@ -1267,6 +1281,26 @@
       };
       document.querySelectorAll("[data-ref]").forEach(b => b.onclick = () => drawRefs(+b.dataset.ref));
       drawRefs(1);
+      // 💜 캐릭터 반응 순위
+      const ps = visitCache.posts || {}, lk = visitCache.likes || {}, sb = visitCache.subs || {}, snt = visitCache.sent || {};
+      const sumC = o => Object.values(o || {}).reduce((a, n) => a + n, 0);
+      const rows = data.posts.filter(p => p.id).map(p => ({ p, v: (ps[p.id] || {}).v || 0, l: lk[p.id] || 0, c: sumC((ps[p.id] || {}).c), cs: (ps[p.id] || {}).c || {}, s: sb[p.id] || 0, sent: snt[p.id] }));
+      const drawRank = k => {
+        const list = rows.filter(r => r[k] > 0 || (k === "s" && r.sent)).sort((a, b) => b[k] - a[k]).slice(0, 30);
+        const max = Math.max(1, ...list.map(r => r[k]));
+        $("rankList").innerHTML = list.length ? list.map((r, n) => `
+          <div class="rk-row">
+            <span class="rk-n">${n + 1}</span>
+            ${r.p.image ? `<img src="${esc(r.p.image)}" alt="" onerror="${rawFallback}" />` : `<span class="rk-ph"></span>`}
+            <div class="rk-main"><b>${esc(r.p.name)}</b>
+              <span class="ref-bar"><i style="width:${Math.max(4, r[k] / max * 100)}%"></i></span>
+              <small>${k === "c" ? Object.entries(r.cs).sort((a, b) => b[1] - a[1]).map(([t, n]) => `${esc(t === "link" ? "대화" : t)} ${n}`).join(" · ") : k === "s" && r.sent !== undefined ? `알림 보냄 ${r.sent}명` : `조회 ${r.v} · 하트 ${r.l} · 대화 ${r.c}`}</small></div>
+            <em>${r[k]}</em>
+          </div>`).join("") : `<div class="hint">아직 기록이 없어요 (이 기능을 켠 뒤부터 쌓여요)</div>`;
+        document.querySelectorAll("[data-rk]").forEach(b => b.classList.toggle("on", b.dataset.rk === k));
+      };
+      document.querySelectorAll("[data-rk]").forEach(b => b.onclick = () => drawRank(b.dataset.rk));
+      drawRank("v");
     };
     // 도메인 → 알아보기 쉬운 이름
     function refName(h) {
