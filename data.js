@@ -70,7 +70,7 @@ window.SITE_DATA = {
       "spoiler": true,
       "theme": "rose",
       "releaseDate": "2026-11-23",
-      "releaseTime": "20:21",
+      "releaseTime": "20:23",
       "wm": true
     },
     {
