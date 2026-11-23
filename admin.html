@@ -871,7 +871,7 @@
         ...randomCounts(), date: today(), description: "", greeting: "", link: ""
       };
       if (!item.id) item.id = uid();
-      edit = { kind: "post", index, item, queue, at };   // at: 여러 장일 때 고른 순서대로 위에서부터 놓이게
+      edit = { kind: "post", index, item, queue, at, orig: index >= 0 ? JSON.stringify(data.posts[index]) : "" };   // at: 여러 장일 때 고른 순서대로 위에서부터 놓이게
       $("editor").innerHTML = `
         <div class="ed-top"><h3>${index >= 0 ? "게시물 수정" : "새 게시물"}</h3><button class="icon" data-close aria-label="닫기">${I.x}</button></div>
         <div class="ed-body">
@@ -924,6 +924,7 @@
           </div>
           <label class="f">대화하러 가기 링크 <small>위에서 체크한 해시태그(플랫폼)마다 주소 칸이 생겨요 · #합작은 세계관 보기 버튼이 돼요</small><div class="links-box" id="f_links"></div></label>
           <label class="check"><input type="checkbox" id="f_adult" ${item.adult ? "checked" : ""} /> 19+ 배지 달기</label>
+          ${index >= 0 ? `<label class="check"><input type="checkbox" id="f_quiet" /> 🤫 조용히 수정 <small style="font-weight:400;color:var(--sub)">오타 고치기처럼 사소한 수정이면 체크 · UPDATE 표시가 안 떠요</small></label>` : ""}
           <label class="check"><input type="checkbox" id="f_hidden" ${item.hidden ? "checked" : ""} /> 🙈 비공개 <small style="font-weight:400;color:var(--sub)">사이트에 안 보이게 숨겨둬요 (준비되면 체크 풀기)</small></label>
           <label class="check"><input type="checkbox" id="f_spoiler" ${item.spoiler ? "checked" : ""} /> ✦ 스포일러 <small style="font-weight:400;color:var(--sub)">고정 공지 바로 아래에 홀로그램 카드로 보이고, 눌러도 안 열려요</small></label>
           <label class="f rel-row ${item.spoiler ? "" : "hidden"}" id="f_relRow">📅 공개 예정일 <small>비워두면 올린 날짜(오늘)로 보여요</small>
@@ -1301,6 +1302,12 @@
       const th = document.querySelector("#f_theme .on"); it.theme = th ? th.dataset.themeKey : "";
       if (!it.theme) delete it.theme;
       const wasEdit = edit.index >= 0, queue = edit.queue || [];
+      // ✦ 내용이 바뀐 게시물은 하루 동안 사이트에 "UPDATE" 표시 (순서·통계용 숫자만 바뀐 건 제외)
+      if (wasEdit) {
+        const strip = o => { const c = JSON.parse(JSON.stringify(o)); ["updatedAt", "rts", "likes", "previewPos", "previewX", "previewZoom", "status", "hidden", "spoiler"].forEach(k => delete c[k]); return JSON.stringify(c); };
+        let before = null; try { before = JSON.parse(edit.orig); } catch {}
+        if (before && strip(before) !== strip(it) && !$("f_quiet")?.checked) it.updatedAt = new Date().toISOString();
+      }
       const at = edit.at || 0;
       if (wasEdit) data.posts[edit.index] = it; else data.posts.splice(at, 0, it);
       closeEditor(); saveDraft(); renderAll();

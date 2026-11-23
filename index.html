@@ -159,6 +159,18 @@
       100% { transform: translate(var(--drift), 115cqh) rotate(var(--spin)); }
     }
     .banner { container-type: size; }
+    /* ✨ 프사 반짝 */
+    #pAvatar { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+    #pAvatar.glow { animation: avGlow 1.2s ease-out; }
+    @keyframes avGlow { 0% { box-shadow: 0 0 0 3px #d9cdfb; } 25% { box-shadow: 0 0 0 4px #fff, 0 0 0 7px #c9b8fa, 0 0 30px 8px rgba(154,216,246,.85); transform: scale(1.04); } 100% { box-shadow: 0 0 0 3px #d9cdfb; transform: none; } }
+    .av-spark { position: fixed; z-index: 200; pointer-events: none; color: #fff; transform: translate(-50%, -50%) scale(0); text-shadow: 0 0 6px #b9a2f6, 0 0 12px #9ad8f6; animation: avSpark 1.1s ease-out forwards; }
+    @keyframes avSpark { 0% { transform: translate(-50%, -50%) scale(0) rotate(0); opacity: 0; } 30% { transform: translate(-50%, -50%) scale(1.2) rotate(20deg); opacity: 1; } 100% { transform: translate(-50%, -70%) scale(.6) rotate(60deg); opacity: 0; } }
+    /* ✦ UPDATE 표시 */
+    .upd { display: flex; align-items: center; gap: 6px; margin: 2px 0 1px; flex-wrap: wrap; }
+    .upd-tag { padding: 1px 8px; border-radius: 999px; font-size: .62rem; font-weight: 900; letter-spacing: .1em; color: #fff; background: linear-gradient(120deg, #a98cf3, #7fb5f2); box-shadow: 0 2px 6px rgba(140,120,240,.3); animation: updPulse 2s ease-in-out infinite; }
+    .upd-note { font-size: .74rem; font-weight: 700; color: #7353d6; }
+    @keyframes updPulse { 50% { box-shadow: 0 2px 12px rgba(140,120,240,.6); } }
+    html.dark .upd-note { color: #c4b5fd; }
     /* 💬 상태 메시지 */
     .p-row { position: relative; }
     .p-status { position: absolute; left: 92px; top: -50px; z-index: 3; max-width: calc(100% - 140px); background: #fff; border: 1.5px solid #ddd3fb; border-radius: 16px 16px 16px 4px; padding: 6px 12px; font-size: .8rem; font-weight: 700; color: #4b3f8f; box-shadow: 0 4px 12px rgba(140,120,240,.2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; animation: popIn .5s cubic-bezier(.2,1.3,.4,1) both .3s; }
@@ -1168,6 +1180,14 @@
     const mediaHTML = c => c.image
       ? `<img class="media" src="${esc(c.image)}" alt="${esc(c.name)}" loading="lazy" decoding="async" />`
       : `<div class="media ph" style="background:linear-gradient(150deg, ${c.color || "#9cc9ea"}, ${c.color || "#9cc9ea"}aa)">${esc(c.name.charAt(0))}</div>`;
+    // ✦ 24시간 안에 설정이 바뀐 캐릭터: "UPDATE" (+ 오늘 적은 업데이트 기록이 있으면 그 내용)
+    const isUpdated = c => { const t = Date.parse(c.updatedAt || ""); return !isNaN(t) && Date.now() - t < 86400000; };
+    const updBadge = c => {
+      if (!isUpdated(c)) return "";
+      const d = new Date(c.updatedAt), k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      const note = (Array.isArray(c.log) ? c.log : []).find(l => l.d === k);
+      return `<div class="upd"><span class="upd-tag">✦ UPDATE</span>${note ? `<span class="upd-note">${escH(note.t)}</span>` : ""}</div>`;
+    };
     const headHTML = (d, label) => `
       <div class="t-head"><b>${esc(profile.name)}</b>${I.verified}<span class="muted">@${esc(profile.handle)} · ${label || shortDate(d)}</span></div>`;
     // ✦ 스포일러 공개 예정일: "12월 3일 공개 예정" (지난 날짜/오늘이면 "오늘 공개")
@@ -1221,6 +1241,19 @@
         const ago = (() => { const t = Date.parse(profile.statusAt || ""); if (isNaN(t)) return ""; const m = Math.floor((Date.now() - t) / 60000);
           return m < 1 ? "방금" : m < 60 ? `${m}분 전` : m < 1440 ? `${Math.floor(m / 60)}시간 전` : m < 43200 ? `${Math.floor(m / 1440)}일 전` : ""; })();
         sb.innerHTML = `${escH(st)}${ago ? `<small>${ago}</small>` : ""}`;
+      }
+    }
+
+    /* ---- ✨ 프사를 누르면 반짝반짝 후광 ---- */
+    function avatarSparkle() {
+      const a = $("pAvatar"); a.classList.remove("glow"); void a.offsetWidth; a.classList.add("glow");
+      if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const r = a.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2, R0 = r.width / 2;
+      for (let k = 0; k < 9; k++) {
+        const s = document.createElement("span"); s.className = "av-spark"; s.textContent = k % 2 ? "✧" : "✦";
+        const ang = (k / 9) * Math.PI * 2 + Math.random() * .5, d = R0 + 6 + Math.random() * 22, sz = 11 + Math.random() * 11;
+        s.style.cssText = `left:${cx + Math.cos(ang) * d}px;top:${cy + Math.sin(ang) * d}px;font-size:${sz}px;animation-delay:${k * 45}ms`;
+        document.body.appendChild(s); setTimeout(() => s.remove(), 1300);
       }
     }
 
@@ -1297,7 +1330,7 @@
         <article class="tweet" data-open="${i}">
           ${meAva()}
           <div class="t-main">
-            ${headHTML(isReleased(c) ? c.releaseDate : c.date)}
+            ${headHTML(isReleased(c) ? c.releaseDate : c.date)}${updBadge(c)}
             <p class="t-title">${escH(c.name)}</p>
             ${c.tagline ? `<p class="t-tagline">${fmtText(c.tagline)}</p>` : ""}
             <p class="t-tags">${hashtags(c)}</p>
@@ -1725,6 +1758,7 @@
       const arrow = e.target.closest("[data-scroll]");
       if (arrow) { const box = $("chips"); box.scrollBy({ left: +arrow.dataset.scroll * box.clientWidth * 0.6 }); return; }
       if (e.target.closest("#calBtn")) return openCal();
+      if (e.target.closest("#pAvatar")) return avatarSparkle();
       // 💬 한마디 더 듣기
       const ln = e.target.closest("[data-line-next]");
       if (ln) {
