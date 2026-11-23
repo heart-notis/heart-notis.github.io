@@ -868,7 +868,7 @@
     const meAva = () => { const src = profile.avatarSmall || profile.avatar; return `<div class="t-ava">${src ? `<img src="${esc(src)}" alt="" />` : esc(profile.name.charAt(0))}</div>`; };
     const charAva = c => `<div class="t-ava" style="background:${c.color || "#cfe3f3"};color:#fff">${c.image ? `<img src="${esc(c.image)}" alt="" />` : esc(c.name.charAt(0))}</div>`;
     const mediaHTML = c => c.image
-      ? `<img class="media" src="${esc(c.image)}" alt="${esc(c.name)}" loading="lazy" />`
+      ? `<img class="media" src="${esc(c.image)}" alt="${esc(c.name)}" loading="lazy" decoding="async" />`
       : `<div class="media ph" style="background:linear-gradient(150deg, ${c.color || "#9cc9ea"}, ${c.color || "#9cc9ea"}aa)">${esc(c.name.charAt(0))}</div>`;
     const headHTML = d => `
       <div class="t-head"><b>${esc(profile.name)}</b>${I.verified}<span class="muted">@${esc(profile.handle)} · ${shortDate(d)}</span></div>`;

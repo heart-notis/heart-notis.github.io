@@ -560,7 +560,18 @@
     const isDesktop = () => matchMedia("(hover: hover) and (pointer: fine)").matches;
     let edit = null;   // { kind, index, item, srcImg }
     function closeEditor() { const e = edit; $("overlay").classList.remove("open"); document.body.style.overflow = ""; edit = null; if (e && e.onClose) e.onClose(); }
-    $("overlay").addEventListener("click", e => { if (e.target.id === "overlay") closeEditor(); });
+    // ✋ 쓰던 내용이 있으면 닫기 전에 물어봐요 (옆을 잘못 눌러도 안 날아가게)
+    const formSnap = () => JSON.stringify([
+      [...document.querySelectorAll("#editor input, #editor textarea, #editor select")].map(el => el.type === "checkbox" ? el.checked : el.value),
+      [...document.querySelectorAll("#editor .on")].map(b => b.textContent),
+      edit && edit.item ? edit.item : null
+    ]);
+    const markClean = () => { if (edit) edit.snap = formSnap(); };
+    function requestClose() {
+      if (edit && edit.snap && formSnap() !== edit.snap && !confirmBox("작성 중인 내용이 있어요.\n저장하지 않고 닫을까요?")) return;
+      closeEditor();
+    }
+    $("overlay").addEventListener("click", e => { if (e.target.id === "overlay") requestClose(); });
 
     // 사진인지 확인 (폰에서 갤러리 앱으로 고를 수 있게 accept 를 안 걸어서 직접 확인해요)
     const isImgFile = f => f && (/^image\//.test(f.type) || /\.(jpe?g|png|webp|gif|bmp|avif|heic|heif)$/i.test(f.name || ""));
@@ -734,6 +745,7 @@
       $("savePost").onclick = savePost;
       // 폰에선 키보드가 갑자기 올라오지 않게, 컴퓨터에서 새로 쓸 때만 이름 칸에 커서를 둬요
       if (index < 0 && isDesktop()) $("f_name").focus();
+      markClean();
     }
     // 🎨 게시물 페이지 꾸미기 (사이트 index.html 의 THEMES 와 이름이 같아야 해요)
     const THEMES = [
@@ -797,6 +809,12 @@
     /* ---------- ✂️ 사진 자르기 창 (확대 · 축소 · 이동) ----------
        cropImage(img, { W, H, round, title }) → 자른 사진(data URL) 또는 취소하면 null
        결과는 다시 그린 사진이라 EXIF(위치·기기 정보)는 남지 않아요 */
+    // 🪶 사진은 WebP로 저장해요: 화질은 그대로, 용량은 보통 30~50% 가벼워요 (지원 안 하는 브라우저는 JPG)
+    function encodeImg(cv, q = 0.9) {
+      try { const w = cv.toDataURL("image/webp", q); if (w.startsWith("data:image/webp")) return w; } catch {}
+      return cv.toDataURL("image/jpeg", q);
+    }
+    const imgExt = url => /^data:image\/webp/.test(url) ? "webp" : "jpg";
     function cropImage(img, opt) {
       return new Promise(resolve => {
         const { W, H } = opt;
@@ -875,7 +893,7 @@
           stage.onpointerdown = stage.onpointermove = stage.onpointerup = stage.onpointercancel = stage.onwheel = null;
           if (!ok) return resolve(null);
           draw(true);
-          resolve(opt.raw ? cv : cv.toDataURL("image/jpeg", 0.9));
+          resolve(opt.raw ? cv : encodeImg(cv));
         };
         $("cropDone").onclick = () => finish(true);
         $("cropCancel").onclick = $("cropCancelX").onclick = () => finish(false);
@@ -944,8 +962,9 @@
         closeEditor(); saveDraft(); renderAll(); toast("공지를 저장했어요");
       };
       if (index < 0 && isDesktop()) $("n_title").focus();
+      markClean();
     }
-    document.addEventListener("click", e => { if (e.target.closest("[data-close]")) closeEditor(); });
+    document.addEventListener("click", e => { if (e.target.closest("[data-close]")) requestClose(); });
     document.addEventListener("keydown", e => { if (e.key === "Escape" && edit) closeEditor(); });
 
     /* ---------- 💌 받은 메시지 ---------- */
@@ -1036,10 +1055,10 @@
       const cv = await cropImage(await loadImage(src), { W: 400, H: 400, round: true, title: "프로필 사진 자르기", raw: true });
       if (!cv) return;
       const f = data.profile;
-      f.avatar = cv.toDataURL("image/jpeg", 0.92);
+      f.avatar = encodeImg(cv, 0.92);
       const sm = document.createElement("canvas"); sm.width = sm.height = 144;
       const sg = sm.getContext("2d"); sg.imageSmoothingQuality = "high"; sg.drawImage(cv, 0, 0, 144, 144);
-      f.avatarSmall = sm.toDataURL("image/jpeg", 0.92);
+      f.avatarSmall = encodeImg(sm, 0.92);
       f.avatarPosition = "center";
       renderProfile(); saveDraft(); toast("프로필 사진을 바꿨어요");
     }
@@ -1119,14 +1138,14 @@
       const stamp = Date.now().toString(36);
       for (const p of out.posts) {
         if (p.image && p.image.startsWith("data:")) {
-          const path = `images/post-${p.id}-${stamp}.jpg`;   // 사진 바꿀 때마다 이름이 달라져서 폰에 예전 사진이 남지 않아요
+          const path = `images/post-${p.id}-${stamp}.${imgExt(p.image)}`;   // 사진 바꿀 때마다 이름이 달라져서 폰에 예전 사진이 남지 않아요
           files.push({ path, bytes: dataUrlBytes(p.image), label: `사진 추가: ${p.name}` });
           p.image = path;
         }
       }
       const f = out.profile || {};
-      [["avatar", `images/profile-${stamp}.jpg`, "프로필 사진 변경"], ["avatarSmall", `images/profile-sm-${stamp}.jpg`, "프로필 사진(작은) 변경"], ["banner", `images/header-${stamp}.jpg`, "헤더 사진 변경"]]
-        .forEach(([k, path, label]) => { if (f[k] && f[k].startsWith("data:")) { files.push({ path, bytes: dataUrlBytes(f[k]), label }); f[k] = path; } });
+      [["avatar", `images/profile-${stamp}`, "프로필 사진 변경"], ["avatarSmall", `images/profile-sm-${stamp}`, "프로필 사진(작은) 변경"], ["banner", `images/header-${stamp}`, "헤더 사진 변경"]]
+        .forEach(([k, base, label]) => { if (f[k] && f[k].startsWith("data:")) { const path = `${base}.${imgExt(f[k])}`; files.push({ path, bytes: dataUrlBytes(f[k]), label }); f[k] = path; } });
       return files;
     }
     const referenced = out => new Set([...out.posts.map(p => p.image), ...["avatar", "avatarSmall", "banner"].map(k => (out.profile || {})[k])].filter(src => src && !src.startsWith("http") && !src.startsWith("data:")));
@@ -1242,7 +1261,7 @@
           const list = await gh(`/contents/images?ref=${BRANCH}`);
           for (const f of list) {
             // 지운 게시물 사진, 바꾸기 전 프로필/헤더 사진만 정리 (처음 넣은 기본 사진은 안 지워요)
-            if (/^(post-.+|profile-[a-z0-9]{6,}|profile-sm-[a-z0-9]{6,}|header-[a-z0-9]{6,})\.jpg$/.test(f.name) && !used.has(f.path)) {
+            if (/^(post-.+|profile-[a-z0-9]{6,}|profile-sm-[a-z0-9]{6,}|header-[a-z0-9]{6,})\.(jpg|webp)$/.test(f.name) && !used.has(f.path)) {
               await gh(`/contents/${f.path}`, { method: "DELETE", body: JSON.stringify({ message: `사진 정리: ${f.name}`, sha: f.sha, branch: BRANCH }) });
             }
           }
@@ -1335,7 +1354,7 @@
         const fix = async (o, k) => {
           const p = o && o[k];
           if (!p || /^(data:|https?:)/.test(p) || have.has(p)) return;
-          try { o[k] = "data:image/jpeg;base64," + await fileB64(p, sha); } catch (e) { console.warn("사진 못 가져옴", p, e); }
+          try { o[k] = `data:image/${/\.webp$/i.test(p) ? "webp" : "jpeg"};base64,` + await fileB64(p, sha); } catch (e) { console.warn("사진 못 가져옴", p, e); }
         };
         for (const p of old.posts) await fix(p, "image");
         for (const k of ["avatar", "avatarSmall", "banner"]) await fix(old.profile, k);
