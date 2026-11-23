@@ -235,6 +235,19 @@
     }
     .t-ava img { width: 100%; height: 100%; object-fit: cover; object-position: var(--ava-pos, center 20%); }
     .t-main { flex: 1; min-width: 0; }
+    /* 🔧 에셋 교체중 / ✨ 리뉴얼 중 */
+    .tweet.locked { cursor: default; }
+    .tweet.locked:hover { background: transparent; }
+    .tweet.locked .t-title, .tweet.locked .t-tagline, .tweet.locked .t-tags { opacity: .55; }
+    .lock-note { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 0 0 6px; padding: 5px 11px; border-radius: 10px; font-size: .78rem; color: #6b5a3a; background: #fff6e3; border: 1px dashed #f0c987; transform: rotate(-.6deg); box-shadow: 0 2px 6px rgba(240,180,80,.15); }
+    .lock-note b { color: #b4690e; }
+    .lock-note span { color: #9a8a6c; font-size: .72rem; }
+    .lock-veil { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,.45); backdrop-filter: blur(4px) grayscale(.5); -webkit-backdrop-filter: blur(4px) grayscale(.5); }
+    .lock-veil span { padding: 6px 14px; border-radius: 999px; background: rgba(255,255,255,.92); color: #b4690e; font-size: .8rem; font-weight: 800; box-shadow: 0 3px 12px rgba(0,0,0,.12); }
+    .tweet.locked:hover .t-media.preview .media { transform: scale(var(--pz, 1)); }
+    .m-tile.locked { cursor: default; }
+    .m-tile.locked .lock-veil span { font-size: .68rem; padding: 4px 9px; }
+    .m-tile.locked:hover .media { filter: none; }
     .t-context { font-size: .8rem; font-weight: 700; color: var(--sub); margin: -2px 0 2px; display: flex; align-items: center; gap: 6px; }
     .t-context svg { width: 14px; height: 14px; }
     /* 📌 고정된 공지: 눈에 잘 띄게 */
@@ -885,7 +898,27 @@
     }
 
     /* ---- 게시물 조각 ---- */
+    // 🔧 에셋 교체중 / ✨ 리뉴얼 중: 안내를 붙이고 눌러도 안 열려요
+    const STATUS = { asset: ["🔧", "에셋 교체중", "새 이미지로 단장하고 있어요"], renewal: ["✨", "리뉴얼 중", "더 좋아져서 돌아올게요"] };
+    const isLocked = c => !!(c && STATUS[c.status]);
+    const veilHTML = c => { const [ic, t] = STATUS[c.status]; return `<div class="lock-veil"><span>${ic} ${t}</span></div>`; };
+    function lockedTweet(c) {
+      const [ic, t, sub] = STATUS[c.status];
+      return `
+        <article class="tweet locked" aria-disabled="true">
+          ${meAva()}
+          <div class="t-main">
+            <div class="lock-note">${ic} <b>${t}</b><span>${sub}</span></div>
+            ${headHTML(c.date)}
+            <p class="t-title">${escH(c.name)}</p>
+            ${c.tagline ? `<p class="t-tagline">${fmtText(c.tagline)}</p>` : ""}
+            <p class="t-tags">${hashtags(c)}</p>
+            ${c.image ? `<div class="t-media preview" style="--pv:${typeof c.previewPos === "number" ? c.previewPos : 25}%;--px:${typeof c.previewX === "number" ? c.previewX : 50}%;--pz:${typeof c.previewZoom === "number" ? c.previewZoom : 1}">${mediaHTML(c)}${veilHTML(c)}</div>` : ""}
+          </div>
+        </article>`;
+    }
     function charTweet(c, i) {
+      if (isLocked(c)) return lockedTweet(c);
       return `
         <article class="tweet" data-open="${i}">
           ${meAva()}
@@ -993,7 +1026,7 @@
       if (view === "media") {
         const withImg = characters.map((c, i) => ({ c, i })).filter(({ c }) => c.image);
         el.innerHTML = withImg.length ? `<div class="media-grid">${withImg.map(({ c, i }) => `
-          <button class="m-tile" data-open="${i}" aria-label="${esc(c.name)}">${mediaHTML(c)}${c.adult ? `<span class="badge">19+</span>` : ""}</button>`).join("")}</div>`
+          ${isLocked(c) ? `<div class="m-tile locked" aria-disabled="true">${mediaHTML(c)}${veilHTML(c)}</div>` : `<button class="m-tile" data-open="${i}" aria-label="${esc(c.name)}">${mediaHTML(c)}${c.adult ? `<span class="badge">19+</span>` : ""}</button>`}`).join("")}</div>`
           : `<p class="empty">아직 올라간 이미지가 없어요</p>`;
         return;
       }
@@ -1106,6 +1139,7 @@
     const baseUrl = () => location.pathname + location.search;
     const postKey = i => characters[i] && (characters[i].id || String(i));
     function openTweet(i) {
+      if (isLocked(characters[i])) return;
       showTweet(i);
       history.pushState({ heart: "post", i, view }, "", baseUrl() + "#post-" + postKey(i));
     }
@@ -1124,7 +1158,7 @@
     window.addEventListener("popstate", () => {
       const st = history.state || {};
       if (st.view && st.view !== view) setView(st.view, false);
-      if (st.heart === "post" && characters[st.i]) showTweet(st.i);
+      if (st.heart === "post" && characters[st.i] && !isLocked(characters[st.i])) showTweet(st.i);
       else hideTweet();
     });
 
