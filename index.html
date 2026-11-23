@@ -1126,7 +1126,7 @@
         inp.oninput = () => { searchQ = inp.value; $("results").innerHTML = postsHTML(); };
         inp.onkeydown = e => { if (e.key === "Escape") closeSearch(); if (e.key === "Enter") inp.blur(); };
         $("results").innerHTML = postsHTML();
-        if (searchFocus) { searchFocus = false; setTimeout(() => inp.focus(), 30); }
+        searchFocus = false;   // 키보드는 검색창을 직접 눌렀을 때만 올라와요
         return;
       }
       const tags = ["전체", ...new Set([...tagList, ...characters.flatMap(c => c.tags)])];
