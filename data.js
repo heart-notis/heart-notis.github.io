@@ -15,12 +15,12 @@ window.SITE_DATA = {
     "avatar": "images/profile-mwrt2j4d.jpg",
     "avatarSmall": "images/profile-sm-mwrt2j4d.jpg",
     "avatarPosition": "center",
-    "banner": "images/header.jpg",
-    "bannerPosition": "center 57%",
+    "banner": "images/header-mwt7w1ef.webp",
+    "bannerPosition": "center",
     "share": {
       "title": "하트 (@HEART)",
       "desc": "이식 요청, 문의는 홈페이지로 메시지 남겨주세요 💙",
-      "image": "og-2.jpg",
+      "image": "images/og-mwt7w1ef.jpg",
       "auto": true
     },
     "status": "열심히 작업하는 중♥",
