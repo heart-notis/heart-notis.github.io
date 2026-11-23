@@ -416,6 +416,8 @@
             </div>
             <div class="ban-prev" id="banPrev"></div>
           </div>
+          <label class="f">💬 상태 메시지 <small>프사 옆에 말풍선으로 떠요 · 비워두면 안 떠요 · 예: 마감 중… 🥹</small>
+            <div class="rel-in"><input type="text" id="pf_status" maxlength="40" placeholder="비워두면 말풍선 없이 지금처럼 보여요" /><button type="button" class="btn btn-ghost btn-sm" id="pf_statusClear">지우기</button></div></label>
           <label class="f">소개글<textarea id="pf_bio" style="min-height:110px"></textarea></label>
           <div class="row">
             <label class="f">링크에 보일 글자<input type="text" id="pf_linkLabel" placeholder="예: ASK♥" /></label>
@@ -1461,6 +1463,7 @@
       $("banPrev").style.backgroundImage = f.banner ? `url("${f.banner}")` : "linear-gradient(120deg,#cdbdf9,#9ad8f6)";
       $("banPrev").style.backgroundPosition = f.bannerPosition || "center";
       $("pf_bio").value = f.bio || "";
+      $("pf_status").value = f.status || "";
       $("pf_link").value = f.link || "";
       $("pf_linkLabel").value = f.linkLabel || "";
       $("avaRecrop").classList.toggle("hidden", !f.avatar);
@@ -1566,9 +1569,12 @@
     $("avaRecrop").onclick = () => setAvatarFrom(data.profile.avatar).catch(() => toast("사진을 다시 열 수 없어요. 새로 골라주세요."));
     $("banFile").onchange = e => { const file = e.target.files[0]; e.target.value = ""; if (file && !isImgFile(file)) return toast("사진 파일만 고를 수 있어요"); if (file) setBannerFrom(file).catch(() => toast("이 사진은 열 수 없어요")); };
     $("banRecrop").onclick = () => setBannerFrom(data.profile.banner).catch(() => toast("사진을 다시 열 수 없어요. 새로 골라주세요."));
+    $("pf_statusClear").onclick = () => { $("pf_status").value = ""; };
     $("saveProfile").onclick = () => {
       const f = data.profile;
       f.bio = $("pf_bio").value.trim();
+      const stv = $("pf_status").value.trim();
+      if (stv !== (f.status || "")) { if (stv) { f.status = stv; f.statusAt = new Date().toISOString(); } else { delete f.status; delete f.statusAt; } }
       f.link = $("pf_link").value.trim();
       f.linkLabel = $("pf_linkLabel").value.trim();
       setShare({ title: $("sh_title").value.trim() || SHARE_DEFAULT.title, desc: $("sh_desc").value.trim() || SHARE_DEFAULT.desc, auto: $("sh_auto").checked });
