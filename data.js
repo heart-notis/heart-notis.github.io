@@ -218,6 +218,30 @@ window.SITE_DATA = {
       }
     },
     {
+      "id": "mwsj5mvjzgsf",
+      "name": "중앙소방서 구조대 2팀",
+      "world": "중앙소방서 구조대 2팀",
+      "tagline": "가장 가까운 곳에서 지키겠습니다.",
+      "tags": [
+        "WHIF"
+      ],
+      "image": "images/post-mwsj5mvjzgsf-mwsj8xtm.jpg",
+      "adult": true,
+      "likes": 721,
+      "rts": 198,
+      "date": "2026-11-23",
+      "description": "**#대형견공 #무심공 #사별남 #구조대2팀**\n\n서울 중앙소방서 구조대 2팀 다인물.",
+      "greeting": "",
+      "link": "",
+      "previewPos": 46,
+      "previewX": 50,
+      "previewZoom": 1,
+      "links": {
+        "WHIF": "https://www.whif.io/characters/adcd0db5-f77c-482f-9808-cb4f825b136d"
+      },
+      "theme": "fire"
+    },
+    {
       "id": "mwrmeo1x9fr6",
       "name": "오태식",
       "world": "중앙소방서 구조대 2팀",
