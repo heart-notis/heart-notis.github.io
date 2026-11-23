@@ -294,7 +294,7 @@
             <div class="img-side">
               <div style="font-weight:700;font-size:.82rem;color:#3d4650">프로필 사진</div>
               <div class="btn-row">
-                <label class="btn btn-line btn-sm file-btn">사진 바꾸기<input type="file" id="avaFile" /></label>
+                <label class="btn btn-line btn-sm file-btn">사진 바꾸기<input type="file" accept="image/*" id="avaFile" /></label>
                 <button class="btn btn-ghost btn-sm" id="avaRecrop">✂️ 다시 자르기</button>
               </div>
               <div class="tiny">정사각형으로 잘려요 · 🔒 사진 정보(EXIF) 자동 삭제</div>
@@ -304,7 +304,7 @@
             <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
               <div style="font-weight:700;font-size:.82rem;color:#3d4650;white-space:nowrap">헤더 사진</div>
               <div class="btn-row">
-                <label class="btn btn-line btn-sm file-btn">사진 바꾸기<input type="file" id="banFile" /></label>
+                <label class="btn btn-line btn-sm file-btn">사진 바꾸기<input type="file" accept="image/*" id="banFile" /></label>
                 <button class="btn btn-ghost btn-sm" id="banRecrop">✂️ 다시 자르기</button>
               </div>
             </div>
@@ -566,7 +566,8 @@
             <div class="img-prev" id="imgPrev">${item.image ? `<img src="${esc(item.image)}" alt="" />` : "이미지<br/>없음"}</div>
             <div class="img-side">
               <div class="btn-row" id="imgBtns">
-                <label class="btn btn-line btn-sm file-btn">${item.image ? "사진 바꾸기" : "사진 고르기"}<input type="file" id="imgFile" ${index < 0 ? "multiple" : ""} /></label>
+                <label class="btn btn-line btn-sm file-btn">${item.image ? "사진 바꾸기" : "사진 고르기"}<input type="file" accept="image/*" id="imgFile" ${index < 0 ? "multiple" : ""} /></label>
+                <label class="btn btn-ghost btn-sm file-btn" title="파일 → 왼쪽 위 ☰ → 갤러리">📁 다른 앱<input type="file" id="imgFile2" ${index < 0 ? "multiple" : ""} /></label>
                 ${item.image ? `<button class="btn btn-ghost btn-sm" id="imgRecrop">✂️ 다시 자르기</button>` : ""}
               </div>
               ${item.image ? `<button class="btn btn-ghost btn-sm" id="imgRemove" style="align-self:flex-start">사진 빼기</button>` : ""}
@@ -701,7 +702,7 @@
         $("qNote").classList.toggle("hidden", !n);
         $("qNote").innerHTML = `📷 이어서 올릴 사진 <b>${n}장</b> 남았어요 · 이 게시물을 저장하면 다음 사진으로 넘어가요`;
       };
-      $("imgFile").onchange = async e => {
+      $("imgFile").onchange = $("imgFile2").onchange = async e => {
         const all = [...e.target.files]; e.target.value = "";
         const files = all.filter(isImgFile);
         if (!files.length) { if (all.length) toast("사진 파일만 고를 수 있어요"); return; }
