@@ -1490,7 +1490,7 @@
       document.querySelectorAll(".t-media.talk").forEach(m => { if (m !== talk) m.classList.remove("talk"); });
       if (talk) {
         clearTimeout(talk._t);
-        if (talk.classList.toggle("talk")) talk._t = setTimeout(() => talk.classList.remove("talk"), 5000);   // 5초 뒤 알아서 쏙
+        if (talk.classList.toggle("talk")) talk._t = setTimeout(() => talk.classList.remove("talk"), 3500);   // 3.5초 뒤 알아서 쏙
         return;
       }
       if (e.target.closest("[data-search-open]")) { searchOpen = true; searchFocus = true; return renderView(); }
