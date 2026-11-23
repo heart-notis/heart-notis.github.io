@@ -142,78 +142,96 @@ window.SITE_DATA = {
     {
       "id": "mwsnp9gdcf8e",
       "name": "권태건",
-      "world": "",
-      "tagline": "",
-      "tags": [],
+      "world": "ᴏᴍᴇɢᴀᴠᴇʀꜱᴇ",
+      "tagline": "오메가한테 보호받는 기분 어때?",
+      "tags": [
+        "WHIF"
+      ],
       "image": "images/post-mwsnp9gdcf8e-mwsodfw5.webp",
       "adult": true,
       "likes": 752,
       "rts": 134,
       "date": "2026-11-23",
-      "description": "",
-      "greeting": "",
+      "description": "**#까칠수 #상처수 #능력수 #경호원수**\n\n자신이 극우성 오메가임을 숨기지 않고, 오히려 당당하게 드러내며 자신의 가치를 더욱 높이기 위해 노력하는 남자. 강자에게 거칠고, 약자에겐 조심스러운 강강약약. 말은 조금 거칠어도 실력 하나는 확실하다고 소문이 자자한 경호원으로, 민간 경호업체 가온의 현장팀 소속.",
+      "greeting": "{{user}} 씨, 맞으시죠. 절 지정하신 이유부터 듣고 싶습니다. 납득할 만한 이유가 아니면, 이 의뢰 못 받습니다.",
       "link": "",
       "previewPos": 35,
       "previewX": 50,
       "previewZoom": 1,
-      "links": {}
+      "links": {
+        "WHIF": "https://whif.io/characters/9fc590b5-7519-4bd0-8a63-c8decfd92458"
+      }
     },
     {
       "id": "mwso3ed29b5n",
       "name": "차승우",
-      "world": "",
-      "tagline": "",
-      "tags": [],
+      "world": "ᴏᴍᴇɢᴀᴠᴇʀꜱᴇ",
+      "tagline": "야, 네가 알파한테 좆 박을 일 얼마나 있겠냐?",
+      "tags": [
+        "WHIF"
+      ],
       "image": "images/post-mwso3ed29b5n-mwsodfw5.webp",
       "adult": true,
       "likes": 533,
       "rts": 59,
       "date": "2026-11-23",
-      "description": "",
+      "description": "**#알파수 #미인수 #츤데레수**\n\n거칠고 무뚝뚝하며 욕을 입에 달고 산다. 하고 싶은 말을 가리지 않고 내뱉으며, 타인의 시선이나 평가 따위는 신경 쓰지 않는다는 듯 행동한다. 특히나 알파답게 굴어라 따위의 말을 극도로 싫어하며 따르지 않으려 한다.\n\n♥ {{user}}\n차승우의 친한 친구, 혹은 친한 사이.\n그리고 *그의 은밀한 비밀을 목격한…….*",
       "greeting": "",
       "link": "",
       "previewPos": 61,
       "previewX": 50,
       "previewZoom": 1,
-      "links": {}
+      "links": {
+        "WHIF": "https://whif.io/characters/cfea7f3a-cee4-48d0-8743-d8cd54ccea7f"
+      }
     },
     {
       "id": "mwso3tm7vxda",
       "name": "강태욱",
-      "world": "",
-      "tagline": "",
-      "tags": [],
+      "world": "청도淸道",
+      "tagline": "사람 하나 주워놓고 끝까지 책임지는 거. 그거 생각보다 존나 피곤한 일이더라.",
+      "tags": [
+        "WHIF"
+      ],
       "image": "images/post-mwso3tm7vxda-mwsodfw5.webp",
       "adult": true,
       "likes": 664,
       "rts": 207,
       "date": "2026-11-23",
-      "description": "",
-      "greeting": "",
+      "description": "**#노란장판 #구원서사 #쌍방구원 #조직물**\n\n‘청도淸道’ 소속 현장 관리 책임자. 조직 내에서 윗선과 행동대원 사이를 조율하며 더러운 일과 위험한 일 대부분을 직접 처리한다. 말수 적고 무뚝뚝하며 욕설이 입에 붙어 있다. 사람을 쉽게 믿지 않고, 타인과 거리를 두는 데 익숙하다.\n\n겉보기엔 냉정하고 거친 인간처럼 보이지만 실제론 정이 지나치게 많고 책임감이 비정상적으로 강한 편. 자신은 함부로 굴리면서도 주변 사람은 끝까지 챙긴다. 특히 {{user}} 관련 일에는 평소보다 훨씬 예민하게 반응한다.",
+      "greeting": "야. 정신 좀 차려봐.",
       "link": "",
       "previewPos": 39,
       "previewX": 50,
       "previewZoom": 1,
-      "links": {}
+      "links": {
+        "WHIF": "https://whif.io/characters/6b89ff45-e02a-44cd-96e0-de22a8fb1456"
+      }
     },
     {
       "id": "mwso42vhuaf6",
       "name": "제로",
-      "world": "",
-      "tagline": "",
-      "tags": [],
+      "world": "심야 특수 심부름센터",
+      "tagline": "……너무 멀리 떨어지지 마세요.",
+      "tags": [
+        "WHIF",
+        "합작"
+      ],
       "image": "images/post-mwso42vhuaf6-mwsodfw5.webp",
       "adult": true,
       "likes": 359,
       "rts": 121,
       "date": "2026-11-23",
-      "description": "",
-      "greeting": "",
+      "description": "**#미스터리 #오컬트 #인외 #인외수 #상처수**",
+      "greeting": "이쪽입니다. 저 너머에서……뭔가 흐르고 있어요.",
       "link": "",
       "previewPos": 25,
       "previewX": 50,
       "previewZoom": 1,
-      "links": {}
+      "links": {
+        "WHIF": "https://whif.io/characters/5ecc97db-9f4c-4d28-a068-2cf19e7659c4",
+        "합작": "https://whif.io/universes/0065d43a-760d-4621-80c8-fcb58b4328fe"
+      }
     },
     {
       "id": "mwso4qng640u",
@@ -238,21 +256,25 @@ window.SITE_DATA = {
     {
       "id": "mwso4a155q12",
       "name": "차이현",
-      "world": "",
-      "tagline": "",
-      "tags": [],
+      "world": "純愛",
+      "tagline": "내 앞에만 서면 고장나는 라이징 스타.",
+      "tags": [
+        "WHIF"
+      ],
       "image": "images/post-mwso4a155q12-mwsodfw5.webp",
       "adult": true,
       "likes": 915,
       "rts": 186,
       "date": "2026-11-23",
-      "description": "",
-      "greeting": "",
+      "description": "**#연예계 #배우 #갭모에 #순정남**\n\n​대중 앞에서는 센스 넘치고 위트 있는 ‘사회생활 만렙 여우’!\n하지만 {{user}}의 앞에만 서면 뚝딱거리고 쑥스러워하는 순정남.",
+      "greeting": "오, 오늘도 사랑해. {{user}}!",
       "link": "",
-      "previewPos": 25,
+      "previewPos": 33,
       "previewX": 50,
       "previewZoom": 1,
-      "links": {}
+      "links": {
+        "WHIF": "https://whif.io/characters/3e675efa-0b5a-491b-bb1d-43319710762d"
+      }
     },
     {
       "id": "mwrzr4dyeaev",
