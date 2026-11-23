@@ -179,7 +179,19 @@
     }
 
     /* ---------- 해시태그 필터 ---------- */
-    .chips-wrap { position: relative; border-bottom: 1px solid var(--line); }
+    .filter-row { display: flex; align-items: center; border-bottom: 1px solid var(--line); }
+    .chips-wrap { position: relative; flex: 1; min-width: 0; }
+    .srch-btn { flex-shrink: 0; width: 34px; height: 34px; margin-left: 10px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--blue); background: #f4f1ff; transition: transform .15s; }
+    .srch-btn:active { transform: scale(.92); }
+    .srch-btn svg, .srch-box svg { width: 17px; height: 17px; }
+    .filter-row .chips { padding-left: 10px; }
+    .srch-box { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; margin: 8px 12px; padding: 0 6px 0 12px; height: 40px; border-radius: 999px; background: #f6f4ff; border: 1.5px solid #ddd3fb; color: var(--blue); }
+    .srch-box:focus-within { border-color: #b9a2f6; box-shadow: 0 0 0 3px rgba(185,162,246,.18); background: #fff; }
+    .srch-box input { flex: 1; min-width: 0; border: none; background: transparent; outline: none; font: inherit; font-size: 16px; color: var(--ink); }
+    .srch-box input::-webkit-search-cancel-button { display: none; }
+    .srch-x { flex-shrink: 0; padding: 6px 12px; border-radius: 999px; font-size: .8rem; font-weight: 700; color: #6f5fe0; background: #fff; border: 1px solid #ddd3fb; }
+    .srch-count { padding: 10px 16px 2px; font-size: .8rem; color: var(--sub); }
+    .srch-count b { color: var(--blue); }
     .chips {
       display: flex; gap: 6px; padding: 10px 16px;
       overflow-x: auto; scrollbar-width: none;
@@ -887,6 +899,7 @@
       pin: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 3l5 5-3 1-3 3 1 5-2 2-4-4-5 5-1-1 5-5-4-4 2-2 5 1 3-3z"/></svg>`,
       link: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>`,
       cal: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>`,
+      search: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>`,
       chevL: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>`,
       chevR: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>`,
       back: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>`,
@@ -1097,17 +1110,42 @@
           : `<p class="empty">아직 올라간 이미지가 없어요</p>`;
         return;
       }
+      if (searchOpen) {   // 🔍 검색 모드
+        el.innerHTML = `<div class="filter-row search-on"><div class="srch-box">${I.search}<input id="srch" type="search" placeholder="이름 · 세계관 · 대사 · 본문 검색" value="${esc(searchQ)}" autocomplete="off" enterkeyhint="search" /><button class="srch-x" data-search-close>닫기</button></div></div><div id="results"></div>`;
+        const inp = $("srch");
+        inp.oninput = () => { searchQ = inp.value; $("results").innerHTML = postsHTML(); };
+        inp.onkeydown = e => { if (e.key === "Escape") closeSearch(); if (e.key === "Enter") inp.blur(); };
+        $("results").innerHTML = postsHTML();
+        if (searchFocus) { searchFocus = false; setTimeout(() => inp.focus(), 30); }
+        return;
+      }
       const tags = ["전체", ...new Set([...tagList, ...characters.flatMap(c => c.tags)])];
-      const chips = `<div class="chips-wrap"><div class="edge left"><button data-scroll="-1" aria-label="왼쪽 태그">${I.chevL}</button></div><div class="chips" id="chips">${tags.map(t => `<button class="chip ${t === activeTag ? "active" : ""}" data-tag="${esc(t)}">${t === "전체" ? "전체" : "#" + esc(t)}</button>`).join("")}</div><div class="edge right"><button data-scroll="1" aria-label="오른쪽 태그">${I.chevR}</button></div></div>`;
+      const chips = `<div class="filter-row"><button class="srch-btn" data-search-open aria-label="검색">${I.search}</button><div class="chips-wrap"><div class="edge left"><button data-scroll="-1" aria-label="왼쪽 태그">${I.chevL}</button></div><div class="chips" id="chips">${tags.map(t => `<button class="chip ${t === activeTag ? "active" : ""}" data-tag="${esc(t)}">${t === "전체" ? "전체" : "#" + esc(t)}</button>`).join("")}</div><div class="edge right"><button data-scroll="1" aria-label="오른쪽 태그">${I.chevR}</button></div></div></div>`;
       const prevScroll = $("chips")?.scrollLeft || 0;
-      const list = characters.map((c, i) => ({ c, i })).filter(({ c }) => activeTag === "전체" || c.tags.includes(activeTag))
-        .sort((a, b) => (b.c.spoiler ? 1 : 0) - (a.c.spoiler ? 1 : 0));   // 스포일러는 맨 위로 (나머지 순서는 그대로)
-      // 공지 중 "게시물 상단에 띄우기"를 체크한 것은 게시물 탭 맨 위에
-      const topNotices = activeTag === "전체" ? notices.filter(n => n.onPosts).map(n => noticeTweet(n, true)).join("") : "";
-      el.innerHTML = chips + topNotices + (list.length ? list.map(({ c, i }) => charTweet(c, i)).join("")
-        : `<p class="empty">${characters.length ? "해당 해시태그의 게시물이 없어요" : "아직 게시물이 없어요"}</p>`);
+      el.innerHTML = chips + postsHTML();
       setupChips(prevScroll);
     }
+
+    /* ---- 🔍 검색: 이름 · 세계관 · 한 줄 대사 · 본문 · 첫 대사 · 태그 ---- */
+    let searchOpen = false, searchQ = "", searchFocus = false;
+    const norm = t => String(t || "").toLowerCase().replace(/\*/g, "").replace(/\s+/g, "");
+    function matchPost(c, q) {
+      const fields = [c.name, c.world, c.tagline, ...(c.tags || []), ...(c.spoiler ? [] : [c.description, c.greeting])];   // 스포일러는 본문까지는 안 뒤져요
+      return fields.some(f => norm(f).includes(q));
+    }
+    function postsHTML() {
+      const q = searchOpen ? norm(searchQ) : "";
+      let list = characters.map((c, i) => ({ c, i }));
+      if (searchOpen) list = q ? list.filter(({ c }) => matchPost(c, q)) : list;
+      else list = list.filter(({ c }) => activeTag === "전체" || c.tags.includes(activeTag));
+      list.sort((a, b) => (b.c.spoiler ? 1 : 0) - (a.c.spoiler ? 1 : 0));   // 스포일러는 맨 위로 (나머지 순서는 그대로)
+      // 공지 중 "게시물 상단에 띄우기"를 체크한 것은 게시물 탭 맨 위에 (검색 중엔 숨김)
+      const topNotices = !searchOpen && activeTag === "전체" ? notices.filter(n => n.onPosts).map(n => noticeTweet(n, true)).join("") : "";
+      const head = searchOpen && q ? `<p class="srch-count">검색 결과 <b>${list.length}</b>개</p>` : "";
+      return head + topNotices + (list.length ? list.map(({ c, i }) => charTweet(c, i)).join("")
+        : `<p class="empty">${searchOpen ? "찾는 게시물이 없어요" : characters.length ? "해당 해시태그의 게시물이 없어요" : "아직 게시물이 없어요"}</p>`);
+    }
+    function closeSearch() { searchOpen = false; searchQ = ""; renderView(); }
 
     /* ---- 태그 줄: 손가락/마우스로 밀기 ---- */
     function setupChips(prevScroll) {
@@ -1260,6 +1298,8 @@
       if (sh) return share(characters[+sh.dataset.share].name);
       const arrow = e.target.closest("[data-scroll]");
       if (arrow) { const box = $("chips"); box.scrollBy({ left: +arrow.dataset.scroll * box.clientWidth * 0.6 }); return; }
+      if (e.target.closest("[data-search-open]")) { searchOpen = true; searchFocus = true; return renderView(); }
+      if (e.target.closest("[data-search-close]")) return closeSearch();
       const chip = e.target.closest(".chip");
       if (chip) { activeTag = chip.dataset.tag; return renderView(); }
       const tab = e.target.closest(".tab");
