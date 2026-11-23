@@ -395,6 +395,29 @@
     .t-media.preview .media { object-position: center var(--pv, 25%); transform-origin: var(--px, 50%) var(--pv, 25%); transform: scale(var(--pz, 1)); transition: transform .4s; }
     .tweet:hover .t-media.preview .media { transform: scale(calc(var(--pz, 1) * 1.03)); }
     .t-media.preview .media.ph { font-size: 2.2rem; }
+    .many { position: absolute; right: 10px; top: 10px; display: flex; align-items: center; gap: 3px; padding: 3px 8px 3px 6px; border-radius: 999px; background: rgba(0,0,0,.45); color: #fff; font-size: .7rem; font-weight: 800; backdrop-filter: blur(4px); }
+    .many svg { width: 13px; height: 13px; }
+    /* 🖼️ 상세: 여러 장 넘기기 */
+    .gal-box { touch-action: pan-x pan-y; }
+    .gal-track { display: flex; width: 100%; height: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
+    .gal-track::-webkit-scrollbar { display: none; }
+    .gal-track .media { flex: 0 0 100%; scroll-snap-align: center; scroll-snap-stop: always; }
+    .gal-cnt { position: absolute; right: 10px; top: 10px; padding: 3px 9px; border-radius: 999px; background: rgba(0,0,0,.45); color: #fff; font-size: .7rem; font-weight: 700; backdrop-filter: blur(4px); pointer-events: none; }
+    .gal-arr { position: absolute; top: 50%; transform: translateY(-50%); width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,.88); color: #7a5ce0; font-size: 1.2rem; font-weight: 900; line-height: 1; box-shadow: 0 2px 8px rgba(0,0,0,.18); transition: opacity .2s; }
+    .gal-arr.prev { left: 8px; } .gal-arr.next { right: 8px; }
+    .gal-arr.off { opacity: 0; pointer-events: none; }
+    @media (hover: none) { .gal-arr { display: none; } }   /* 폰은 손가락으로 넘겨요 */
+    .gal-dots { display: flex; gap: 6px; justify-content: center; margin-top: 10px; }
+    .gal-dots i { width: 7px; height: 7px; border-radius: 4px; background: #d9d3f3; transition: width .25s, background .25s; }
+    .gal-dots i.on { width: 20px; background: linear-gradient(90deg, #a993f4, #74c6f0); }
+    .gal-thumbs { display: flex; gap: 6px; margin-top: 10px; overflow-x: auto; scrollbar-width: none; padding: 3px; }
+    .gal-thumbs button { flex: 0 0 auto; border-radius: 10px; padding: 0; opacity: .55; transition: opacity .2s, box-shadow .2s; }
+    .gal-thumbs button.on { opacity: 1; box-shadow: 0 0 0 2px #fff, 0 0 0 4px #a993f4; }
+    .gal-thumbs img { width: 52px; height: 64px; border-radius: 10px; object-fit: cover; display: block; }
+    html.dark .gal-dots i { background: #3a3456; }
+    html.dark .gal-thumbs button.on { box-shadow: 0 0 0 2px #17171f, 0 0 0 4px #a993f4; }
+    /* 🛡️ 사진 저장 막기 (꾹 누르기 · 우클릭 · 끌어가기) */
+    img.media, .gal-thumbs img, .avatar img { -webkit-touch-callout: none; -webkit-user-drag: none; user-select: none; -webkit-user-select: none; }
     .expand {
       position: absolute; right: 10px; bottom: 10px;
       font-size: .7rem; font-weight: 700; color: #fff;
@@ -1029,6 +1052,7 @@
       pin: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 3l5 5-3 1-3 3 1 5-2 2-4-4-5 5-1-1 5-5-4-4 2-2 5 1 3-3z"/></svg>`,
       link: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>`,
       cal: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>`,
+      photos: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="7" y="7" width="13" height="13" rx="2.5"/><path d="M4 16V6.5A2.5 2.5 0 0 1 6.5 4H16"/></svg>`,
       search: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>`,
       chevL: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>`,
       chevR: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>`,
@@ -1038,6 +1062,40 @@
 
     const meAva = () => { const src = profile.avatarSmall || profile.avatar; return `<div class="t-ava">${src ? `<img src="${esc(src)}" alt="" />` : esc(profile.name.charAt(0))}</div>`; };
     const charAva = c => `<div class="t-ava" style="background:${c.color || "#cfe3f3"};color:#fff">${c.image ? `<img src="${esc(c.image)}" alt="" />` : esc(c.name.charAt(0))}</div>`;
+    // 🖼️ 여러 장: 대표 사진(image) + 추가 사진(images)
+    const allImgs = c => [c.image, ...(Array.isArray(c.images) ? c.images : [])].filter(Boolean);
+    function galleryHTML(c) {
+      const imgs = allImgs(c), badge = c.adult ? `<span class="badge">19+</span>` : "";
+      if (imgs.length < 2) return `<div class="t-media">${mediaHTML(c)}${badge}</div>`;   // 1장이면 지금처럼
+      return `
+        <div class="gal" data-gal>
+          <div class="t-media gal-box">
+            <div class="gal-track">${imgs.map((src, k) => `<img class="media" src="${esc(src)}" alt="${esc(c.name)} ${k + 1}" ${k ? 'loading="lazy"' : ""} decoding="async" />`).join("")}</div>
+            ${badge}<span class="gal-cnt"><b>1</b> / ${imgs.length}</span>
+            <button class="gal-arr prev" data-gal-go="-1" aria-label="이전 사진">‹</button><button class="gal-arr next" data-gal-go="1" aria-label="다음 사진">›</button>
+          </div>
+          <div class="gal-dots">${imgs.map((_, k) => `<i class="${k ? "" : "on"}"></i>`).join("")}</div>
+          <div class="gal-thumbs">${imgs.map((src, k) => `<button data-gal-to="${k}" class="${k ? "" : "on"}" aria-label="${k + 1}번째 사진"><img src="${esc(src)}" alt="" loading="lazy" /></button>`).join("")}</div>
+        </div>`;
+    }
+    function setupGallery(root) {
+      const g = root.querySelector("[data-gal]"); if (!g) return;
+      const track = g.querySelector(".gal-track"), n = track.children.length;
+      const mark = k => {
+        g.querySelector(".gal-cnt b").textContent = k + 1;
+        g.querySelectorAll(".gal-dots i").forEach((d, j) => d.classList.toggle("on", j === k));
+        g.querySelectorAll("[data-gal-to]").forEach((t, j) => t.classList.toggle("on", j === k));
+        g.querySelector(".prev").classList.toggle("off", k === 0); g.querySelector(".next").classList.toggle("off", k === n - 1);
+      };
+      const cur = () => Math.round(track.scrollLeft / track.clientWidth);
+      const go = k => track.scrollTo({ left: Math.max(0, Math.min(n - 1, k)) * track.clientWidth, behavior: "smooth" });
+      let raf = 0; track.addEventListener("scroll", () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => mark(cur())); }, { passive: true });
+      g.addEventListener("click", e => {
+        const a = e.target.closest("[data-gal-go]"); if (a) return go(cur() + +a.dataset.galGo);
+        const t = e.target.closest("[data-gal-to]"); if (t) go(+t.dataset.galTo);
+      });
+      mark(0);
+    }
     const mediaHTML = c => c.image
       ? `<img class="media" src="${esc(c.image)}" alt="${esc(c.name)}" loading="lazy" decoding="async" />`
       : `<div class="media ph" style="background:linear-gradient(150deg, ${c.color || "#9cc9ea"}, ${c.color || "#9cc9ea"}aa)">${esc(c.name.charAt(0))}</div>`;
@@ -1139,7 +1197,7 @@
             <p class="t-title">${escH(c.name)}</p>
             ${c.tagline ? `<p class="t-tagline">${fmtText(c.tagline)}</p>` : ""}
             <p class="t-tags">${hashtags(c)}</p>
-            <div class="t-media preview" style="--pv:${typeof c.previewPos === "number" ? c.previewPos : 25}%;--px:${typeof c.previewX === "number" ? c.previewX : 50}%;--pz:${typeof c.previewZoom === "number" ? c.previewZoom : 1}">${mediaHTML(c)}${c.adult ? `<span class="badge">19+</span>` : ""}<span class="expand">♡ 전체 보기</span></div>
+            <div class="t-media preview" style="--pv:${typeof c.previewPos === "number" ? c.previewPos : 25}%;--px:${typeof c.previewX === "number" ? c.previewX : 50}%;--pz:${typeof c.previewZoom === "number" ? c.previewZoom : 1}">${mediaHTML(c)}${c.adult ? `<span class="badge">19+</span>` : ""}${allImgs(c).length > 1 ? `<span class="many">${I.photos}${allImgs(c).length}</span>` : ""}<span class="expand">♡ 전체 보기</span></div>
             <div class="t-actions">
               <button class="act reply" data-open="${i}" aria-label="자세히">${I.reply}</button>
               <span class="act rt deco" aria-hidden="true">${I.rt}${fmt(c.rts || 0)}</span>
@@ -1259,7 +1317,7 @@
       if (view === "media") {
         const withImg = characters.map((c, i) => ({ c, i })).filter(({ c }) => c.image);
         el.innerHTML = withImg.length ? `<div class="media-grid">${withImg.map(({ c, i }) => `
-          ${isLocked(c) ? `<div class="m-tile locked${isSpoiler(c) ? " spoil-tile" : ""}" aria-disabled="true">${mediaHTML(c)}${veilHTML(c)}</div>` : `<button class="m-tile" data-open="${i}" aria-label="${esc(c.name)}">${mediaHTML(c)}${c.adult ? `<span class="badge">19+</span>` : ""}</button>`}`).join("")}</div>`
+          ${isLocked(c) ? `<div class="m-tile locked${isSpoiler(c) ? " spoil-tile" : ""}" aria-disabled="true">${mediaHTML(c)}${veilHTML(c)}</div>` : `<button class="m-tile" data-open="${i}" aria-label="${esc(c.name)}">${mediaHTML(c)}${c.adult ? `<span class="badge">19+</span>` : ""}${allImgs(c).length > 1 ? `<span class="many">${I.photos}${allImgs(c).length}</span>` : ""}</button>`}`).join("")}</div>`
           : `<p class="empty">아직 올라간 이미지가 없어요</p>`;
         return;
       }
@@ -1368,7 +1426,7 @@
           ${c.tagline ? `<div class="d-tagline">${fmtText(c.tagline)}</div>` : ""}
           ${c.description ? `<p class="d-text">${fmtText(c.description)}</p>` : ""}
           <p class="d-tags">${hashtags(c)}</p>
-          <div class="t-media">${mediaHTML(c)}${c.adult ? `<span class="badge">19+</span>` : ""}</div>
+          ${galleryHTML(c)}
           <div class="d-time">${longDate(isReleased(c) ? c.releaseDate : c.date)}${c.world ? ` · ${escH(c.world)}` : ""}</div>
           <div class="d-stats"><b>${fmt(c.rts || 0)}</b>재게시 &nbsp; <b data-likes="${i}">${fmt(likeCount(c))}</b>마음에 들어요</div>
           <div class="d-actions">
@@ -1390,6 +1448,7 @@
         </article>` : ""}`;
       $("overlay").classList.add("open");
       document.documentElement.classList.add("modal-open");
+      setupGallery($("modal"));
     }
     function hideTweet() {
       $("overlay").classList.remove("open");
@@ -1527,6 +1586,9 @@
       });
       document.querySelectorAll(`[data-likes="${i}"]`).forEach(el => el.textContent = fmt(likeCount(c)));
     }
+    // 🛡️ 캐릭터 사진은 저장 메뉴 대신 안내만
+    document.addEventListener("contextmenu", e => { if (e.target.closest("img.media, .gal-thumbs img, .m-tile img")) { e.preventDefault(); toast("💜 사진은 저장할 수 없어요"); } });
+    document.addEventListener("dragstart", e => { if (e.target.closest && e.target.closest("img")) e.preventDefault(); });
     function toast(msg) {
       const t = $("toast"); t.textContent = msg; t.classList.add("show");
       clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("show"), 1800);

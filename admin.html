@@ -233,6 +233,15 @@
     .tag-pick button.on { background: var(--grad); border-color: transparent; color: #fff; }
 
     .img-box { display: flex; gap: 14px; align-items: flex-start; }
+    .ex-row { display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 6px; touch-action: pan-x; }
+    .ex-it { position: relative; flex: 0 0 64px; height: 79px; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); background: var(--soft); touch-action: none; cursor: grab; user-select: none; -webkit-touch-callout: none; transition: transform .15s, box-shadow .15s; }
+    .ex-it.lift { transform: scale(1.08); box-shadow: 0 6px 16px rgba(110,90,220,.3); z-index: 2; }
+    .ex-it img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+    .ex-it b { position: absolute; left: 4px; top: 4px; font-size: .62rem; color: #fff; background: rgba(0,0,0,.45); padding: 0 5px; border-radius: 6px; }
+    .ex-x { position: absolute; right: 3px; top: 3px; width: 20px; height: 20px; border-radius: 50%; background: rgba(0,0,0,.55); color: #fff; font-size: .8rem; line-height: 20px; }
+    .ex-add { flex: 0 0 64px; height: 79px; border-radius: 10px; border: 1.5px dashed #cdbdfb; color: var(--accent); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 800; cursor: pointer; }
+    .ex-add span { font-size: .6rem; font-weight: 700; }
+    .ex-add input { display: none; }
     .img-side { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
     #imgBtns { flex-wrap: wrap; }
     .img-prev { width: 120px; aspect-ratio: 987 / 1216; border-radius: 12px; background: var(--soft); border: 1px dashed #cfc4fa; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: .78rem; text-align: center; }
@@ -360,6 +369,7 @@
           <div><h2>게시물</h2><div class="hint">위에 있을수록 최신 · 사진을 꾹 눌러 끌면 순서 바꾸기</div></div>
           <div class="head-btns"><button class="btn btn-ghost" id="selectBtn">☑ 선택</button><button class="btn btn-main" id="newPost">+ 새 게시물</button></div>
         </div>
+        <div class="banner hidden" id="wmBanner"></div>
         <div class="list" id="postList"></div>
         <div class="sel-bar hidden" id="selBar"></div>
       </section>
@@ -746,7 +756,22 @@
       const [h, mi] = (p.releaseTime || "0:0").split(":");
       return Date.now() >= new Date(+m[1], m[2] - 1, +m[3], +h || 0, +mi || 0).getTime() + 60000;
     };
+    // 🛡️ 워터마크 없는 예전 사진에 한 번에 넣기
+    function drawWmBanner() {
+      const need = data.posts.filter(p => p.image && !p.wm);
+      $("wmBanner").classList.toggle("hidden", !need.length);
+      if (need.length) $("wmBanner").innerHTML = `<span>🛡️ 워터마크가 없는 게시물 사진이 <b>${need.length}장</b> 있어요</span><button class="btn btn-main btn-sm" id="wmAll">한 번에 넣고 올리기</button>`;
+      const b = $("wmAll"); if (b) b.onclick = async () => {
+        if (!(await confirmBox(`게시물 사진 ${need.length}장에 "♥ @HEART" 워터마크를 넣고 바로 사이트에 올릴까요?`, { ok: "넣고 올리기" }))) return;
+        b.disabled = true;
+        let n = 0;
+        for (const p of need) { b.textContent = `넣는 중 (${++n}/${need.length})`; try { p.image = await addWatermark(p.image); p.wm = true; } catch (e) { console.warn("워터마크 실패", p.name, e); } }
+        saveDraft(); renderAll();
+        $("publishBtn").click();
+      };
+    }
     function renderPosts() {
+      drawWmBanner();
       const el = $("postList");
       if (!data.posts.length) { el.innerHTML = `<div class="empty">아직 게시물이 없어요.<br/>"+ 새 게시물"을 눌러 첫 캐릭터를 올려보세요!</div>`; return; }
       el.innerHTML = data.posts.map((p, i) => `
@@ -844,6 +869,9 @@
               ${item.image ? `<button class="btn btn-ghost btn-sm" id="imgRemove" style="align-self:flex-start">사진 빼기</button>` : ""}
               <div class="tiny" style="white-space:normal">987×1216 비율로 잘려요 · 🔒 사진 정보(EXIF) 자동 삭제${index < 0 ? "<br/>📷 여러 장 고르면 한 장씩 따로 게시물이 돼요" : ""}</div>
             </div>
+          </div>
+          <div class="f ex-wrap" id="exWrap">🖼️ 추가 사진 <small>게시물 안에서 옆으로 넘겨 볼 수 있어요 · 1장이면 지금처럼 보여요 · 사진을 끌어서 순서 바꾸기</small>
+            <div class="ex-row" id="exRow"></div>
           </div>
           <div class="pv-wrap ${item.image ? "" : "hidden"}" id="pvWrap">
             <label class="f" style="margin:0">목록에서 보이는 부분 <small>홈 게시물 목록에는 사진이 가로로 길게 잘려서 보여요. 끌거나 슬라이더로 위치·크기를 맞춰주세요.</small></label>
@@ -959,7 +987,8 @@
           drawPv();
         };
       })();
-      const setPostImg = url => {
+      const setPostImg = async (url, raw) => {
+        if (raw !== false) { edit.rawMain = url; url = await addWatermark(url); edit.item.wm = true; }   // raw=false: 이미 워터마크가 있는 사진을 다시 자른 경우
         edit.item.image = url;
         $("imgPrev").innerHTML = `<img src="${url}" alt="" />`;
         drawPv();
@@ -967,11 +996,13 @@
         $("imgRecrop").onclick = recrop;
       };
       const recrop = async () => {
-        try { const url = await cropImage(await loadImage(edit.item.image), { W: IMG_W, H: IMG_H, title: "게시물 사진 자르기" }); if (url) setPostImg(url); }
+        // 이번에 고른 원본이 있으면 원본으로, 없으면 지금 사진으로 (워터마크 두 번 안 찍히게)
+        const src = edit.rawMain || edit.item.image, already = !edit.rawMain && edit.item.wm;
+        try { const url = await cropImage(await loadImage(src), { W: IMG_W, H: IMG_H, title: "게시물 사진 자르기" }); if (url) await setPostImg(url, already ? false : undefined); }
         catch { toast("사진을 다시 열 수 없어요. 새로 골라주세요."); }
       };
       const cropFile = async f => {
-        try { const url = await cropImage(await loadImage(f), { W: IMG_W, H: IMG_H, title: "게시물 사진 자르기" }); if (url) setPostImg(url); }
+        try { const url = await cropImage(await loadImage(f), { W: IMG_W, H: IMG_H, title: "게시물 사진 자르기" }); if (url) await setPostImg(url); }
         catch { toast("이 사진은 열 수 없어요. 다른 사진을 골라주세요."); }
       };
       const drawQueue = () => {
@@ -990,11 +1021,41 @@
       drawQueue();
       if (edit.index < 0 && queue.length) { const f = edit.queue.shift(); drawQueue(); setTimeout(() => cropFile(f), 120); }
       if ($("imgRecrop")) $("imgRecrop").onclick = recrop;
-      if ($("imgRemove")) $("imgRemove").onclick = () => { edit.item.image = ""; drawPv(); if ($("imgRecrop")) $("imgRecrop").remove(); $("imgPrev").innerHTML = "이미지<br/>없음"; $("imgRemove").remove(); };
+      if ($("imgRemove")) $("imgRemove").onclick = () => { edit.item.image = ""; delete edit.item.wm; edit.rawMain = null; drawPv(); if ($("imgRecrop")) $("imgRecrop").remove(); $("imgPrev").innerHTML = "이미지<br/>없음"; $("imgRemove").remove(); };
       // 상태 표시는 하나만 고를 수 있어요
       document.querySelectorAll(".f-status").forEach(cb => cb.onchange = () => { if (cb.checked) document.querySelectorAll(".f-status").forEach(o => { if (o !== cb) o.checked = false; }); });
       $("f_spoiler").onchange = () => $("f_relRow").classList.toggle("hidden", !$("f_spoiler").checked);
       $("f_relClear").onclick = e => { e.preventDefault(); $("f_release").value = ""; $("f_releaseTime").value = ""; };
+      // 🖼️ 추가 사진
+      if (!Array.isArray(edit.item.images)) edit.item.images = [];
+      const drawEx = () => {
+        const ex = edit.item.images;
+        $("exRow").innerHTML = ex.map((src, k) => `
+          <div class="ex-it" data-ex="${k}" draggable="true"><img src="${esc(src)}" alt="" onerror="${rawFallback}" /><b>${k + 2}</b><button type="button" class="ex-x" data-ex-del="${k}" aria-label="빼기">×</button></div>`).join("")
+          + `<label class="ex-add">＋<span>사진 추가</span><input type="file" accept="image/*" multiple id="exFile" /></label>`;
+        $("exFile").onchange = async e => {
+          const files = [...e.target.files].filter(isImgFile); e.target.value = "";
+          for (const f of files) {
+            try { const url = await cropImage(await loadImage(f), { W: IMG_W, H: IMG_H, title: `추가 사진 자르기 (${edit.item.images.length + 2}번째)` }); if (url) { edit.item.images.push(await addWatermark(url)); drawEx(); } }
+            catch { toast("이 사진은 열 수 없어요"); }
+          }
+        };
+      };
+      $("exRow").addEventListener("click", e => { const d = e.target.closest("[data-ex-del]"); if (d) { e.preventDefault(); edit.item.images.splice(+d.dataset.exDel, 1); drawEx(); } });
+      // 끌어서 순서 바꾸기 (컴퓨터: 드래그 · 폰: 꾹 눌러 끌기)
+      (() => {
+        const row = $("exRow"); let from = null, timer = null, startX = 0, moved = false;
+        const idxAt = x => { const its = [...row.querySelectorAll(".ex-it")]; let k = its.findIndex(it => { const r = it.getBoundingClientRect(); return x < r.left + r.width / 2; }); return k < 0 ? its.length - 1 : k; };
+        const move = to => { if (from === null || to === from) return; const a = edit.item.images; const [m] = a.splice(from, 1); a.splice(to, 0, m); from = to; drawEx(); row.querySelectorAll(".ex-it")[to]?.classList.add("lift"); };
+        row.addEventListener("pointerdown", e => { const it = e.target.closest(".ex-it"); if (!it || e.target.closest(".ex-x")) return; startX = e.clientX; moved = false;
+          const begin = () => { from = +it.dataset.ex; it.classList.add("lift"); row.setPointerCapture(e.pointerId); };
+          if (e.pointerType === "mouse") begin(); else timer = setTimeout(begin, 250); });
+        row.addEventListener("pointermove", e => { if (from === null) { if (Math.abs(e.clientX - startX) > 8) clearTimeout(timer); return; } e.preventDefault(); move(idxAt(e.clientX)); });
+        const end = () => { clearTimeout(timer); if (from !== null) { from = null; row.querySelectorAll(".lift").forEach(x => x.classList.remove("lift")); } };
+        row.addEventListener("pointerup", end); row.addEventListener("pointercancel", end);
+        row.addEventListener("dragstart", e => e.preventDefault());
+      })();
+      drawEx();
       $("savePost").onclick = savePost;
       // 폰에선 키보드가 갑자기 올라오지 않게, 컴퓨터에서 새로 쓸 때만 이름 칸에 커서를 둬요
       if (index < 0 && isDesktop()) $("f_name").focus();
@@ -1066,6 +1127,23 @@
     function encodeImg(cv, q = 0.9) {
       try { const w = cv.toDataURL("image/webp", q); if (w.startsWith("data:image/webp")) return w; } catch {}
       return cv.toDataURL("image/jpeg", q);
+    }
+    // 🛡️ 워터마크: 사진 오른쪽 아래에 작게 "♥ @HEART" (사진 파일 자체에 새겨져요)
+    async function addWatermark(url) {
+      const img = await loadImage(url), W = img.naturalWidth || img.width, H = img.naturalHeight || img.height;
+      const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+      const g = cv.getContext("2d"); g.drawImage(img, 0, 0, W, H);
+      try { await document.fonts.load('800 28px "Pretendard Variable"'); } catch {}
+      const fs = Math.round(W * 0.027), pad = Math.round(W * 0.024), text = "@HEART";
+      g.font = `800 ${fs}px "Pretendard Variable", Pretendard, sans-serif`; g.textBaseline = "alphabetic";
+      const tw = g.measureText(text).width, hs = fs * 0.95, gap = fs * 0.3;
+      const x = W - pad - tw, y = H - pad, hx = x - gap - hs, hy = y - fs * 0.86;
+      g.shadowColor = "rgba(0,0,0,.45)"; g.shadowBlur = fs * 0.35; g.shadowOffsetY = fs * 0.05;
+      g.fillStyle = "rgba(255,255,255,.88)";
+      g.save(); g.translate(hx, hy); g.scale(hs / 24, hs / 24);
+      g.fill(new Path2D("M12 21.2s-8.6-5.2-10.4-10.6C.3 6.6 2.8 2.8 6.7 2.8c2.3 0 4.1 1.2 5.3 3.1 1.2-1.9 3-3.1 5.3-3.1 3.9 0 6.4 3.8 5.1 7.8C20.6 16 12 21.2 12 21.2z")); g.restore();
+      g.fillText(text, x, y);
+      return encodeImg(cv, 0.9);
     }
     const imgExt = url => /^data:image\/webp/.test(url) ? "webp" : "jpg";
     function cropImage(img, opt) {
@@ -1170,6 +1248,7 @@
       it.link = it.tags.length ? "" : (edit.linkVals[""] || "").trim();
       it.adult = $("f_adult").checked;
       if ($("f_hidden").checked) it.hidden = true; else delete it.hidden;
+      if (Array.isArray(it.images) && !it.images.length) delete it.images;
       if ($("f_spoiler").checked) it.spoiler = true; else delete it.spoiler;
       const rel = $("f_release").value;
       if (it.spoiler && rel) it.releaseDate = rel; else delete it.releaseDate;
@@ -1552,6 +1631,9 @@
       const files = [];
       const stamp = Date.now().toString(36);
       for (const p of out.posts) {
+        (p.images || []).forEach((src, k) => {
+          if (src && src.startsWith("data:")) { const path = `images/post-${p.id}-${stamp}-${k + 2}.${imgExt(src)}`; files.push({ path, bytes: dataUrlBytes(src), label: `추가 사진: ${p.name}` }); p.images[k] = path; }
+        });
         if (p.image && p.image.startsWith("data:")) {
           const path = `images/post-${p.id}-${stamp}.${imgExt(p.image)}`;   // 사진 바꿀 때마다 이름이 달라져서 폰에 예전 사진이 남지 않아요
           files.push({ path, bytes: dataUrlBytes(p.image), label: `사진 추가: ${p.name}` });
@@ -1566,7 +1648,7 @@
       }
       return files;
     }
-    const referenced = out => new Set([...out.posts.map(p => p.image), ...["avatar", "avatarSmall", "banner"].map(k => (out.profile || {})[k]), ((out.profile || {}).share || {}).image].filter(src => src && !src.startsWith("http") && !src.startsWith("data:")));
+    const referenced = out => new Set([...out.posts.map(p => p.image), ...out.posts.flatMap(p => p.images || []), ...["avatar", "avatarSmall", "banner"].map(k => (out.profile || {})[k]), ((out.profile || {}).share || {}).image].filter(src => src && !src.startsWith("http") && !src.startsWith("data:")));
     const siteJs = out => "/* 이 파일은 제작자 페이지(admin.html)가 자동으로 만들어요. 직접 고치지 않아도 돼요. */\nwindow.SITE_DATA = " + JSON.stringify({ tags: out.tags, profile: out.profile || {}, notices: out.notices, posts: out.posts }, null, 2) + ";\n";
 
     async function exportZip(btn) {
@@ -1816,7 +1898,7 @@
           if (!p || /^(data:|https?:)/.test(p) || have.has(p)) return;
           try { o[k] = `data:image/${/\.webp$/i.test(p) ? "webp" : "jpeg"};base64,` + await fileB64(p, sha); } catch (e) { console.warn("사진 못 가져옴", p, e); }
         };
-        for (const p of old.posts) await fix(p, "image");
+        for (const p of old.posts) { await fix(p, "image"); for (let k = 0; k < (p.images || []).length; k++) await fix(p.images, k); }
         for (const k of ["avatar", "avatarSmall", "banner"]) await fix(old.profile, k);
         SERVER = now; data = old; data._base = H(now);
         saveDraft(); renderAll(); closeEditor();
