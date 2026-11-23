@@ -326,18 +326,22 @@
     @keyframes spoilFlow { to { background-position: 300% 0; } }
     .tweet.spoiler .t-title, .tweet.spoiler .t-tagline, .tweet.spoiler .t-tags { opacity: 1; }
     .t-media.can-talk { cursor: pointer; -webkit-tap-highlight-color: transparent; }
-    .spoil-typing { position: absolute; left: 14px; bottom: 12px; z-index: 3; display: flex; gap: 4px; align-items: center; padding: 9px 12px; border-radius: 16px 16px 16px 4px; background: rgba(255,255,255,.92); box-shadow: 0 4px 14px rgba(80,60,180,.22); transition: opacity .2s, transform .2s; }
+    .spoil-typing { position: absolute; left: 14px; bottom: 12px; z-index: 3; display: flex; gap: 4px; align-items: center; padding: 9px 12px; border-radius: 16px 16px 16px 4px; background: rgba(255,255,255,.92); box-shadow: 0 4px 14px rgba(80,60,180,.22);
+      transition: opacity .3s ease .22s, transform .4s cubic-bezier(.22,1,.36,1) .22s; }   /* 말풍선이 들어간 뒤 살며시 다시 나타나요 */
     .spoil-typing i { width: 6px; height: 6px; border-radius: 50%; background: #a98cf3; animation: typing 1.2s ease-in-out infinite; }
     .spoil-typing i:nth-child(2) { animation-delay: .15s; background: #8fb2f3; }
     .spoil-typing i:nth-child(3) { animation-delay: .3s; background: #7fcdf2; }
     @keyframes typing { 0%, 60%, 100% { transform: translateY(0); opacity: .55; } 30% { transform: translateY(-4px); opacity: 1; } }
     .tweet.spoiler .holo-spark { display: none; }
     .spoil-bubble { position: absolute; left: 14px; right: 14px; bottom: 14px; z-index: 4; padding: 10px 14px; border-radius: 16px 16px 16px 4px; background: rgba(255,255,255,.95); color: #2b2f35; font-size: .84rem; font-weight: 600; line-height: 1.5; word-break: keep-all; box-shadow: 0 6px 18px rgba(80,60,180,.22);
-      opacity: 0; transform: translateY(14px) scale(.96); transform-origin: left bottom; pointer-events: none; transition: opacity .25s, transform .32s cubic-bezier(.2, 1.3, .4, 1); }
+      opacity: 0; transform: translateY(10px) scale(.9); filter: blur(3px); transform-origin: 12px 100%; pointer-events: none;
+      transition: opacity .22s ease-in, transform .26s ease-in, filter .22s ease-in; }   /* 사라질 때: 짧고 부드럽게 */
     .spoil-bubble b { display: block; font-size: .66rem; color: #7353d6; letter-spacing: .06em; margin-bottom: 2px; }
     .spoil-bubble b::before { content: "✦ "; color: #a98cf3; }
-    .t-media.talk .spoil-bubble { opacity: 1; transform: none; }
-    .t-media.talk .spoil-typing { opacity: 0; transform: scale(.8); }
+    .t-media.talk .spoil-bubble { opacity: 1; transform: none; filter: none;
+      transition: opacity .3s ease-out .06s, transform .55s cubic-bezier(.2, 1.25, .35, 1) .06s, filter .3s ease-out .06s; }   /* 나타날 때: 점 말풍선에서 톡 커지듯 */
+    .t-media.talk .spoil-typing { opacity: 0; transform: scale(.6) translateY(4px); transition: opacity .15s ease-in, transform .2s ease-in; }
+    .spoil-bubble b, .spoil-bubble { will-change: transform, opacity; }
     .tweet.spoiler .t-media, .m-tile.locked:has(.spoil) { position: relative; overflow: hidden; }
     .tweet.spoiler .t-media .media, .m-tile .lock-veil.spoil ~ .media, .m-tile:has(.spoil) .media { filter: blur(2px) saturate(1.1); }
     .lock-veil.spoil { backdrop-filter: none; -webkit-backdrop-filter: none; mix-blend-mode: soft-light; animation: holo 5s ease-in-out infinite;
