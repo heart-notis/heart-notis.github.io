@@ -932,7 +932,22 @@
     html.dark .srch-x, html.dark .t-context.pin-label { color: #c4b5fd; }
     html.dark .act.rt:hover { background: #1b2a36; }
 
+    /* ---------- 🔔 공개 알림 버튼 ---------- */
     .spoil-tag { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .notify-btn { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 999px; font-size: .72rem; font-weight: 800; color: #7353d6; background: #fff; border: 1px solid #ddd3fb; box-shadow: 0 2px 8px rgba(140,120,240,.15); transition: transform .15s; }
+    .notify-btn:active { transform: scale(.94); }
+    .notify-btn.on { color: #fff; background: linear-gradient(120deg, #a98cf3, #7fb5f2); border-color: transparent; }
+    .notify-btn .bell { display: inline-block; transform-origin: 50% 10%; }
+    .notify-btn:not(.on) .bell { animation: ring 2.8s ease-in-out infinite; }
+    @keyframes ring { 0%, 70%, 100% { transform: rotate(0); } 74% { transform: rotate(14deg); } 80% { transform: rotate(-12deg); } 86% { transform: rotate(8deg); } 92% { transform: rotate(-4deg); } }
+    html.dark .notify-btn:not(.on) { background: #1d1b2b; border-color: #3a3456; color: #c4b5fd; }
+    .ios-guide { position: fixed; inset: 0; z-index: 120; display: flex; align-items: flex-end; justify-content: center; background: rgba(40,32,80,.32); animation: fade .2s; }
+    .ios-guide .g { width: min(560px, 100%); background: #fff; border-radius: 22px 22px 0 0; padding: 20px 20px calc(20px + env(safe-area-inset-bottom)); animation: up .35s cubic-bezier(.2,.9,.25,1); }
+    html.dark .ios-guide .g { background: #17171f; }
+    @keyframes up { from { transform: translateY(100%); } }
+    .ios-guide h4 { font-size: 1rem; margin-bottom: 10px; }
+    .ios-guide ol { padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: .88rem; }
+    .ios-guide button { margin-top: 16px; width: 100%; height: 44px; border-radius: 14px; background: var(--grad-strong); color: #fff; font-weight: 800; }
   </style>
 </head>
 <body>
@@ -1048,6 +1063,7 @@
       get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
       set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
     };
+    var pushSubs = store.get("push_subs", {});   // 🔔 공개 알림 신청한 스포일러 {게시물 id: 알림 주소}
     let liked = store.get("tw_liked", {});
     let view = "tweets";
     let activeTag = "전체";
@@ -1248,7 +1264,7 @@
         <article class="tweet locked spoiler">
           ${meAva()}
           <div class="t-main">
-            <div class="spoil-tag"><span>✦ SPOILER</span></div>
+            <div class="spoil-tag"><span>✦ SPOILER</span>${c.releaseDate && c.id ? `<button class="notify-btn ${pushSubs[c.id] ? "on" : ""}" data-notify="${esc(c.id)}"><span class="bell">🔔</span>${pushSubs[c.id] ? "알림 신청됨" : "공개 알림"}</button>` : ""}</div>
             ${headHTML(c.date, releaseLabel(c.releaseDate, c.releaseTime))}
             <p class="t-title">${escH(c.name)}</p>
             <p class="t-tags">${hashtags(c)}</p>
@@ -1727,6 +1743,8 @@
       if (wg) { const w = wg.dataset.worldGo; closeTweet(); setTimeout(() => { activeWorld = w; searchOpen = false; activeTag = "전체"; if (view !== "tweets") setView("tweets", true); else renderView(); document.querySelector(".tabs")?.scrollIntoView({ behavior: "smooth" }); }, 60); return; }
       if (e.target.closest("[data-world-clear]")) { activeWorld = ""; renderView(); return; }
       if (e.target.closest("#modeBtn")) return toggleMode();
+      const nb = e.target.closest("[data-notify]");
+      if (nb) { e.stopPropagation(); return toggleNotify(nb.dataset.notify); }
       const cta = e.target.closest(".chat-cta[data-cta]");
       if (cta && $("overlay").classList.contains("open")) { const ci = history.state && history.state.heart === "post" ? history.state.i : -1; if (ci >= 0) track("click", { post: postKey(ci), to: cta.dataset.cta }); }
       // ✦ 스포일러 사진을 누르면 한마디 말풍선이 톡 (다른 곳 누르면 닫혀요)
@@ -1840,8 +1858,47 @@
     }
     if (document.documentElement.classList.contains("dark")) document.querySelector('meta[name="theme-color"]').content = "#15151e";
 
-    // (예전에 알림 기능을 쓰던 방문자 브라우저에 남은 알림 담당 파일 정리)
-    try { navigator.serviceWorker && navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister())).catch(() => {}); localStorage.removeItem("push_subs"); } catch {}
+    /* ---- 🔔 스포일러 공개 알림 (웹 푸시) ---- */
+    const VAPID_KEY = "BEkBdgYVbmYjSvwvvGwCNqa8oZYsYC426SqcIe8zy_qNxnvMecuyn03zvrUB-0A2hT0656wQ7IV2N8uBYtsHYlY";
+    const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const isStandalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+    const inAppBrowser = /KAKAOTALK|Instagram|FBAN|FBAV|Line\/|Twitter|NAVER\(inapp|DaumApps|everytimeApp|Whale\/.*inapp/i.test(navigator.userAgent);
+    const b64u = s => { const p = "=".repeat((4 - s.length % 4) % 4), b = atob((s + p).replace(/-/g, "+").replace(/_/g, "/")); return Uint8Array.from(b, ch => ch.charCodeAt(0)); };
+    function refreshNotify() {
+      document.querySelectorAll("[data-notify]").forEach(b => {
+        const on = !!pushSubs[b.dataset.notify];
+        b.classList.toggle("on", on);
+        b.innerHTML = `<span class="bell">🔔</span>${on ? "알림 신청됨" : "공개 알림"}`;
+      });
+    }
+    function iosGuide() {
+      const el = document.createElement("div"); el.className = "ios-guide";
+      el.innerHTML = `<div class="g"><h4>🔔 아이폰은 홈 화면에 추가하면 알림을 받을 수 있어요</h4>
+        <ol><li>사파리 아래쪽 <b>공유 버튼(□↑)</b>을 눌러요</li><li><b>홈 화면에 추가</b>를 눌러요</li><li>홈 화면에 생긴 <b>하트 아이콘</b>으로 열고, 다시 <b>🔔 공개 알림</b>을 눌러주세요</li></ol>
+        <button>알겠어요</button></div>`;
+      el.onclick = e => { if (e.target === el || e.target.tagName === "BUTTON") el.remove(); };
+      document.body.appendChild(el);
+    }
+    async function toggleNotify(id) {
+      if (pushSubs[id]) {   // 취소
+        fetch(MSG_API, { method: "POST", headers: { "content-type": "text/plain" }, body: JSON.stringify({ action: "push-unsub", post: id, endpoint: pushSubs[id] }) }).catch(() => {});
+        delete pushSubs[id]; store.set("push_subs", pushSubs); refreshNotify(); return toast("알림 신청을 취소했어요");
+      }
+      if (inAppBrowser) return toast("앱 안 화면에선 알림을 못 받아요 · 크롬/사파리로 열어주세요");
+      if (isIOS && !isStandalone) return toast("아이폰 사파리는 알림을 지원하지 않아요 🥲");
+      if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) return toast("이 브라우저는 알림을 지원하지 않아요");
+      try {
+        const perm = await Notification.requestPermission();
+        if (perm !== "granted") return toast("알림이 꺼져 있어요 · 브라우저 설정에서 허용해주세요");
+        const reg = await navigator.serviceWorker.register("sw.js");
+        await navigator.serviceWorker.ready;
+        const sub = (await reg.pushManager.getSubscription()) || (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64u(VAPID_KEY) }));
+        const r = await fetch(MSG_API, { method: "POST", headers: { "content-type": "text/plain" }, body: JSON.stringify({ action: "push-sub", post: id, sub: sub.toJSON() }) });
+        if (!r.ok) throw new Error("server");
+        pushSubs[id] = sub.endpoint; store.set("push_subs", pushSubs); refreshNotify();
+        toast("🔔 공개되면 알려드릴게요!");
+      } catch (e) { console.warn(e); toast("알림 신청이 안 됐어요. 잠시 뒤 다시 눌러주세요"); }
+    }
 
     updateCalDot();
     (function watchRelease() {
