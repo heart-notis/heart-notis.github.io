@@ -960,6 +960,9 @@
     .ios-guide h4 { font-size: 1rem; margin-bottom: 10px; }
     .ios-guide ol { padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: .88rem; }
     .ios-guide button { margin-top: 16px; width: 100%; height: 44px; border-radius: 14px; background: var(--grad-strong); color: #fff; font-weight: 800; }
+    /* 한글이 단어 중간에서 끊기지 않게 (긴 링크·영문은 넘치지 않게 끊어요) */
+    body { word-break: keep-all; overflow-wrap: anywhere; }
+    input, textarea { word-break: normal; }
   </style>
 </head>
 <body>

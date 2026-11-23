@@ -170,6 +170,9 @@
     .thumb { width: 52px; aspect-ratio: 987 / 1216; border-radius: 8px; object-fit: cover; background: var(--soft); flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--accent); font-weight: 800; }
     .item-main { flex: 1; min-width: 0; }
     .item-title { font-weight: 800; font-size: .95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .item-title:has(.nm) { display: flex; align-items: center; gap: 4px; }
+    .item-title .nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+    .item-title .badge { flex-shrink: 0; margin-left: 0; }
     .item-sub { font-size: .78rem; color: var(--sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .badge { display: inline-block; font-size: .66rem; font-weight: 800; padding: 1px 6px; border-radius: 5px; background: var(--soft); color: var(--accent); margin-left: 4px; vertical-align: 1px; }
     .badge.new { background: #e8f8ef; color: #17a35a; }
@@ -203,7 +206,7 @@
     .tf-group { margin: 6px 2px 6px; font-size: .76rem; color: var(--sub); }
     label.f { display: flex; flex-direction: column; gap: 5px; font-size: .82rem; font-weight: 700; color: #3d4650; }
     label.f small { font-weight: 400; color: var(--sub); }
-    .f input[type=text], .f input[type=url], .f input[type=date], .f input[type=number], .f textarea, .f input[type=password] {
+    .f input[type=text], .f input[type=url], .f input[type=date], .f input[type=time], .f input[type=number], .f textarea, .f input[type=password] {
       width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; outline: none; font-weight: 400; background: #fff;
     }
     .f textarea { min-height: 90px; resize: vertical; line-height: 1.55; }
@@ -217,7 +220,10 @@
     .rel-row { margin-left: 26px; }
     .rel-in { display: flex; gap: 6px; align-items: center; }
     .rel-in input { flex: 1; min-width: 0; }
-    .rel-in input[type=time] { flex: 0 0 110px; }
+    .rel-in input[type=date] { flex: 1 1 130px; }
+    .rel-in input[type=time] { flex: 1 1 110px; }
+    .rel-in { flex-wrap: wrap; }
+    .log-add #logText { flex: 1 1 100%; order: 3; }
     .badge.spo { background: linear-gradient(120deg, #ece5ff, #e3f2fd); color: #7353d6; }
     .hist { display: flex; flex-direction: column; max-height: 55vh; overflow-y: auto; border: 1px solid var(--line); border-radius: 12px; }
     .hist-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-bottom: 1px solid var(--line); }
@@ -226,8 +232,9 @@
     .hist-main span { font-size: .74rem; color: var(--sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .hist-now { font-size: .74rem; font-weight: 700; color: var(--accent); padding: 0 8px; }
     .badge.st.re { background: #f1ecff; color: #7353d6; }
-    .check { display: flex; align-items: center; gap: 8px; font-size: .88rem; font-weight: 600; }
-    .check input { width: 18px; height: 18px; accent-color: var(--accent); }
+    .check { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; font-size: .88rem; font-weight: 600; }
+    .check input { width: 18px; height: 18px; flex-shrink: 0; accent-color: var(--accent); }
+    .check > small { flex-basis: 100%; padding-left: 26px; margin-top: -2px; font-size: .74rem; line-height: 1.45; }   /* 설명은 제목 아래 줄로 */
     .tag-pick { display: flex; flex-wrap: wrap; gap: 6px; }
     .tag-pick button { padding: 5px 12px; border-radius: 999px; border: 1px solid var(--line); font-size: .82rem; font-weight: 600; color: var(--sub); }
     .tag-pick button.on { background: var(--grad); border-color: transparent; color: #fff; }
@@ -329,6 +336,9 @@
 
     .toast { position: fixed; left: 50%; bottom: 80px; transform: translate(-50%, 20px); background: var(--grad); color: #fff; padding: 10px 18px; border-radius: 999px; font-size: .8rem; font-weight: 600; white-space: nowrap; max-width: calc(100vw - 24px); overflow: hidden; text-overflow: ellipsis; opacity: 0; pointer-events: none; transition: all .3s; z-index: 60; }
     .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    /* 한글이 단어 중간에서 끊기지 않게 (긴 링크·영문은 넘치지 않게 끊어요) */
+    body { word-break: keep-all; overflow-wrap: anywhere; }
+    input, textarea { word-break: normal; }
   </style>
 </head>
 <body>
@@ -797,7 +807,7 @@
           ${selMode ? `<span class="pick" aria-hidden="true">✓</span>` : ""}
           ${p.image ? `<img class="thumb" src="${esc(p.image)}" alt="" draggable="false" onerror="${rawFallback}" />` : `<div class="thumb">${esc((p.name || "?").charAt(0))}</div>`}
           <div class="item-main">
-            <div class="item-title">${esc(p.name || "(이름 없음)")}${p.hidden ? `<span class="badge hid">🙈 비공개</span>` : ""}${p.spoiler ? (spoilerOpened(p) ? `<span class="badge spo">✦ 공개됨</span>` : `<span class="badge spo">✦ 스포</span>`) : ""}${p.adult ? `<span class="badge">19+</span>` : ""}${p.status === "asset" ? `<span class="badge st">🔧 교체중</span>` : p.status === "renewal" ? `<span class="badge st re">✨ 리뉴얼</span>` : ""}${isNew(p, "posts") ? `<span class="badge new">NEW</span>` : ""}</div>
+            <div class="item-title"><span class="nm">${esc(p.name || "(이름 없음)")}</span>${p.hidden ? `<span class="badge hid">🙈 비공개</span>` : ""}${p.spoiler ? (spoilerOpened(p) ? `<span class="badge spo">✦ 공개됨</span>` : `<span class="badge spo">✦ 스포</span>`) : ""}${p.adult ? `<span class="badge">19+</span>` : ""}${p.status === "asset" ? `<span class="badge st">🔧 교체중</span>` : p.status === "renewal" ? `<span class="badge st re">✨ 리뉴얼</span>` : ""}${isNew(p, "posts") ? `<span class="badge new">NEW</span>` : ""}</div>
             <div class="item-sub">${esc(p.date || "")} · ${(p.tags || []).map(t => "#" + esc(t)).join(" ") || "태그 없음"}</div>
             <div class="item-sub">${esc(p.tagline || "")}</div>
           </div>
@@ -920,7 +930,7 @@
           <label class="f">첫 인사말 <small>상세 화면에서 캐릭터의 답글처럼 보여요</small><textarea id="f_greet" style="min-height:60px">${esc(item.greeting)}</textarea></label>
           <div class="f">🛠️ 업데이트 기록 <small>상세 화면 사진 아래에 작게 보여요 · 비워두면 안 보여요</small>
             <div id="logList" class="log-list"></div>
-            <div class="rel-in"><input type="date" id="logDate" /><input type="text" id="logText" placeholder="예: 에셋 교체 (표정 6종)" style="flex:2" /><button type="button" class="btn btn-line btn-sm" id="logAdd">추가</button></div>
+            <div class="rel-in log-add"><input type="date" id="logDate" /><input type="text" id="logText" placeholder="예: 에셋 교체 (표정 6종)" /><button type="button" class="btn btn-line btn-sm" id="logAdd">추가</button></div>
           </div>
           <label class="f">대화하러 가기 링크 <small>위에서 체크한 해시태그(플랫폼)마다 주소 칸이 생겨요 · #합작은 세계관 보기 버튼이 돼요</small><div class="links-box" id="f_links"></div></label>
           <label class="check"><input type="checkbox" id="f_adult" ${item.adult ? "checked" : ""} /> 19+ 배지 달기</label>
