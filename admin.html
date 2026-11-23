@@ -118,6 +118,7 @@
     .ed-top { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--line); }
     .ed-top h3 { font-size: 1rem; font-weight: 800; }
     .ed-body { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+    .queue-note { background: var(--soft); color: #4b3f8f; border-radius: 10px; padding: 9px 12px; font-size: .8rem; font-weight: 600; }
     .ed-foot { display: flex; gap: 8px; justify-content: flex-end; padding: 12px 16px; border-top: 1px solid var(--line); background: #fbfcfd; }
     div.f { display: flex; flex-direction: column; gap: 5px; font-size: .82rem; font-weight: 700; color: #3d4650; }
     div.f small { font-weight: 400; color: var(--sub); }
@@ -289,7 +290,7 @@
             <div class="img-side">
               <div style="font-weight:700;font-size:.82rem;color:#3d4650">프로필 사진</div>
               <div class="btn-row">
-                <label class="btn btn-line btn-sm file-btn">사진 바꾸기<input type="file" accept="image/*" id="avaFile" /></label>
+                <label class="btn btn-line btn-sm file-btn">사진 바꾸기<input type="file" id="avaFile" /></label>
                 <button class="btn btn-ghost btn-sm" id="avaRecrop">✂️ 다시 자르기</button>
               </div>
               <div class="tiny">정사각형으로 잘려요 · 🔒 사진 정보(EXIF) 자동 삭제</div>
@@ -299,7 +300,7 @@
             <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
               <div style="font-weight:700;font-size:.82rem;color:#3d4650;white-space:nowrap">헤더 사진</div>
               <div class="btn-row">
-                <label class="btn btn-line btn-sm file-btn">사진 바꾸기<input type="file" accept="image/*" id="banFile" /></label>
+                <label class="btn btn-line btn-sm file-btn">사진 바꾸기<input type="file" id="banFile" /></label>
                 <button class="btn btn-ghost btn-sm" id="banRecrop">✂️ 다시 자르기</button>
               </div>
             </div>
@@ -542,26 +543,29 @@
     function closeEditor() { $("overlay").classList.remove("open"); document.body.style.overflow = ""; edit = null; }
     $("overlay").addEventListener("click", e => { if (e.target.id === "overlay") closeEditor(); });
 
+    // 사진인지 확인 (폰에서 갤러리 앱으로 고를 수 있게 accept 를 안 걸어서 직접 확인해요)
+    const isImgFile = f => f && (/^image\//.test(f.type) || /\.(jpe?g|png|webp|gif|bmp|avif|heic|heif)$/i.test(f.name || ""));
     $("newPost").onclick = () => openPost(-1);
-    function openPost(index) {
+    function openPost(index, queue = [], at = 0) {
       const item = index >= 0 ? clone(data.posts[index]) : {
         id: uid(), name: "", world: "", tagline: "", tags: [], image: "", adult: false,
         ...randomCounts(), date: today(), description: "", greeting: "", link: ""
       };
       if (!item.id) item.id = uid();
-      edit = { kind: "post", index, item };
+      edit = { kind: "post", index, item, queue, at };   // at: 여러 장일 때 고른 순서대로 위에서부터 놓이게
       $("editor").innerHTML = `
         <div class="ed-top"><h3>${index >= 0 ? "게시물 수정" : "새 게시물"}</h3><button class="icon" data-close aria-label="닫기">${I.x}</button></div>
         <div class="ed-body">
+          <div class="queue-note hidden" id="qNote"></div>
           <div class="img-box">
             <div class="img-prev" id="imgPrev">${item.image ? `<img src="${esc(item.image)}" alt="" />` : "이미지<br/>없음"}</div>
             <div class="img-side">
               <div class="btn-row" id="imgBtns">
-                <label class="btn btn-line btn-sm file-btn">${item.image ? "사진 바꾸기" : "사진 고르기"}<input type="file" accept="image/*" id="imgFile" /></label>
+                <label class="btn btn-line btn-sm file-btn">${item.image ? "사진 바꾸기" : "사진 고르기"}<input type="file" id="imgFile" ${index < 0 ? "multiple" : ""} /></label>
                 ${item.image ? `<button class="btn btn-ghost btn-sm" id="imgRecrop">✂️ 다시 자르기</button>` : ""}
               </div>
               ${item.image ? `<button class="btn btn-ghost btn-sm" id="imgRemove" style="align-self:flex-start">사진 빼기</button>` : ""}
-              <div class="tiny" style="white-space:normal">987×1216 비율로 잘려요 · 🔒 사진 정보(EXIF) 자동 삭제</div>
+              <div class="tiny" style="white-space:normal">987×1216 비율로 잘려요 · 🔒 사진 정보(EXIF) 자동 삭제${index < 0 ? "<br/>📷 여러 장 고르면 한 장씩 따로 게시물이 돼요" : ""}</div>
             </div>
           </div>
           <div class="pv-wrap ${item.image ? "" : "hidden"}" id="pvWrap">
@@ -678,11 +682,25 @@
         try { const url = await cropImage(await loadImage(edit.item.image), { W: IMG_W, H: IMG_H, title: "게시물 사진 자르기" }); if (url) setPostImg(url); }
         catch { toast("사진을 다시 열 수 없어요. 새로 골라주세요."); }
       };
-      $("imgFile").onchange = async e => {
-        const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+      const cropFile = async f => {
         try { const url = await cropImage(await loadImage(f), { W: IMG_W, H: IMG_H, title: "게시물 사진 자르기" }); if (url) setPostImg(url); }
         catch { toast("이 사진은 열 수 없어요. 다른 사진을 골라주세요."); }
       };
+      const drawQueue = () => {
+        const n = (edit && edit.queue || []).length;
+        $("qNote").classList.toggle("hidden", !n);
+        $("qNote").innerHTML = `📷 이어서 올릴 사진 <b>${n}장</b> 남았어요 · 이 게시물을 저장하면 다음 사진으로 넘어가요`;
+      };
+      $("imgFile").onchange = async e => {
+        const all = [...e.target.files]; e.target.value = "";
+        const files = all.filter(isImgFile);
+        if (!files.length) { if (all.length) toast("사진 파일만 고를 수 있어요"); return; }
+        // 여러 장 고르면: 첫 장은 지금 게시물, 나머지는 한 장씩 새 게시물로 이어서 만들어요
+        if (edit.index < 0 && files.length > 1) { edit.queue = files.slice(1); drawQueue(); }
+        await cropFile(files[0]);
+      };
+      drawQueue();
+      if (edit.index < 0 && queue.length) { const f = edit.queue.shift(); drawQueue(); setTimeout(() => cropFile(f), 120); }
       if ($("imgRecrop")) $("imgRecrop").onclick = recrop;
       if ($("imgRemove")) $("imgRemove").onclick = () => { edit.item.image = ""; drawPv(); if ($("imgRecrop")) $("imgRecrop").remove(); $("imgPrev").innerHTML = "이미지<br/>없음"; $("imgRemove").remove(); };
       $("savePost").onclick = savePost;
@@ -855,9 +873,11 @@
       it.rts = Math.max(0, parseInt($("f_rts").value) || 0);
       const th = document.querySelector("#f_theme .on"); it.theme = th ? th.dataset.themeKey : "";
       if (!it.theme) delete it.theme;
-      const wasEdit = edit.index >= 0;
-      if (wasEdit) data.posts[edit.index] = it; else data.posts.unshift(it);
+      const wasEdit = edit.index >= 0, queue = edit.queue || [];
+      const at = edit.at || 0;
+      if (wasEdit) data.posts[edit.index] = it; else data.posts.splice(at, 0, it);
       closeEditor(); saveDraft(); renderAll();
+      if (!wasEdit && queue.length) { toast(`추가했어요 💜 다음 사진으로 넘어가요 (남은 ${queue.length}장)`); setTimeout(() => openPost(-1, queue, at + 1), 300); return; }
       toast(wasEdit ? "수정했어요" : "게시물을 추가했어요 💜");
     }
 
@@ -999,9 +1019,9 @@
       data.profile.banner = url; data.profile.bannerPosition = "center";
       renderProfile(); saveDraft(); toast("헤더 사진을 바꿨어요");
     }
-    $("avaFile").onchange = e => { const file = e.target.files[0]; e.target.value = ""; if (file) setAvatarFrom(file).catch(() => toast("이 사진은 열 수 없어요")); };
+    $("avaFile").onchange = e => { const file = e.target.files[0]; e.target.value = ""; if (file && !isImgFile(file)) return toast("사진 파일만 고를 수 있어요"); if (file) setAvatarFrom(file).catch(() => toast("이 사진은 열 수 없어요")); };
     $("avaRecrop").onclick = () => setAvatarFrom(data.profile.avatar).catch(() => toast("사진을 다시 열 수 없어요. 새로 골라주세요."));
-    $("banFile").onchange = e => { const file = e.target.files[0]; e.target.value = ""; if (file) setBannerFrom(file).catch(() => toast("이 사진은 열 수 없어요")); };
+    $("banFile").onchange = e => { const file = e.target.files[0]; e.target.value = ""; if (file && !isImgFile(file)) return toast("사진 파일만 고를 수 있어요"); if (file) setBannerFrom(file).catch(() => toast("이 사진은 열 수 없어요")); };
     $("banRecrop").onclick = () => setBannerFrom(data.profile.banner).catch(() => toast("사진을 다시 열 수 없어요. 새로 골라주세요."));
     $("saveProfile").onclick = () => {
       const f = data.profile;
