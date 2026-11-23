@@ -225,7 +225,7 @@ window.SITE_DATA = {
       "description": "**#미스터리 #오컬트 #인외 #인외수 #상처수**",
       "greeting": "이쪽입니다. 저 너머에서……뭔가 흐르고 있어요.",
       "link": "",
-      "previewPos": 25,
+      "previewPos": 16,
       "previewX": 50,
       "previewZoom": 1,
       "links": {
@@ -444,7 +444,10 @@ window.SITE_DATA = {
       "link": "",
       "links": {
         "WHIF": "https://www.whif.io/characters/5a89641f-55f7-43d6-a7db-19aafc2c26d0"
-      }
+      },
+      "previewPos": 22,
+      "previewX": 50,
+      "previewZoom": 1
     },
     {
       "id": "mwrpenxf93yt",
