@@ -195,6 +195,9 @@
     .status-box small { font-size: .74rem; color: var(--sub); }
     .badge.st { background: #fff4e0; color: #b4690e; }
     .badge.hid { background: #eceef1; color: #5b6470; }
+    .rel-row { margin-left: 26px; }
+    .rel-in { display: flex; gap: 6px; align-items: center; }
+    .rel-in input { flex: 1; min-width: 0; }
     .badge.spo { background: linear-gradient(120deg, #ece5ff, #e3f2fd); color: #7353d6; }
     .hist { display: flex; flex-direction: column; max-height: 55vh; overflow-y: auto; border: 1px solid var(--line); border-radius: 12px; }
     .hist-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-bottom: 1px solid var(--line); }
@@ -825,6 +828,9 @@
           <label class="check"><input type="checkbox" id="f_adult" ${item.adult ? "checked" : ""} /> 19+ 배지 달기</label>
           <label class="check"><input type="checkbox" id="f_hidden" ${item.hidden ? "checked" : ""} /> 🙈 비공개 <small style="font-weight:400;color:var(--sub)">사이트에 안 보이게 숨겨둬요 (준비되면 체크 풀기)</small></label>
           <label class="check"><input type="checkbox" id="f_spoiler" ${item.spoiler ? "checked" : ""} /> ✦ 스포일러 <small style="font-weight:400;color:var(--sub)">고정 공지 바로 아래에 홀로그램 카드로 보이고, 눌러도 안 열려요</small></label>
+          <label class="f rel-row ${item.spoiler ? "" : "hidden"}" id="f_relRow">📅 공개 예정일 <small>비워두면 올린 날짜(오늘)로 보여요</small>
+            <div class="rel-in"><input type="date" id="f_release" value="${esc(item.releaseDate || "")}" /><button type="button" class="btn btn-ghost btn-sm" id="f_relClear">지우기</button></div>
+          </label>
           <div class="status-box">
             <label class="check"><input type="checkbox" class="f-status" value="asset" ${item.status === "asset" ? "checked" : ""} /> 🔧 에셋 교체중 표시</label>
             <label class="check"><input type="checkbox" class="f-status" value="renewal" ${item.status === "renewal" ? "checked" : ""} /> ✨ 리뉴얼 중 표시</label>
@@ -939,6 +945,8 @@
       if ($("imgRemove")) $("imgRemove").onclick = () => { edit.item.image = ""; drawPv(); if ($("imgRecrop")) $("imgRecrop").remove(); $("imgPrev").innerHTML = "이미지<br/>없음"; $("imgRemove").remove(); };
       // 상태 표시는 하나만 고를 수 있어요
       document.querySelectorAll(".f-status").forEach(cb => cb.onchange = () => { if (cb.checked) document.querySelectorAll(".f-status").forEach(o => { if (o !== cb) o.checked = false; }); });
+      $("f_spoiler").onchange = () => $("f_relRow").classList.toggle("hidden", !$("f_spoiler").checked);
+      $("f_relClear").onclick = e => { e.preventDefault(); $("f_release").value = ""; };
       $("savePost").onclick = savePost;
       // 폰에선 키보드가 갑자기 올라오지 않게, 컴퓨터에서 새로 쓸 때만 이름 칸에 커서를 둬요
       if (index < 0 && isDesktop()) $("f_name").focus();
@@ -1115,6 +1123,8 @@
       it.adult = $("f_adult").checked;
       if ($("f_hidden").checked) it.hidden = true; else delete it.hidden;
       if ($("f_spoiler").checked) it.spoiler = true; else delete it.spoiler;
+      const rel = $("f_release").value;
+      if (it.spoiler && rel) it.releaseDate = rel; else delete it.releaseDate;
       const st = document.querySelector(".f-status:checked"); if (st) it.status = st.value; else delete it.status;
       it.likes = Math.max(0, parseInt($("f_likes").value) || 0);
       it.rts = Math.max(0, parseInt($("f_rts").value) || 0);

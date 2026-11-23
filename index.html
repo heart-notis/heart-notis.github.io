@@ -249,7 +249,11 @@
     .tweet.locked:hover .t-media.preview .media { transform: scale(var(--pz, 1)); }
     .m-tile.locked { cursor: default; }
     /* ✦ 스포일러: 홀로그램 카드 */
+    /* 고정 공지(연보라→하늘)와 구분되게 핑크→복숭아 그라데이션 */
+    .tweet.spoiler { background: linear-gradient(90deg, #fff0f7 0%, #fff5f0 60%, #fff 100%); box-shadow: inset 3px 0 0 #f3a6c8; }
+    .tweet.spoiler:hover { background: linear-gradient(90deg, #ffeaf4 0%, #fff0ea 60%, #fffcfb 100%); }
     .spoil-tag { margin: 0 0 6px; }
+    .rel-date { font-weight: 800; background: linear-gradient(120deg, #8b6fe8, #5fa8ea); -webkit-background-clip: text; background-clip: text; color: transparent; }
     .spoil-tag span { display: inline-block; padding: 4px 11px; border-radius: 999px; font-size: .7rem; font-weight: 800; letter-spacing: .12em; color: #fff;
       background: linear-gradient(120deg, #a98cf3, #7fb5f2, #e79ad0, #a98cf3); background-size: 300% 100%; animation: spoilFlow 4s linear infinite; box-shadow: 0 3px 10px rgba(150,120,240,.35); }
     @keyframes spoilFlow { to { background-position: 300% 0; } }
@@ -887,8 +891,17 @@
     const mediaHTML = c => c.image
       ? `<img class="media" src="${esc(c.image)}" alt="${esc(c.name)}" loading="lazy" decoding="async" />`
       : `<div class="media ph" style="background:linear-gradient(150deg, ${c.color || "#9cc9ea"}, ${c.color || "#9cc9ea"}aa)">${esc(c.name.charAt(0))}</div>`;
-    const headHTML = d => `
-      <div class="t-head"><b>${esc(profile.name)}</b>${I.verified}<span class="muted">@${esc(profile.handle)} · ${shortDate(d)}</span></div>`;
+    const headHTML = (d, label) => `
+      <div class="t-head"><b>${esc(profile.name)}</b>${I.verified}<span class="muted">@${esc(profile.handle)} · ${label || shortDate(d)}</span></div>`;
+    // ✦ 스포일러 공개 예정일: "12월 3일 공개 예정" (지난 날짜/오늘이면 "오늘 공개")
+    const releaseLabel = d => {
+      const dt = toDay(d); if (!d || isNaN(dt)) return "";
+      const now = new Date(), today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const diff = Math.round((dt - today) / 86400000);
+      if (diff <= 0) return `<b class="rel-date">오늘 공개</b>`;
+      if (diff === 1) return `<b class="rel-date">내일 공개 예정</b>`;
+      return `<b class="rel-date">${dt.getMonth() + 1}월 ${dt.getDate()}일 공개 예정</b>`;
+    };
 
     /* ---- 프로필 ---- */
     function renderProfile() {
@@ -930,7 +943,7 @@
           ${meAva()}
           <div class="t-main">
             <div class="spoil-tag"><span>✦ SPOILER</span></div>
-            ${headHTML(c.date)}
+            ${headHTML(c.date, releaseLabel(c.releaseDate))}
             <p class="t-title">${escH(c.name)}</p>
             ${c.tagline ? `<p class="t-tagline">${fmtText(c.tagline)}</p>` : ""}
             <p class="t-tags">${hashtags(c)}</p>
