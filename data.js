@@ -60,7 +60,8 @@ window.SITE_DATA = {
       "previewZoom": 1,
       "links": {},
       "spoiler": true,
-      "theme": "rose"
+      "theme": "rose",
+      "releaseDate": "2026-11-27"
     },
     {
       "id": "mwso99e36g7y",
