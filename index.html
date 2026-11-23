@@ -24,6 +24,7 @@
   <title>하트 (@HEART)</title>
   <meta name="description" content="티팟을 메인으로 천천히 제작하고 있는 AI 캐릭터들을 모아뒀어요 💜" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap" media="print" onload="this.media='all'" />
   <style>
     :root {
       --blue: #8b7cf0;          /* 포인트 글자색 (연보라) */
@@ -559,13 +560,30 @@
       --m-deco: radial-gradient(1.6px 1.6px at 15% 25%, rgba(255,111,181,.55), transparent), radial-gradient(1.4px 1.4px at 70% 60%, rgba(199,125,255,.5), transparent), radial-gradient(1.6px 1.6px at 40% 85%, rgba(122,168,255,.5), transparent);
       --m-deco-size: 120px 120px;
     }
-    .modal[data-theme="palace"] {  /* 궁정·로판 */
-      --blue: #a8803a; --blue-soft: #f8f1e2; --line: #eee3cc; --page: #faf6ec;
-      --grad-strong: linear-gradient(120deg, #b8913f 0%, #d8b56a 50%, #efdca4 100%);
-      --m-bg: #fffdf7; --m-quote: #f9f3e4; --m-quote-line: #d8b56a; --m-glow: rgba(184,145,63,.32);
-      --m-deco: radial-gradient(circle at 0 0, rgba(184,145,63,.09) 0 2px, transparent 3px), radial-gradient(circle at 50% 50%, rgba(184,145,63,.09) 0 2px, transparent 3px);
-      --m-deco-size: 26px 26px;
+    /* 👑 궁정·로판: 아이보리 + 금박 + 깊은 자주 · 명조체 */
+    .modal[data-theme="palace"] {
+      --gold: #b8955a; --gold2: #d9bf86; --plum: #2c2340;
+      --blue: #9a7a43; --blue-soft: #f6efe0; --line: #eadfca; --page: #f7f2e7;
+      --ink: #2c2340; --heart: #b8955a;
+      --grad-strong: linear-gradient(135deg, #2c2340 0%, #463a5c 100%);
+      --m-bg: #fcf9f2; --m-text: #3b3346; --m-text2: #4a3f55; --m-quote: transparent; --m-quote-line: transparent; --m-glow: rgba(44,35,64,.3);
+      --serif: "Noto Serif KR", "Nanum Myeongjo", "AppleMyungjo", "Batang", serif;
     }
+    .modal[data-theme="palace"] .m-top { background: #fcf9f2; border-bottom: 1px solid var(--gold2); box-shadow: 0 3px 0 -2px #fcf9f2, 0 4px 0 -2px var(--gold2); font-family: var(--serif); letter-spacing: .06em; color: var(--plum); }
+    .modal[data-theme="palace"] .d-body { position: relative; }
+    .modal[data-theme="palace"] .d-title { font-family: var(--serif); font-weight: 700; letter-spacing: .04em; color: var(--plum); display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .modal[data-theme="palace"] .d-world { background: transparent; border: 1px solid var(--gold2); color: var(--blue); font-family: var(--serif); font-weight: 600; letter-spacing: .06em; border-radius: 2px; }
+    .modal[data-theme="palace"] .d-tagline { border: none; border-top: 1px solid var(--gold2); border-bottom: 1px solid var(--gold2); border-radius: 0; padding: 12px 8px; text-align: center; font-family: var(--serif); font-style: italic; color: var(--plum); position: relative; }
+    .modal[data-theme="palace"] .d-tagline::before, .modal[data-theme="palace"] .d-tagline::after { content: "❦"; position: absolute; left: 50%; transform: translateX(-50%); background: #fcf9f2; padding: 0 8px; color: var(--gold); font-size: .8rem; font-style: normal; line-height: 1; }
+    .modal[data-theme="palace"] .d-tagline::before { top: -7px; }
+    .modal[data-theme="palace"] .d-tagline::after { bottom: -7px; transform: translateX(-50%) scaleY(-1); }
+    .modal[data-theme="palace"] .d-text { font-family: var(--serif); line-height: 1.85; }
+    .modal[data-theme="palace"] .d-tags a, .modal[data-theme="palace"] .d-tags { color: var(--blue); }
+    .modal[data-theme="palace"] .t-media { border-radius: 3px; border: none; box-shadow: 0 0 0 1px var(--gold), 0 0 0 5px #fcf9f2, 0 0 0 6px var(--gold2), 0 10px 26px rgba(44,35,64,.18); margin: 16px 6px; }
+    .modal[data-theme="palace"] .t-media .media { border-radius: 3px; }
+    .modal[data-theme="palace"] .d-time { font-family: var(--serif); letter-spacing: .03em; }
+    .modal[data-theme="palace"] .chat-ctas .chat-cta { border-radius: 4px; color: #f3e3bd; font-family: var(--serif); letter-spacing: .05em; box-shadow: inset 0 0 0 1px rgba(217,191,134,.55), inset 0 0 0 4px var(--plum), inset 0 0 0 5px rgba(217,191,134,.35), 0 6px 16px rgba(44,35,64,.25); }
+    .modal[data-theme="palace"] .chat-ctas .chat-cta svg { color: var(--gold2); }
     .modal[data-theme="oriental"] {  /* 동양풍·무협 */
       --blue: #9b2f2f; --blue-soft: #f5ebe4; --line: #e8ddd0; --page: #f6f0e6;
       --grad-strong: linear-gradient(120deg, #2f2f2f 0%, #6b5d50 50%, #a8452f 100%);
