@@ -600,7 +600,7 @@
       ["asset", "🔧 교체중", p => p.status === "asset"],
       ["renewal", "✨ 리뉴얼", p => p.status === "renewal"],
       ["hidden", "🙈 비공개", p => !!p.hidden],
-      ["spoiler", "🔮 스포일러", p => !!p.spoiler]
+      ["spoiler", "✦ 스포일러", p => !!p.spoiler]
     ];
     function renderSelBar() {
       const bar = $("selBar");
@@ -704,7 +704,7 @@
           ${selMode ? `<span class="pick" aria-hidden="true">✓</span>` : ""}
           ${p.image ? `<img class="thumb" src="${esc(p.image)}" alt="" draggable="false" onerror="${rawFallback}" />` : `<div class="thumb">${esc((p.name || "?").charAt(0))}</div>`}
           <div class="item-main">
-            <div class="item-title">${esc(p.name || "(이름 없음)")}${p.hidden ? `<span class="badge hid">🙈 비공개</span>` : ""}${p.spoiler ? `<span class="badge spo">🔮 스포</span>` : ""}${p.adult ? `<span class="badge">19+</span>` : ""}${p.status === "asset" ? `<span class="badge st">🔧 교체중</span>` : p.status === "renewal" ? `<span class="badge st re">✨ 리뉴얼</span>` : ""}${isNew(p, "posts") ? `<span class="badge new">NEW</span>` : ""}</div>
+            <div class="item-title">${esc(p.name || "(이름 없음)")}${p.hidden ? `<span class="badge hid">🙈 비공개</span>` : ""}${p.spoiler ? `<span class="badge spo">✦ 스포</span>` : ""}${p.adult ? `<span class="badge">19+</span>` : ""}${p.status === "asset" ? `<span class="badge st">🔧 교체중</span>` : p.status === "renewal" ? `<span class="badge st re">✨ 리뉴얼</span>` : ""}${isNew(p, "posts") ? `<span class="badge new">NEW</span>` : ""}</div>
             <div class="item-sub">${esc(p.date || "")} · ${(p.tags || []).map(t => "#" + esc(t)).join(" ") || "태그 없음"}</div>
             <div class="item-sub">${esc(p.tagline || "")}</div>
           </div>
@@ -824,7 +824,7 @@
           <label class="f">대화하러 가기 링크 <small>위에서 체크한 해시태그(플랫폼)마다 주소 칸이 생겨요 · #합작은 세계관 보기 버튼이 돼요</small><div class="links-box" id="f_links"></div></label>
           <label class="check"><input type="checkbox" id="f_adult" ${item.adult ? "checked" : ""} /> 19+ 배지 달기</label>
           <label class="check"><input type="checkbox" id="f_hidden" ${item.hidden ? "checked" : ""} /> 🙈 비공개 <small style="font-weight:400;color:var(--sub)">사이트에 안 보이게 숨겨둬요 (준비되면 체크 풀기)</small></label>
-          <label class="check"><input type="checkbox" id="f_spoiler" ${item.spoiler ? "checked" : ""} /> 🔮 스포일러 <small style="font-weight:400;color:var(--sub)">고정 공지 바로 아래에 반짝이며 보이고, 눌러도 안 열려요</small></label>
+          <label class="check"><input type="checkbox" id="f_spoiler" ${item.spoiler ? "checked" : ""} /> ✦ 스포일러 <small style="font-weight:400;color:var(--sub)">고정 공지 바로 아래에 홀로그램 카드로 보이고, 눌러도 안 열려요</small></label>
           <div class="status-box">
             <label class="check"><input type="checkbox" class="f-status" value="asset" ${item.status === "asset" ? "checked" : ""} /> 🔧 에셋 교체중 표시</label>
             <label class="check"><input type="checkbox" class="f-status" value="renewal" ${item.status === "renewal" ? "checked" : ""} /> ✨ 리뉴얼 중 표시</label>

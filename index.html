@@ -248,20 +248,23 @@
     .lock-veil span { padding: 6px 14px; border-radius: 999px; background: rgba(255,255,255,.92); border: 1px solid var(--st-line, transparent); color: var(--st-ink, #b4690e); font-size: .8rem; font-weight: 800; box-shadow: 0 3px 12px rgba(0,0,0,.12); }
     .tweet.locked:hover .t-media.preview .media { transform: scale(var(--pz, 1)); }
     .m-tile.locked { cursor: default; }
-    /* 🔮 스포일러 */
-    .tweet.spoiler { position: relative; background: linear-gradient(180deg, rgba(185,162,246,.10), rgba(127,205,242,.06)); }
-    .tweet.spoiler::before { content: ""; position: absolute; inset: 6px 8px; border-radius: 18px; padding: 1.5px; pointer-events: none;
-      background: linear-gradient(120deg, #b9a2f6, #9ab9f5, #7fcdf2, #f3a6d6, #b9a2f6); background-size: 300% 100%; animation: spoilFlow 4s linear infinite;
-      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
-    @keyframes spoilFlow { to { background-position: 300% 0; } }
-    .tweet.spoiler .t-title, .tweet.spoiler .t-tagline, .tweet.spoiler .t-tags { opacity: 1; }
+    /* ✦ 스포일러: 홀로그램 카드 */
     .spoil-tag { margin: 0 0 6px; }
     .spoil-tag span { display: inline-block; padding: 4px 11px; border-radius: 999px; font-size: .7rem; font-weight: 800; letter-spacing: .12em; color: #fff;
-      background: linear-gradient(120deg, #a98cf3, #7fb5f2, #e79ad0); background-size: 200% 100%; animation: spoilFlow 3s linear infinite; box-shadow: 0 3px 10px rgba(150,120,240,.35); }
-    .lock-veil.spoil { background: rgba(240,236,255,.25); backdrop-filter: blur(16px) saturate(1.3); -webkit-backdrop-filter: blur(16px) saturate(1.3); overflow: hidden; }
-    .lock-veil.spoil::after { content: ""; position: absolute; inset: 0; background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,.55) 50%, transparent 65%); transform: translateX(-100%); animation: spoilShine 2.8s ease-in-out infinite; }
-    @keyframes spoilShine { 60%, 100% { transform: translateX(100%); } }
-    .lock-veil.spoil span { color: #7353d6; border-color: #cdbdfb; letter-spacing: .04em; position: relative; z-index: 1; }
+      background: linear-gradient(120deg, #a98cf3, #7fb5f2, #e79ad0, #a98cf3); background-size: 300% 100%; animation: spoilFlow 4s linear infinite; box-shadow: 0 3px 10px rgba(150,120,240,.35); }
+    @keyframes spoilFlow { to { background-position: 300% 0; } }
+    .tweet.spoiler .t-title, .tweet.spoiler .t-tagline, .tweet.spoiler .t-tags { opacity: 1; }
+    .tweet.spoiler .t-media, .m-tile.locked:has(.spoil) { position: relative; overflow: hidden; }
+    .tweet.spoiler .t-media .media, .m-tile .lock-veil.spoil ~ .media, .m-tile:has(.spoil) .media { filter: blur(2px) saturate(1.1); }
+    .lock-veil.spoil { backdrop-filter: none; -webkit-backdrop-filter: none; mix-blend-mode: soft-light; animation: holo 5s ease-in-out infinite;
+      background: linear-gradient(125deg, rgba(185,162,246,.5), rgba(127,205,242,.4) 35%, rgba(243,166,214,.45) 65%, rgba(185,162,246,.5)); background-size: 250% 250%; }
+    @keyframes holo { 50% { background-position: 100% 100%; } }
+    .lock-veil.spoil span { display: none; }
+    .holo-ribbon { position: absolute; top: 12px; right: -36px; z-index: 2; transform: rotate(35deg); width: 130px; text-align: center; padding: 4px 0; background: linear-gradient(90deg, #a98cf3, #7fb5f2); color: #fff; font-size: .62rem; font-weight: 900; letter-spacing: .2em; box-shadow: 0 2px 8px rgba(80,60,180,.3); pointer-events: none; }
+    .holo-spark { position: absolute; left: 12px; bottom: 8px; z-index: 2; color: #fff; font-size: 18px; text-shadow: 0 0 8px #b9a2f6, 0 0 2px #fff; animation: twinkle 2.2s ease-in-out infinite; pointer-events: none; }
+    @keyframes twinkle { 50% { opacity: .35; transform: scale(.8) rotate(20deg); } }
+    .m-tile .holo-ribbon { top: 8px; right: -40px; font-size: .5rem; padding: 2px 0; }
+    .m-tile .holo-spark { font-size: 13px; left: 7px; bottom: 5px; }
     .m-tile.locked .lock-veil span { font-size: .68rem; padding: 4px 9px; }
     .m-tile.locked:hover .media { filter: none; }
     .t-context { font-size: .8rem; font-weight: 700; color: var(--sub); margin: -2px 0 2px; display: flex; align-items: center; gap: 6px; }
@@ -916,17 +919,17 @@
     /* ---- 게시물 조각 ---- */
     // 🔧 에셋 교체중 / ✨ 리뉴얼 중: 안내를 붙이고 눌러도 안 열려요
     const STATUS = { asset: ["🔧", "에셋 교체중"], renewal: ["✨", "리뉴얼 중"] };
-    // 🔮 스포일러: 맨 위(고정 공지 바로 아래)에 반짝이며 보이고, 눌러도 안 열려요
+    // ✦ 스포일러: 맨 위(고정 공지 바로 아래)에 반짝이며 보이고, 눌러도 안 열려요
     const isLocked = c => !!(c && (c.spoiler || STATUS[c.status]));
     const veilHTML = c => c.spoiler
-      ? `<div class="lock-veil spoil"><span>🔮 스포일러</span></div>`
+      ? `<div class="lock-veil spoil"></div><span class="holo-ribbon">SPOILER</span><span class="holo-spark">✦</span>`
       : (() => { const [ic, t] = STATUS[c.status]; return `<div class="lock-veil st-${c.status}"><span>${ic} ${t}</span></div>`; })();
     function spoilerTweet(c) {
       return `
         <article class="tweet locked spoiler" aria-disabled="true">
           ${meAva()}
           <div class="t-main">
-            <div class="spoil-tag"><span>🔮 SPOILER</span></div>
+            <div class="spoil-tag"><span>✦ SPOILER</span></div>
             ${headHTML(c.date)}
             <p class="t-title">${escH(c.name)}</p>
             ${c.tagline ? `<p class="t-tagline">${fmtText(c.tagline)}</p>` : ""}
