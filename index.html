@@ -359,6 +359,9 @@
     .m-tile .holo-spark { font-size: 13px; left: 7px; bottom: 5px; }
     .m-tile.locked .lock-veil span { font-size: .68rem; padding: 4px 9px; }
     .m-tile.locked:hover .media { filter: none; }
+    /* ✦ 미디어 탭 스포일러: 눌러도·마우스 올려도 계속 흐리게 */
+    .m-tile.spoil-tile .media, .m-tile.spoil-tile:hover .media, .m-tile.spoil-tile:active .media { filter: blur(6px) saturate(1.1) !important; transform: scale(1.08); }
+    .m-tile.spoil-tile { -webkit-tap-highlight-color: transparent; cursor: default; }
     .t-context { font-size: .8rem; font-weight: 700; color: var(--sub); margin: -2px 0 2px; display: flex; align-items: center; gap: 6px; }
     .t-context svg { width: 14px; height: 14px; }
     /* 📌 고정된 공지: 눈에 잘 띄게 */
@@ -1256,7 +1259,7 @@
       if (view === "media") {
         const withImg = characters.map((c, i) => ({ c, i })).filter(({ c }) => c.image);
         el.innerHTML = withImg.length ? `<div class="media-grid">${withImg.map(({ c, i }) => `
-          ${isLocked(c) ? `<div class="m-tile locked" aria-disabled="true">${mediaHTML(c)}${veilHTML(c)}</div>` : `<button class="m-tile" data-open="${i}" aria-label="${esc(c.name)}">${mediaHTML(c)}${c.adult ? `<span class="badge">19+</span>` : ""}</button>`}`).join("")}</div>`
+          ${isLocked(c) ? `<div class="m-tile locked${isSpoiler(c) ? " spoil-tile" : ""}" aria-disabled="true">${mediaHTML(c)}${veilHTML(c)}</div>` : `<button class="m-tile" data-open="${i}" aria-label="${esc(c.name)}">${mediaHTML(c)}${c.adult ? `<span class="badge">19+</span>` : ""}</button>`}`).join("")}</div>`
           : `<p class="empty">아직 올라간 이미지가 없어요</p>`;
         return;
       }
