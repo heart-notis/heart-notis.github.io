@@ -22,7 +22,9 @@ window.SITE_DATA = {
       "desc": "이식 요청, 문의는 홈페이지로 메시지 남겨주세요 💙",
       "image": "og-2.jpg",
       "auto": true
-    }
+    },
+    "status": "열심히 작업하는 중♥",
+    "statusAt": "2026-11-23T11:12:47.625Z"
   },
   "notices": [
     {
