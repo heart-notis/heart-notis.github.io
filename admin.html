@@ -1068,14 +1068,14 @@
       $("f_relClear").onclick = e => { e.preventDefault(); $("f_release").value = ""; $("f_releaseTime").value = ""; };
       // 🛠️ 업데이트 기록
       if (!Array.isArray(edit.item.log)) edit.item.log = [];
-      const today = (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; })();
-      $("logDate").value = today;
+      const todayStr = today();
+      $("logDate").value = todayStr;
       const drawLog = () => {
         $("logList").innerHTML = edit.item.log.map((l, k) => `<div class="log-it"><b>${esc(l.d.slice(5).replace("-", "/"))}</b><span>${esc(l.t)}</span><button type="button" data-log-del="${k}" aria-label="지우기">×</button></div>`).join("");
       };
       $("logAdd").onclick = () => {
         const t = $("logText").value.trim(); if (!t) return toast("내용을 적어주세요");
-        edit.item.log.push({ d: $("logDate").value || today, t }); edit.item.log.sort((a, b) => b.d.localeCompare(a.d));
+        edit.item.log.push({ d: $("logDate").value || todayStr, t }); edit.item.log.sort((a, b) => b.d.localeCompare(a.d));
         $("logText").value = ""; drawLog();
       };
       $("logText").onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); $("logAdd").click(); } };
