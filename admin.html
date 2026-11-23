@@ -490,7 +490,7 @@
 
     /* 사이트에 항상 들어가는 파일들 */
     const FIXED_FILES = [
-      "index.html", "admin.html", "favicon.svg", "favicon-64.png", "apple-touch-icon.png", "og.jpg", "og-2.jpg", "sw.js", "manifest.json",
+      "index.html", "admin.html", "favicon.svg", "favicon-64.png", "apple-touch-icon.png", "og.jpg", "og-2.jpg",
       "images/header.jpg", "images/profile.jpg", "images/profile-sm.jpg",
       "images/sticker-smile.png", "images/sticker-open.png", "images/sticker-top.png", "images/sticker-top2.png"
     ];
@@ -1263,9 +1263,9 @@
             <div class="hint" style="margin-top:6px">💡 링크 끝에 <b>?from=이름</b>을 붙여서 올리면 정확히 구분돼요. 예: heart-notis.github.io/?from=티팟</div>
           </div>
           <div class="vs-ref">
-            <div class="vs-ref-top"><b>💜 캐릭터 반응</b><div class="vs-seg">${[["v", "조회"], ["l", "하트"], ["c", "대화"], ["s", "알림"]].map(([k, t], n) => `<button data-rk="${k}" class="${n === 0 ? "on" : ""}">${t}</button>`).join("")}</div></div>
+            <div class="vs-ref-top"><b>💜 캐릭터 반응</b><div class="vs-seg">${[["v", "조회"], ["l", "하트"], ["c", "대화"]].map(([k, t], n) => `<button data-rk="${k}" class="${n === 0 ? "on" : ""}">${t}</button>`).join("")}</div></div>
             <div id="rankList"></div>
-            <div class="hint" style="margin-top:6px">조회 = 게시물을 열어본 횟수 · 하트 = 지금 하트 눌러둔 사람 · 대화 = 대화하기 버튼 누른 횟수 · 알림 = 스포일러 공개 알림 신청</div>
+            <div class="hint" style="margin-top:6px">조회 = 게시물을 열어본 횟수 · 하트 = 지금 하트 눌러둔 사람 · 대화 = 대화하기 버튼 누른 횟수</div>
           </div>
           <div class="hint">방문 = 그날 들어온 사람 수 (같은 사람은 하루 1번) · 조회 = 사이트를 연 횟수<br/>제작자 페이지를 연 기기의 방문은 세지 않아요. 세기 시작한 날부터 쌓여요.</div>
         </div>`;
