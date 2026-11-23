@@ -249,8 +249,8 @@
     .w-it b { font-size: .86rem; }
     .w-it small { font-size: .72rem; color: var(--sub); font-weight: 500; }
     .w-it textarea { min-height: 54px; }
-    .ex-row { display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 6px; touch-action: pan-x; }
-    .ex-it { position: relative; flex: 0 0 64px; height: 79px; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); background: var(--soft); touch-action: none; cursor: grab; user-select: none; -webkit-touch-callout: none; transition: transform .15s, box-shadow .15s; }
+    .ex-row { display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 6px; }
+    .ex-it { position: relative; flex: 0 0 64px; height: 79px; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); background: var(--soft); cursor: grab; user-select: none; -webkit-touch-callout: none; transition: transform .15s, box-shadow .15s; }
     .ex-it.lift { transform: scale(1.08); box-shadow: 0 6px 16px rgba(110,90,220,.3); z-index: 2; }
     .ex-it img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
     .ex-it b { position: absolute; left: 4px; top: 4px; font-size: .62rem; color: #fff; background: rgba(0,0,0,.45); padding: 0 5px; border-radius: 6px; }
@@ -1103,6 +1103,8 @@
         const end = () => { clearTimeout(timer); if (from !== null) { from = null; row.querySelectorAll(".lift").forEach(x => x.classList.remove("lift")); } };
         row.addEventListener("pointerup", end); row.addEventListener("pointercancel", end);
         row.addEventListener("dragstart", e => e.preventDefault());
+        // 꾹 눌러 잡았을 때만 화면 스크롤을 막아요 (평소엔 위아래로 자유롭게 스크롤)
+        row.addEventListener("touchmove", e => { if (from !== null) e.preventDefault(); }, { passive: false });
       })();
       drawEx();
       $("savePost").onclick = savePost;
