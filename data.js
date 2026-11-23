@@ -16,7 +16,13 @@ window.SITE_DATA = {
     "avatarSmall": "images/profile-sm-mwrt2j4d.jpg",
     "avatarPosition": "center",
     "banner": "images/header.jpg",
-    "bannerPosition": "center 57%"
+    "bannerPosition": "center 57%",
+    "share": {
+      "title": "하트 (@HEART)",
+      "desc": "이식 요청, 문의는 홈페이지로 메시지 남겨주세요 💙",
+      "image": "og-2.jpg",
+      "auto": true
+    }
   },
   "notices": [
     {
