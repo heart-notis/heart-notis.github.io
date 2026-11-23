@@ -1488,7 +1488,11 @@
       // ✦ 스포일러 사진을 누르면 한마디 말풍선이 톡 (다른 곳 누르면 닫혀요)
       const talk = e.target.closest(".tweet.spoiler .t-media.can-talk");
       document.querySelectorAll(".t-media.talk").forEach(m => { if (m !== talk) m.classList.remove("talk"); });
-      if (talk) { talk.classList.toggle("talk"); return; }
+      if (talk) {
+        clearTimeout(talk._t);
+        if (talk.classList.toggle("talk")) talk._t = setTimeout(() => talk.classList.remove("talk"), 5000);   // 5초 뒤 알아서 쏙
+        return;
+      }
       if (e.target.closest("[data-search-open]")) { searchOpen = true; searchFocus = true; return renderView(); }
       if (e.target.closest("[data-search-close]")) return closeSearch();
       const chip = e.target.closest(".chip");
