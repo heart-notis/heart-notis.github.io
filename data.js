@@ -39,6 +39,30 @@ window.SITE_DATA = {
   ],
   "posts": [
     {
+      "id": "mwspzf0v78ao",
+      "name": "러브 LOVE",
+      "world": "SIGNAL",
+      "tagline": "너무 진심이 되지는 말아요, 서로 부담스럽잖아.",
+      "tags": [
+        "WHIF",
+        "BLOOM"
+      ],
+      "image": "images/post-mwspzf0v78ao-mwsq1tzb.webp",
+      "adult": false,
+      "likes": 652,
+      "rts": 163,
+      "date": "2026-11-27",
+      "description": "",
+      "greeting": "",
+      "link": "",
+      "previewPos": 25,
+      "previewX": 50,
+      "previewZoom": 1,
+      "links": {},
+      "spoiler": true,
+      "theme": "rose"
+    },
+    {
       "id": "mwso99e36g7y",
       "name": "카일루스",
       "world": "아르켈 제국",
