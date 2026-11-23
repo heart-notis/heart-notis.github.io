@@ -285,11 +285,11 @@
     .tab-new { display: inline-block; width: 7px; height: 7px; margin-left: 3px; border-radius: 50%; vertical-align: 9px; font-size: 0; background: linear-gradient(135deg, #c3a8ff, #7fcdf2); box-shadow: 0 0 0 2px #fff, 0 0 8px rgba(160, 140, 250, .7); }
     .new-badge { display: inline-block; margin-left: 6px; padding: 0 7px; border-radius: 999px; border: 1px solid #ddd3fb; background: #f6f2ff; color: #7a68e6; font-size: .62rem; font-weight: 800; letter-spacing: .05em; line-height: 1.6; vertical-align: 2px; }
     .tab.active { color: var(--blue); }
-    .tabs { position: relative; }
-    .tab-heart { position: absolute; left: 0; bottom: -9px; z-index: 2; width: 18px; height: 18px; pointer-events: none; transition: transform .45s cubic-bezier(.3, 1.4, .5, 1); filter: drop-shadow(0 2px 4px rgba(140,120,240,.4)); }
-    .tab-heart svg { width: 100%; height: 100%; }
-    .tab-heart.hop svg { animation: hop .45s ease; }
-    @keyframes hop { 40% { transform: translateY(-6px) scale(1.15); } }
+    .tab.active::after {
+      content: ""; position: absolute; left: 50%; bottom: 0;
+      transform: translateX(-50%);
+      width: 56px; height: 3px; border-radius: 3px; background: var(--grad-strong);
+    }
 
     /* ---------- 해시태그 필터 ---------- */
     .filter-row { display: flex; align-items: center; border-bottom: 1px solid var(--line); }
@@ -1032,7 +1032,7 @@
       </div>
     </section>
 
-    <nav class="tabs" role="tablist"><span class="tab-heart" id="tabHeart" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="url(#hg)" d="M12 21.2s-8.6-5.2-10.4-10.6C.3 6.6 2.8 2.8 6.7 2.8c2.3 0 4.1 1.2 5.3 3.1 1.2-1.9 3-3.1 5.3-3.1 3.9 0 6.4 3.8 5.1 7.8C20.6 16 12 21.2 12 21.2z"/></svg></span>
+    <nav class="tabs" role="tablist">
       <button class="tab active" data-view="tweets">게시물<span class="tab-count" id="cntPosts"></span></button>
       <button class="tab" data-view="media">미디어</button>
       <button class="tab" data-view="notice">공지<span class="tab-count" id="cntNotices"></span><span class="tab-new hidden" id="newNotices" aria-label="새 공지"></span></button>
@@ -1274,15 +1274,6 @@
       }
     }
 
-    /* ---- 💜 탭 아래 하트가 미끄러져 따라가요 ---- */
-    function moveTabHeart() {
-      const h = $("tabHeart"), t = document.querySelector(".tab.active"); if (!h || !t) return;
-      h.style.transform = `translateX(${t.offsetLeft + t.offsetWidth / 2 - 9}px)`;
-      h.classList.remove("hop"); void h.offsetWidth; h.classList.add("hop");
-    }
-    addEventListener("resize", moveTabHeart);
-    requestAnimationFrame(() => { const h = $("tabHeart"); if (h) { h.style.transition = "none"; moveTabHeart(); h.offsetWidth; h.style.transition = ""; } });
-
     /* ---- 💍 24시간 안에 새 게시물이 있으면 프사에 링 + NEW ---- */
     (function newRing() {
       const fresh = characters.some(c => !isSpoiler(c) && !c.hidden && (() => {
@@ -1294,7 +1285,8 @@
       const place = () => {
         r.style.left = a.offsetLeft - 6 + "px"; r.style.top = a.offsetTop - 6 + "px"; r.style.width = r.style.height = a.offsetWidth + 12 + "px";
         // NEW 딱지: 원 테두리 오른쪽 아래에 걸쳐서 (사진은 안 가리게)
-        nw.style.left = a.offsetLeft + a.offsetWidth * .84 + "px"; nw.style.top = a.offsetTop + a.offsetHeight * .88 + "px";
+        const half = a.offsetWidth / 2, k = (half + 3) * Math.SQRT1_2;   // 링 위 오른쪽 아래(45°) 지점에 딱지 가운데를 맞춰요
+        nw.style.left = a.offsetLeft + half + k - nw.offsetWidth / 2 + "px"; nw.style.top = a.offsetTop + half + k - nw.offsetHeight / 2 + "px";
       };
       r.classList.remove("hidden"); nw.classList.remove("hidden"); place(); addEventListener("resize", place);
     })();
@@ -1780,7 +1772,6 @@
       if (!document.querySelector(`.tab[data-view="${v}"]`)) v = "tweets";
       view = v;
       document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.view === v));
-      moveTabHeart();
       renderView();
       if (push) history.pushState({ heart: "tab", view: v }, "", baseUrl() + (v === "tweets" ? "" : "#" + v));
     }
