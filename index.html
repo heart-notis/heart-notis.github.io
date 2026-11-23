@@ -248,6 +248,20 @@
     .lock-veil span { padding: 6px 14px; border-radius: 999px; background: rgba(255,255,255,.92); border: 1px solid var(--st-line, transparent); color: var(--st-ink, #b4690e); font-size: .8rem; font-weight: 800; box-shadow: 0 3px 12px rgba(0,0,0,.12); }
     .tweet.locked:hover .t-media.preview .media { transform: scale(var(--pz, 1)); }
     .m-tile.locked { cursor: default; }
+    /* 🔮 스포일러 */
+    .tweet.spoiler { position: relative; background: linear-gradient(180deg, rgba(185,162,246,.10), rgba(127,205,242,.06)); }
+    .tweet.spoiler::before { content: ""; position: absolute; inset: 6px 8px; border-radius: 18px; padding: 1.5px; pointer-events: none;
+      background: linear-gradient(120deg, #b9a2f6, #9ab9f5, #7fcdf2, #f3a6d6, #b9a2f6); background-size: 300% 100%; animation: spoilFlow 4s linear infinite;
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
+    @keyframes spoilFlow { to { background-position: 300% 0; } }
+    .tweet.spoiler .t-title, .tweet.spoiler .t-tagline, .tweet.spoiler .t-tags { opacity: 1; }
+    .spoil-tag { margin: 0 0 6px; }
+    .spoil-tag span { display: inline-block; padding: 4px 11px; border-radius: 999px; font-size: .7rem; font-weight: 800; letter-spacing: .12em; color: #fff;
+      background: linear-gradient(120deg, #a98cf3, #7fb5f2, #e79ad0); background-size: 200% 100%; animation: spoilFlow 3s linear infinite; box-shadow: 0 3px 10px rgba(150,120,240,.35); }
+    .lock-veil.spoil { background: rgba(240,236,255,.25); backdrop-filter: blur(16px) saturate(1.3); -webkit-backdrop-filter: blur(16px) saturate(1.3); overflow: hidden; }
+    .lock-veil.spoil::after { content: ""; position: absolute; inset: 0; background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,.55) 50%, transparent 65%); transform: translateX(-100%); animation: spoilShine 2.8s ease-in-out infinite; }
+    @keyframes spoilShine { 60%, 100% { transform: translateX(100%); } }
+    .lock-veil.spoil span { color: #7353d6; border-color: #cdbdfb; letter-spacing: .04em; position: relative; z-index: 1; }
     .m-tile.locked .lock-veil span { font-size: .68rem; padding: 4px 9px; }
     .m-tile.locked:hover .media { filter: none; }
     .t-context { font-size: .8rem; font-weight: 700; color: var(--sub); margin: -2px 0 2px; display: flex; align-items: center; gap: 6px; }
@@ -902,9 +916,27 @@
     /* ---- 게시물 조각 ---- */
     // 🔧 에셋 교체중 / ✨ 리뉴얼 중: 안내를 붙이고 눌러도 안 열려요
     const STATUS = { asset: ["🔧", "에셋 교체중"], renewal: ["✨", "리뉴얼 중"] };
-    const isLocked = c => !!(c && STATUS[c.status]);
-    const veilHTML = c => { const [ic, t] = STATUS[c.status]; return `<div class="lock-veil st-${c.status}"><span>${ic} ${t}</span></div>`; };
+    // 🔮 스포일러: 맨 위(고정 공지 바로 아래)에 반짝이며 보이고, 눌러도 안 열려요
+    const isLocked = c => !!(c && (c.spoiler || STATUS[c.status]));
+    const veilHTML = c => c.spoiler
+      ? `<div class="lock-veil spoil"><span>🔮 스포일러</span></div>`
+      : (() => { const [ic, t] = STATUS[c.status]; return `<div class="lock-veil st-${c.status}"><span>${ic} ${t}</span></div>`; })();
+    function spoilerTweet(c) {
+      return `
+        <article class="tweet locked spoiler" aria-disabled="true">
+          ${meAva()}
+          <div class="t-main">
+            <div class="spoil-tag"><span>🔮 SPOILER</span></div>
+            ${headHTML(c.date)}
+            <p class="t-title">${escH(c.name)}</p>
+            ${c.tagline ? `<p class="t-tagline">${fmtText(c.tagline)}</p>` : ""}
+            <p class="t-tags">${hashtags(c)}</p>
+            ${c.image ? `<div class="t-media preview" style="--pv:${typeof c.previewPos === "number" ? c.previewPos : 25}%;--px:${typeof c.previewX === "number" ? c.previewX : 50}%;--pz:${typeof c.previewZoom === "number" ? c.previewZoom : 1}">${mediaHTML(c)}${veilHTML(c)}</div>` : ""}
+          </div>
+        </article>`;
+    }
     function lockedTweet(c) {
+      if (c.spoiler) return spoilerTweet(c);
       const [ic, t] = STATUS[c.status];
       return `
         <article class="tweet locked st-${c.status}" aria-disabled="true">
@@ -1045,7 +1077,8 @@
       const tags = ["전체", ...new Set([...tagList, ...characters.flatMap(c => c.tags)])];
       const chips = `<div class="chips-wrap"><div class="edge left"><button data-scroll="-1" aria-label="왼쪽 태그">${I.chevL}</button></div><div class="chips" id="chips">${tags.map(t => `<button class="chip ${t === activeTag ? "active" : ""}" data-tag="${esc(t)}">${t === "전체" ? "전체" : "#" + esc(t)}</button>`).join("")}</div><div class="edge right"><button data-scroll="1" aria-label="오른쪽 태그">${I.chevR}</button></div></div>`;
       const prevScroll = $("chips")?.scrollLeft || 0;
-      const list = characters.map((c, i) => ({ c, i })).filter(({ c }) => activeTag === "전체" || c.tags.includes(activeTag));
+      const list = characters.map((c, i) => ({ c, i })).filter(({ c }) => activeTag === "전체" || c.tags.includes(activeTag))
+        .sort((a, b) => (b.c.spoiler ? 1 : 0) - (a.c.spoiler ? 1 : 0));   // 스포일러는 맨 위로 (나머지 순서는 그대로)
       // 공지 중 "게시물 상단에 띄우기"를 체크한 것은 게시물 탭 맨 위에
       const topNotices = activeTag === "전체" ? notices.filter(n => n.onPosts).map(n => noticeTweet(n, true)).join("") : "";
       el.innerHTML = chips + topNotices + (list.length ? list.map(({ c, i }) => charTweet(c, i)).join("")

@@ -195,6 +195,7 @@
     .status-box small { font-size: .74rem; color: var(--sub); }
     .badge.st { background: #fff4e0; color: #b4690e; }
     .badge.hid { background: #eceef1; color: #5b6470; }
+    .badge.spo { background: linear-gradient(120deg, #ece5ff, #e3f2fd); color: #7353d6; }
     .hist { display: flex; flex-direction: column; max-height: 55vh; overflow-y: auto; border: 1px solid var(--line); border-radius: 12px; }
     .hist-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-bottom: 1px solid var(--line); }
     .hist-row:last-child { border-bottom: 0; }
@@ -209,6 +210,8 @@
     .tag-pick button.on { background: var(--grad); border-color: transparent; color: #fff; }
 
     .img-box { display: flex; gap: 14px; align-items: flex-start; }
+    .img-side { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+    #imgBtns { flex-wrap: wrap; }
     .img-prev { width: 120px; aspect-ratio: 987 / 1216; border-radius: 12px; background: var(--soft); border: 1px dashed #cfc4fa; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: .78rem; text-align: center; }
     .img-prev img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .img-side { flex: 1; display: flex; flex-direction: column; gap: 8px; font-size: .82rem; color: var(--sub); }
@@ -596,7 +599,8 @@
       ["adult", "19+", p => !!p.adult],
       ["asset", "🔧 교체중", p => p.status === "asset"],
       ["renewal", "✨ 리뉴얼", p => p.status === "renewal"],
-      ["hidden", "🙈 비공개", p => !!p.hidden]
+      ["hidden", "🙈 비공개", p => !!p.hidden],
+      ["spoiler", "🔮 스포일러", p => !!p.spoiler]
     ];
     function renderSelBar() {
       const bar = $("selBar");
@@ -700,7 +704,7 @@
           ${selMode ? `<span class="pick" aria-hidden="true">✓</span>` : ""}
           ${p.image ? `<img class="thumb" src="${esc(p.image)}" alt="" draggable="false" onerror="${rawFallback}" />` : `<div class="thumb">${esc((p.name || "?").charAt(0))}</div>`}
           <div class="item-main">
-            <div class="item-title">${esc(p.name || "(이름 없음)")}${p.hidden ? `<span class="badge hid">🙈 비공개</span>` : ""}${p.adult ? `<span class="badge">19+</span>` : ""}${p.status === "asset" ? `<span class="badge st">🔧 교체중</span>` : p.status === "renewal" ? `<span class="badge st re">✨ 리뉴얼</span>` : ""}${isNew(p, "posts") ? `<span class="badge new">NEW</span>` : ""}</div>
+            <div class="item-title">${esc(p.name || "(이름 없음)")}${p.hidden ? `<span class="badge hid">🙈 비공개</span>` : ""}${p.spoiler ? `<span class="badge spo">🔮 스포</span>` : ""}${p.adult ? `<span class="badge">19+</span>` : ""}${p.status === "asset" ? `<span class="badge st">🔧 교체중</span>` : p.status === "renewal" ? `<span class="badge st re">✨ 리뉴얼</span>` : ""}${isNew(p, "posts") ? `<span class="badge new">NEW</span>` : ""}</div>
             <div class="item-sub">${esc(p.date || "")} · ${(p.tags || []).map(t => "#" + esc(t)).join(" ") || "태그 없음"}</div>
             <div class="item-sub">${esc(p.tagline || "")}</div>
           </div>
@@ -820,6 +824,7 @@
           <label class="f">대화하러 가기 링크 <small>위에서 체크한 해시태그(플랫폼)마다 주소 칸이 생겨요 · #합작은 세계관 보기 버튼이 돼요</small><div class="links-box" id="f_links"></div></label>
           <label class="check"><input type="checkbox" id="f_adult" ${item.adult ? "checked" : ""} /> 19+ 배지 달기</label>
           <label class="check"><input type="checkbox" id="f_hidden" ${item.hidden ? "checked" : ""} /> 🙈 비공개 <small style="font-weight:400;color:var(--sub)">사이트에 안 보이게 숨겨둬요 (준비되면 체크 풀기)</small></label>
+          <label class="check"><input type="checkbox" id="f_spoiler" ${item.spoiler ? "checked" : ""} /> 🔮 스포일러 <small style="font-weight:400;color:var(--sub)">고정 공지 바로 아래에 반짝이며 보이고, 눌러도 안 열려요</small></label>
           <div class="status-box">
             <label class="check"><input type="checkbox" class="f-status" value="asset" ${item.status === "asset" ? "checked" : ""} /> 🔧 에셋 교체중 표시</label>
             <label class="check"><input type="checkbox" class="f-status" value="renewal" ${item.status === "renewal" ? "checked" : ""} /> ✨ 리뉴얼 중 표시</label>
@@ -1109,6 +1114,7 @@
       it.link = it.tags.length ? "" : (edit.linkVals[""] || "").trim();
       it.adult = $("f_adult").checked;
       if ($("f_hidden").checked) it.hidden = true; else delete it.hidden;
+      if ($("f_spoiler").checked) it.spoiler = true; else delete it.spoiler;
       const st = document.querySelector(".f-status:checked"); if (st) it.status = st.value; else delete it.status;
       it.likes = Math.max(0, parseInt($("f_likes").value) || 0);
       it.rts = Math.max(0, parseInt($("f_rts").value) || 0);
