@@ -143,6 +143,7 @@
     .status-box { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border: 1px dashed var(--line); border-radius: 12px; }
     .status-box small { font-size: .74rem; color: var(--sub); }
     .badge.st { background: #fff4e0; color: #b4690e; }
+    .badge.st.re { background: #f1ecff; color: #7353d6; }
     .check { display: flex; align-items: center; gap: 8px; font-size: .88rem; font-weight: 600; }
     .check input { width: 18px; height: 18px; accent-color: var(--accent); }
     .tag-pick { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -497,7 +498,7 @@
         <div class="item">
           ${p.image ? `<img class="thumb" src="${esc(p.image)}" alt="" />` : `<div class="thumb">${esc((p.name || "?").charAt(0))}</div>`}
           <div class="item-main">
-            <div class="item-title">${esc(p.name || "(이름 없음)")}${p.adult ? `<span class="badge">19+</span>` : ""}${p.status === "asset" ? `<span class="badge st">🔧 교체중</span>` : p.status === "renewal" ? `<span class="badge st">✨ 리뉴얼</span>` : ""}${isNew(p, "posts") ? `<span class="badge new">NEW</span>` : ""}</div>
+            <div class="item-title">${esc(p.name || "(이름 없음)")}${p.adult ? `<span class="badge">19+</span>` : ""}${p.status === "asset" ? `<span class="badge st">🔧 교체중</span>` : p.status === "renewal" ? `<span class="badge st re">✨ 리뉴얼</span>` : ""}${isNew(p, "posts") ? `<span class="badge new">NEW</span>` : ""}</div>
             <div class="item-sub">${esc(p.date || "")} · ${(p.tags || []).map(t => "#" + esc(t)).join(" ") || "태그 없음"}</div>
             <div class="item-sub">${esc(p.tagline || "")}</div>
           </div>

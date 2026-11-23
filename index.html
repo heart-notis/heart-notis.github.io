@@ -239,11 +239,13 @@
     .tweet.locked { cursor: default; }
     .tweet.locked:hover { background: transparent; }
     .tweet.locked .t-title, .tweet.locked .t-tagline, .tweet.locked .t-tags { opacity: .55; }
-    .lock-note { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 0 0 6px; padding: 5px 11px; border-radius: 10px; font-size: .78rem; color: #6b5a3a; background: #fff6e3; border: 1px dashed #f0c987; transform: rotate(-.6deg); box-shadow: 0 2px 6px rgba(240,180,80,.15); }
-    .lock-note b { color: #b4690e; }
-    .lock-note span { color: #9a8a6c; font-size: .72rem; }
-    .lock-veil { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,.45); backdrop-filter: blur(4px) grayscale(.5); -webkit-backdrop-filter: blur(4px) grayscale(.5); }
-    .lock-veil span { padding: 6px 14px; border-radius: 999px; background: rgba(255,255,255,.92); color: #b4690e; font-size: .8rem; font-weight: 800; box-shadow: 0 3px 12px rgba(0,0,0,.12); }
+    /* 색: 에셋 교체중 = 살구·주황 / 리뉴얼 중 = 라벤더·보라 */
+    .st-asset { --st-ink: #b4690e; --st-bg: #fff6e3; --st-line: #f0c987; --st-glow: rgba(240,180,80,.18); --st-veil: rgba(255,244,226,.5); }
+    .st-renewal { --st-ink: #7353d6; --st-bg: #f4f0ff; --st-line: #c9b8fa; --st-glow: rgba(150,120,240,.18); --st-veil: rgba(244,240,255,.5); }
+    .lock-note { display: inline-flex; align-items: center; gap: 6px; margin: 0 0 6px; padding: 5px 11px; border-radius: 10px; font-size: .78rem; background: var(--st-bg); border: 1px dashed var(--st-line); transform: rotate(-.6deg); box-shadow: 0 2px 6px var(--st-glow); }
+    .lock-note b { color: var(--st-ink); }
+    .lock-veil { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: var(--st-veil, rgba(255,255,255,.45)); backdrop-filter: blur(4px) grayscale(.5); -webkit-backdrop-filter: blur(4px) grayscale(.5); }
+    .lock-veil span { padding: 6px 14px; border-radius: 999px; background: rgba(255,255,255,.92); border: 1px solid var(--st-line, transparent); color: var(--st-ink, #b4690e); font-size: .8rem; font-weight: 800; box-shadow: 0 3px 12px rgba(0,0,0,.12); }
     .tweet.locked:hover .t-media.preview .media { transform: scale(var(--pz, 1)); }
     .m-tile.locked { cursor: default; }
     .m-tile.locked .lock-veil span { font-size: .68rem; padding: 4px 9px; }
@@ -899,16 +901,16 @@
 
     /* ---- 게시물 조각 ---- */
     // 🔧 에셋 교체중 / ✨ 리뉴얼 중: 안내를 붙이고 눌러도 안 열려요
-    const STATUS = { asset: ["🔧", "에셋 교체중", "새 이미지로 단장하고 있어요"], renewal: ["✨", "리뉴얼 중", "더 좋아져서 돌아올게요"] };
+    const STATUS = { asset: ["🔧", "에셋 교체중"], renewal: ["✨", "리뉴얼 중"] };
     const isLocked = c => !!(c && STATUS[c.status]);
-    const veilHTML = c => { const [ic, t] = STATUS[c.status]; return `<div class="lock-veil"><span>${ic} ${t}</span></div>`; };
+    const veilHTML = c => { const [ic, t] = STATUS[c.status]; return `<div class="lock-veil st-${c.status}"><span>${ic} ${t}</span></div>`; };
     function lockedTweet(c) {
-      const [ic, t, sub] = STATUS[c.status];
+      const [ic, t] = STATUS[c.status];
       return `
-        <article class="tweet locked" aria-disabled="true">
+        <article class="tweet locked st-${c.status}" aria-disabled="true">
           ${meAva()}
           <div class="t-main">
-            <div class="lock-note">${ic} <b>${t}</b><span>${sub}</span></div>
+            <div class="lock-note">${ic} <b>${t}</b></div>
             ${headHTML(c.date)}
             <p class="t-title">${escH(c.name)}</p>
             ${c.tagline ? `<p class="t-tagline">${fmtText(c.tagline)}</p>` : ""}
