@@ -112,6 +112,28 @@
     /* ---------- 목록 ---------- */
     .list { display: flex; flex-direction: column; gap: 8px; }
     .item { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 10px; display: flex; gap: 12px; align-items: center; }
+    #postList .thumb { touch-action: none; -webkit-touch-callout: none; user-select: none; -webkit-user-select: none; cursor: grab; }
+    #postList .item { transition: transform .18s ease, box-shadow .18s; }
+    #postList .item.dragging { transition: none; position: relative; z-index: 5; box-shadow: 0 12px 30px rgba(110,90,220,.28); border-color: var(--accent); }
+    body.drag-on { user-select: none; -webkit-user-select: none; }
+    body.drag-on * { cursor: grabbing !important; }
+    .head-btns { display: flex; gap: 6px; flex-shrink: 0; }
+    .item.selecting { cursor: pointer; }
+    .item.selecting .item-actions { display: none; }
+    .item .pick { width: 22px; height: 22px; flex-shrink: 0; border-radius: 50%; border: 2px solid var(--line); color: transparent; display: flex; align-items: center; justify-content: center; font-size: .75rem; font-weight: 900; }
+    .item.picked { border-color: var(--accent); background: #f7f4ff; }
+    .item.picked .pick { background: var(--grad); border-color: transparent; color: #fff; }
+    .sel-bar { position: fixed; left: 50%; transform: translateX(-50%); bottom: 76px; z-index: 40; width: min(560px, calc(100% - 20px)); background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 10px 12px; box-shadow: 0 10px 30px rgba(90,70,200,.2); }
+    .sel-top { display: flex; align-items: center; justify-content: space-between; font-size: .86rem; margin-bottom: 8px; }
+    .sel-link { color: var(--accent); font-weight: 700; font-size: .8rem; }
+    .sel-chips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+    .sel-chip { flex-shrink: 0; padding: 7px 12px; border-radius: 999px; border: 1px solid var(--line); background: #fff; font-size: .8rem; font-weight: 700; color: #4b5563; }
+    .sel-chip.on { background: var(--grad); color: #fff; border-color: transparent; }
+    .sel-chip.del { color: #e0527a; border-color: #f6cbd8; }
+    .sel-chip:disabled { opacity: .4; }
+    body.sel-on .toast { bottom: 210px; }
+    .sel-hint { margin-top: 6px; font-size: .7rem; color: var(--sub); }
+    #postList { padding-bottom: 4px; }
     .thumb { width: 52px; aspect-ratio: 987 / 1216; border-radius: 8px; object-fit: cover; background: var(--soft); flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--accent); font-weight: 800; }
     .item-main { flex: 1; min-width: 0; }
     .item-title { font-weight: 800; font-size: .95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -238,7 +260,7 @@
     .done-card ol { padding-left: 20px; display: flex; flex-direction: column; gap: 8px; font-size: .9rem; }
     .done-card code { background: var(--soft); padding: 1px 6px; border-radius: 5px; font-size: .85rem; }
 
-    .toast { position: fixed; left: 50%; bottom: 80px; transform: translate(-50%, 20px); background: var(--grad); color: #fff; padding: 10px 18px; border-radius: 999px; font-size: .86rem; font-weight: 600; opacity: 0; pointer-events: none; transition: all .3s; z-index: 60; }
+    .toast { position: fixed; left: 50%; bottom: 80px; transform: translate(-50%, 20px); background: var(--grad); color: #fff; padding: 10px 18px; border-radius: 999px; font-size: .8rem; font-weight: 600; white-space: nowrap; max-width: calc(100vw - 24px); overflow: hidden; text-overflow: ellipsis; opacity: 0; pointer-events: none; transition: all .3s; z-index: 60; }
     .toast.show { opacity: 1; transform: translate(-50%, 0); }
   </style>
 </head>
@@ -285,10 +307,11 @@
 
       <section id="tab-posts">
         <div class="section-head">
-          <div><h2>게시물</h2><div class="hint">위에 있을수록 최신으로 보여요</div></div>
-          <button class="btn btn-main" id="newPost">+ 새 게시물</button>
+          <div><h2>게시물</h2><div class="hint">위에 있을수록 최신 · 사진을 꾹 눌러 끌면 순서 바꾸기</div></div>
+          <div class="head-btns"><button class="btn btn-ghost" id="selectBtn">☑ 선택</button><button class="btn btn-main" id="newPost">+ 새 게시물</button></div>
         </div>
         <div class="list" id="postList"></div>
+        <div class="sel-bar hidden" id="selBar"></div>
       </section>
 
       <section id="tab-notices" class="hidden">
@@ -492,6 +515,7 @@
     /* ---------- 화면 ---------- */
     let tab = "posts";
     document.querySelectorAll(".tab").forEach(b => b.onclick = () => {
+      if (selMode && b.dataset.tab !== "posts") $("selectBtn").click();
       tab = b.dataset.tab;
       document.querySelectorAll(".tab").forEach(x => x.classList.toggle("active", x === b));
       ["posts", "notices", "tags", "profile", "messages"].forEach(t => $("tab-" + t).classList.toggle("hidden", t !== tab));
@@ -546,12 +570,118 @@
 
     const isNew = (item, list) => !SERVER[list].some(x => x.id && x.id === item.id);
 
+    // 방금 올린 사진이 아직 사이트에 반영 전이면 GitHub 원본에서 보여줘요
+    const rawFallback = "if(!this.dataset.raw&&!/^data:/.test(this.getAttribute('src'))){this.dataset.raw=1;this.src='https://raw.githubusercontent.com/heart-notis/heart-notis.github.io/main/'+this.getAttribute('src')}";
+    /* ---------- ☑ 여러 개 골라서 한 번에 바꾸기 ---------- */
+    let selMode = false; const sel = new Set();
+    $("selectBtn").onclick = () => { selMode = !selMode; sel.clear(); $("selectBtn").textContent = selMode ? "선택 끝" : "☑ 선택"; renderPosts(); renderSelBar(); };
+    const BULK = [
+      ["adult", "19+", p => !!p.adult],
+      ["asset", "🔧 교체중", p => p.status === "asset"],
+      ["renewal", "✨ 리뉴얼", p => p.status === "renewal"],
+      ["hidden", "🙈 비공개", p => !!p.hidden]
+    ];
+    function renderSelBar() {
+      const bar = $("selBar");
+      bar.classList.toggle("hidden", !selMode); $("postList").style.paddingBottom = selMode ? "170px" : ""; document.body.classList.toggle("sel-on", selMode);
+      if (!selMode) return;
+      const ps = data.posts.filter(p => sel.has(p.id));
+      bar.innerHTML = `
+        <div class="sel-top"><b>${ps.length}개 선택</b>
+          <button class="sel-link" data-bulk="all">${ps.length === data.posts.length ? "전체 해제" : "전체 선택"}</button></div>
+        <div class="sel-chips">
+          ${BULK.map(([k, label, has]) => `<button class="sel-chip${ps.length && ps.every(has) ? " on" : ""}" data-bulk="${k}" ${ps.length ? "" : "disabled"}>${label}</button>`).join("")}
+          <button class="sel-chip del" data-bulk="del" ${ps.length ? "" : "disabled"}>🗑 지우기</button>
+        </div>
+        <div class="sel-hint">누르면 켜지고, 고른 게 전부 켜져 있으면 꺼져요</div>`;
+    }
+    $("selBar").addEventListener("click", async e => {
+      const b = e.target.closest("[data-bulk]"); if (!b) return;
+      const k = b.dataset.bulk, ps = data.posts.filter(p => sel.has(p.id));
+      if (k === "all") { if (ps.length === data.posts.length) sel.clear(); else data.posts.forEach(p => sel.add(p.id)); }
+      else if (k === "del") {
+        if (!(await confirmBox(`고른 게시물 ${ps.length}개를 지울까요?\n사이트에 올리기 전까지는 사이트에서 안 지워져요`, { ok: "지우기", danger: true }))) return;
+        data.posts = data.posts.filter(p => !sel.has(p.id)); sel.clear(); toast(`${ps.length}개를 지웠어요`);
+      } else {
+        const has = BULK.find(x => x[0] === k)[2], allOn = ps.every(has);
+        ps.forEach(p => {
+          if (k === "asset" || k === "renewal") { if (allOn) delete p.status; else p.status = k; }
+          else if (allOn) delete p[k]; else p[k] = true;
+        });
+        toast(`${ps.length}개 ${allOn ? "끔" : "켬"}: ${b.textContent}`);
+      }
+      saveDraft(); renderPosts(); renderSelBar();
+    });
+    $("postList").addEventListener("click", e => {
+      if (!selMode) return;
+      const it = e.target.closest(".item"); if (!it) return;
+      e.stopPropagation();
+      const id = it.dataset.id; sel.has(id) ? sel.delete(id) : sel.add(id);
+      it.classList.toggle("picked", sel.has(id)); renderSelBar();
+    }, true);
+
+    /* ---------- ↕ 사진을 꾹 눌러서 끌어 순서 바꾸기 ---------- */
+    (function dragSort() {
+      const list = $("postList");
+      let st = null, timer = null, startPt = null;
+      list.addEventListener("contextmenu", e => { if (e.target.closest(".thumb")) e.preventDefault(); });
+      list.addEventListener("pointerdown", e => {
+        const th = e.target.closest(".thumb"); if (!th || selMode || e.button > 0) return;
+        const item = th.closest(".item");
+        startPt = { x: e.clientX, y: e.clientY };
+        const begin = () => {
+          const items = [...list.querySelectorAll(".item")];
+          if (items.length < 2) return;
+          const tops = items.map(x => x.getBoundingClientRect().top + scrollY);
+          st = { item, items, tops, from: items.indexOf(item), to: items.indexOf(item), y0: startPt.y + scrollY, step: tops[1] - tops[0], y: startPt.y };
+          item.classList.add("dragging"); document.body.classList.add("drag-on");
+          try { navigator.vibrate && navigator.vibrate(12); } catch {}
+          loop();
+        };
+        if (e.pointerType === "mouse") begin(); else timer = setTimeout(begin, 260);
+      });
+      const move = e => {
+        if (!st) { if (timer && startPt && Math.hypot(e.clientX - startPt.x, e.clientY - startPt.y) > 10) { clearTimeout(timer); timer = null; } return; }
+        e.preventDefault(); st.y = e.clientY; place();
+      };
+      const place = () => {
+        const dy = st.y + scrollY - st.y0, n = st.items.length;
+        st.to = Math.max(0, Math.min(n - 1, st.from + Math.round(dy / st.step)));
+        st.items.forEach((x, i) => {
+          if (x === st.item) { x.style.transform = `translateY(${dy}px)`; return; }
+          let sh = 0;
+          if (st.from < st.to && i > st.from && i <= st.to) sh = -st.step;
+          if (st.from > st.to && i < st.from && i >= st.to) sh = st.step;
+          x.style.transform = sh ? `translateY(${sh}px)` : "";
+        });
+      };
+      const loop = () => {   // 화면 위·아래 끝에 가면 자동으로 스크롤
+        if (!st) return;
+        const edge = 90, bottomEdge = innerHeight - 150;
+        if (st.y < edge) scrollBy(0, -Math.ceil((edge - st.y) / 6));
+        else if (st.y > bottomEdge) scrollBy(0, Math.ceil((st.y - bottomEdge) / 6));
+        place(); requestAnimationFrame(loop);
+      };
+      const end = () => {
+        clearTimeout(timer); timer = null; startPt = null;
+        if (!st) return;
+        const { from, to, items } = st; st = null;
+        document.body.classList.remove("drag-on");
+        items.forEach(x => { x.style.transform = ""; x.classList.remove("dragging"); });
+        if (from !== to) { const [m] = data.posts.splice(from, 1); data.posts.splice(to, 0, m); saveDraft(); renderPosts(); toast("순서를 바꿨어요"); }
+      };
+      addEventListener("pointermove", move, { passive: false });
+      addEventListener("pointerup", end); addEventListener("pointercancel", end);
+      list.addEventListener("touchmove", e => { if (st) e.preventDefault(); }, { passive: false });
+    })();
+
     function renderPosts() {
       const el = $("postList");
       if (!data.posts.length) { el.innerHTML = `<div class="empty">아직 게시물이 없어요.<br/>"+ 새 게시물"을 눌러 첫 캐릭터를 올려보세요!</div>`; return; }
       el.innerHTML = data.posts.map((p, i) => `
-        <div class="item">
-          ${p.image ? `<img class="thumb" src="${esc(p.image)}" alt="" />` : `<div class="thumb">${esc((p.name || "?").charAt(0))}</div>`}
+        <div class="item${selMode ? " selecting" : ""}${sel.has(p.id) ? " picked" : ""}" data-id="${esc(p.id)}">
+          ${selMode ? `<span class="pick" aria-hidden="true">✓</span>` : ""}
+          ${p.image ? `<img class="thumb" src="${esc(p.image)}" alt="" draggable="false" onerror="${rawFallback}" />` : `<div class="thumb">${esc((p.name || "?").charAt(0))}</div>`}
           <div class="item-main">
             <div class="item-title">${esc(p.name || "(이름 없음)")}${p.hidden ? `<span class="badge hid">🙈 비공개</span>` : ""}${p.adult ? `<span class="badge">19+</span>` : ""}${p.status === "asset" ? `<span class="badge st">🔧 교체중</span>` : p.status === "renewal" ? `<span class="badge st re">✨ 리뉴얼</span>` : ""}${isNew(p, "posts") ? `<span class="badge new">NEW</span>` : ""}</div>
             <div class="item-sub">${esc(p.date || "")} · ${(p.tags || []).map(t => "#" + esc(t)).join(" ") || "태그 없음"}</div>
@@ -1258,7 +1388,14 @@
         cache: "no-store",
         headers: { Authorization: `Bearer ${getToken()}`, Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28", ...(opts.body ? { "Content-Type": "application/json" } : {}) }
       });
-      if (!r.ok) { const e = new Error("GitHub " + r.status); e.status = r.status; throw e; }
+      try { const exp = r.headers.get("github-authentication-token-expiration"); if (exp) localStorage.setItem("heart_gh_exp", exp); } catch {}
+      if (!r.ok) {
+        const e = new Error("GitHub " + r.status); e.status = r.status;
+        let msg = ""; try { msg = (await r.json()).message || ""; } catch {}
+        e.msg = msg;
+        e.rate = r.headers.get("x-ratelimit-remaining") === "0" || /rate limit|abuse|secondary/i.test(msg);
+        throw e;
+      }
       return r.status === 204 ? null : r.json();
     }
     async function fileSha(path) {
@@ -1269,11 +1406,42 @@
       const sha = await fileSha(path);
       await gh(`/contents/${path}`, { method: "PUT", body: JSON.stringify({ message, content: toB64(bytes), branch: BRANCH, ...(sha ? { sha } : {}) }) });
     }
+    const needsNewToken = e => !e.rate && (e.status === 401 || e.status === 403 || e.status === 404);
     function ghErrorText(e) {
+      if (e.rate) return "GitHub가 잠깐 쉬어가래요. 1~2분 뒤 다시 눌러주세요 (토큰은 괜찮아요)";
       if (e.status === 401) return "열쇠(토큰)가 틀렸거나 기간이 끝났어요. ⚙️ 연결에서 다시 넣어주세요.";
       if (e.status === 403 || e.status === 404) return "열쇠(토큰)에 heart-notis.github.io 쓰기 권한이 없어요. ⚙️ 연결을 확인해주세요.";
       if (e.status === 409 || e.status === 422) return "GitHub가 잠깐 바빴어요. 한 번만 다시 눌러주세요.";
       return "인터넷 연결을 확인하고 다시 시도해주세요.";
+    }
+
+    // 여러 파일을 커밋 하나로 올리기 (Git Data API)
+    async function commitAll(files, used, message, progress) {
+      for (let attempt = 0; ; attempt++) {
+        const head = (await gh(`/git/ref/heads/${BRANCH}`)).object.sha;
+        const baseTree = (await gh(`/git/commits/${head}`)).tree.sha;
+        const tree = [];
+        let i = 0;
+        for (const f of files) {
+          progress(++i, files.length);
+          const b = await gh(`/git/blobs`, { method: "POST", body: JSON.stringify({ content: toB64(f.bytes), encoding: "base64" }) });
+          tree.push({ path: f.path, mode: "100644", type: "blob", sha: b.sha });
+        }
+        // 지운 게시물 사진, 바꾸기 전 프로필/헤더 사진 정리 (처음 넣은 기본 사진은 안 지워요)
+        try {
+          const all = (await gh(`/git/trees/${baseTree}?recursive=1`)).tree;
+          const uploading = new Set(files.map(f => f.path));
+          for (const f of all) {
+            const name = f.path.replace(/^images\//, "");
+            if (f.type === "blob" && f.path.startsWith("images/") && /^(post-.+|profile-[a-z0-9]{6,}|profile-sm-[a-z0-9]{6,}|header-[a-z0-9]{6,})\.(jpg|webp)$/.test(name) && !used.has(f.path) && !uploading.has(f.path))
+              tree.push({ path: f.path, mode: "100644", type: "blob", sha: null });
+          }
+        } catch (e) { console.warn("정리 건너뜀", e); }
+        const t = await gh(`/git/trees`, { method: "POST", body: JSON.stringify({ base_tree: baseTree, tree }) });
+        const c = await gh(`/git/commits`, { method: "POST", body: JSON.stringify({ message, tree: t.sha, parents: [head] }) });
+        try { await gh(`/git/refs/heads/${BRANCH}`, { method: "PATCH", body: JSON.stringify({ sha: c.sha }) }); return; }
+        catch (e) { if (e.status === 422 && attempt < 2) continue; throw e; }   // 그 사이 다른 게 올라갔으면 다시 시도
+      }
     }
 
     $("publishBtn").onclick = async () => {
@@ -1293,24 +1461,12 @@
         }
         const out = clone(data); delete out._base;
         const uploads = materialize(out);
-        let n = 0;
-        for (const u of uploads) { step(`사진 올리는 중 (${++n}/${uploads.length})`); await putFile(u.path, u.bytes, u.label); }
-
-        step("글 저장하는 중…");
-        await putFile("data.js", new TextEncoder().encode(siteJs(out)), `업데이트 · 게시물 ${out.posts.length}개 · 공지 ${out.notices.length}개`);
-
-        // 지운 게시물의 사진 정리
-        step("정리하는 중…");
-        try {
-          const used = referenced(out);
-          const list = await gh(`/contents/images?ref=${BRANCH}`);
-          for (const f of list) {
-            // 지운 게시물 사진, 바꾸기 전 프로필/헤더 사진만 정리 (처음 넣은 기본 사진은 안 지워요)
-            if (/^(post-.+|profile-[a-z0-9]{6,}|profile-sm-[a-z0-9]{6,}|header-[a-z0-9]{6,})\.(jpg|webp)$/.test(f.name) && !used.has(f.path)) {
-              await gh(`/contents/${f.path}`, { method: "DELETE", body: JSON.stringify({ message: `사진 정리: ${f.name}`, sha: f.sha, branch: BRANCH }) });
-            }
-          }
-        } catch (e) { console.warn("정리 건너뜀", e); }
+        uploads.push({ path: "data.js", bytes: new TextEncoder().encode(siteJs(out)), label: "data" });
+        const np = uploads.length - 1;
+        // 📦 사진 + 글 + 정리를 "한 번에" 올려요 → 사이트가 한 번만 새로 만들어져서 훨씬 빨리 반영돼요
+        await commitAll(uploads, referenced(out),
+          `업데이트 · 게시물 ${out.posts.length}개 · 공지 ${out.notices.length}개${np ? ` · 사진 ${np}장` : ""}`,
+          (i, n) => step(n > 1 ? `올리는 중 (${i}/${n})` : "올리는 중…"));
 
         SERVER = clone(out); data = out; data._base = H(SERVER);
         store.del(DRAFT_KEY); renderAll();
@@ -1318,7 +1474,7 @@
       } catch (e) {
         console.error(e);
         toast(ghErrorText(e));
-        if (e.status === 401 || e.status === 403 || e.status === 404) openSettings();
+        if (needsNewToken(e)) openSettings(false, ghErrorText(e));
       } finally {
         btn.disabled = false; btn.textContent = "사이트에 올리기";
       }
@@ -1341,7 +1497,7 @@
         const untouched = sameAsServer(data);
         if (!untouched) return;   // 고치던 게 있으면 그대로 두고, 올릴 때 알려줘요
         SERVER = remote; data = clone(remote); data._base = H(remote);
-        renderAll(); toast("방금 올린 최신 내용으로 불러왔어요");
+        renderAll(); toast("최신 내용으로 불러왔어요");
       } catch (e) { console.warn("최신 확인 건너뜀", e); }
     }
 
@@ -1429,13 +1585,17 @@
 
     /* ---------- ⚙️ 연결 설정 ---------- */
     $("settingsBtn").onclick = () => openSettings();
-    function openSettings(needToken) {
+    function openSettings(needToken, reason) {
       const has = !!getToken();
+      let exp = ""; try { exp = localStorage.getItem("heart_gh_exp") || ""; } catch {}
+      const expD = exp ? new Date(exp.replace(" UTC", "Z").replace(" ", "T")) : null;
+      const expTxt = expD && !isNaN(expD) ? `${expD.getFullYear()}년 ${expD.getMonth() + 1}월 ${expD.getDate()}일` : "";
       edit = { kind: "settings" };
       $("editor").innerHTML = `
         <div class="ed-top"><h3>GitHub 연결</h3><button class="icon" data-close aria-label="닫기">${I.x}</button></div>
         <div class="ed-body">
-          ${needToken ? `<div class="banner" style="margin:0"><span>바로 올리려면 처음 한 번 GitHub 열쇠(토큰)를 넣어주세요.</span></div>` : ""}
+          ${needToken ? `<div class="banner" style="margin:0"><span>${has ? "" : "이 브라우저에는 저장된 토큰이 없어요. "}바로 올리려면 GitHub 열쇠(토큰)를 넣어주세요.</span></div>` : ""}
+          ${reason ? `<div class="banner" style="margin:0"><span>⚠️ ${esc(reason)}</span></div>` : ""}
           <div class="hint" style="line-height:1.7">
             1. <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener" style="color:var(--accent);font-weight:700">GitHub 토큰 만들기 ↗</a><br/>
             2. Resource owner: <b>heart-notis</b> · Repository access: <b>heart-notis.github.io</b>만<br/>
@@ -1445,7 +1605,8 @@
           <label class="f">GitHub 토큰 <small>이 브라우저에만 저장돼요. 다른 사람에게 보여주지 마세요.</small>
             <input type="password" id="tokenInput" placeholder="${has ? "저장된 토큰이 있어요 (바꾸려면 새로 붙여넣기)" : "github_pat_로 시작해요"}" autocomplete="off" />
           </label>
-          <div class="hint" id="tokenStatus">${has ? "✅ 토큰이 저장돼 있어요" : "아직 토큰이 없어요"}</div>
+          <div class="hint" id="tokenStatus">${has ? `✅ 토큰이 저장돼 있어요${expTxt ? ` · <b>${expTxt}</b>까지 쓸 수 있어요` : ""}` : "아직 토큰이 없어요"}</div>
+          <div class="hint">💡 토큰 만들 때 <b>Expiration</b>을 길게(예: 1년, 또는 Custom) 고르면 자주 안 바꿔도 돼요.</div>
           <hr style="border:none;border-top:1px solid var(--line)" />
           <div class="hint">예비용: GitHub 연결 없이 업데이트 파일(zip)로 받아서 Claude에게 보낼 수도 있어요.</div>
           <button class="btn btn-ghost" id="zipBtn" style="align-self:flex-start">zip 파일로 받기</button>
