@@ -779,7 +779,7 @@
       try { const d = JSON.parse(localStorage.getItem("heart_admin_draft")); if (d && d.posts) SITE = d; } catch {}
     }
     const notices = SITE.notices || [];
-    const characters = SITE.posts || [];
+    const characters = (SITE.posts || []).filter(c => !c.hidden);   // 🙈 비공개 게시물은 숨겨요
     const tagList = SITE.tags || [];
     // 제작자 페이지에서 바꾼 프로필(프사 · 헤더 · 소개글 · 링크)이 있으면 그걸로 덮어쓰기
     Object.entries(SITE.profile || {}).forEach(([k, v]) => { if (v !== undefined && v !== null) profile[k] = v; });

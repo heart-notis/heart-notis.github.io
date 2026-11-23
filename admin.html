@@ -143,6 +143,13 @@
     .status-box { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border: 1px dashed var(--line); border-radius: 12px; }
     .status-box small { font-size: .74rem; color: var(--sub); }
     .badge.st { background: #fff4e0; color: #b4690e; }
+    .badge.hid { background: #eceef1; color: #5b6470; }
+    .hist { display: flex; flex-direction: column; max-height: 55vh; overflow-y: auto; border: 1px solid var(--line); border-radius: 12px; }
+    .hist-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+    .hist-row:last-child { border-bottom: 0; }
+    .hist-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; font-size: .84rem; }
+    .hist-main span { font-size: .74rem; color: var(--sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .hist-now { font-size: .74rem; font-weight: 700; color: var(--accent); padding: 0 8px; }
     .badge.st.re { background: #f1ecff; color: #7353d6; }
     .check { display: flex; align-items: center; gap: 8px; font-size: .88rem; font-weight: 600; }
     .check input { width: 18px; height: 18px; accent-color: var(--accent); }
@@ -244,6 +251,7 @@
         <svg class="heart" viewBox="0 0 24 24"><path fill="url(#hg)" d="M12 21.2s-8.6-5.2-10.4-10.6C.3 6.6 2.8 2.8 6.7 2.8c2.3 0 4.1 1.2 5.3 3.1 1.2-1.9 3-3.1 5.3-3.1 3.9 0 6.4 3.8 5.1 7.8C20.6 16 12 21.2 12 21.2z"/></svg>
         <h1><span class="h1-text">제작자 페이지</span><span id="hdrBadge" class="badge new hidden" style="margin-left:6px;cursor:pointer" title="안 읽은 메시지">💌 0</span></h1>
         <a class="link-btn" href="index.html" target="_blank" rel="noopener">사이트 보기 ↗</a>
+        <button class="link-btn" id="historyBtn">🕘 기록</button>
         <button class="link-btn" id="settingsBtn">⚙️ 연결</button>
         <button class="link-btn" id="logoutBtn">잠그기</button>
       </div>
@@ -423,6 +431,10 @@
     let SERVER = clone(window.SITE_DATA || { tags: [], notices: [], posts: [] });
     SERVER.tags = SERVER.tags || []; SERVER.notices = SERVER.notices || []; SERVER.posts = SERVER.posts || []; SERVER.profile = SERVER.profile || {};
     let data = clone(SERVER);
+    // 🛡️ 덮어쓰기 방지: 지금 작업이 "어느 시점의 사이트"를 바탕으로 했는지 기억해둬요
+    const dataKey = d => JSON.stringify({ t: d.tags || [], n: d.notices || [], p: d.posts || [], f: d.profile || {} });
+    const H = d => { const k = dataKey(d); let h = 5381; for (let i = 0; i < k.length; i++) h = (h * 33 + k.charCodeAt(i)) | 0; return (h >>> 0).toString(36) + "-" + k.length; };
+    data._base = H(SERVER);
     const sameAsServer = d => JSON.stringify({ t: d.tags, n: d.notices, p: d.posts, f: d.profile || {} }) === JSON.stringify({ t: SERVER.tags, n: SERVER.notices, p: SERVER.posts, f: SERVER.profile || {} });
 
     function saveDraft() {
@@ -471,8 +483,10 @@
       if (tab === "messages") loadMessages();
     });
 
+    const BASE_AT_LOAD = H(SERVER);
     function initApp() {
       loadMessages(true);
+      syncFromRemote();
       const draft = store.get(DRAFT_KEY);
       if (draft && draft.posts && !sameAsServer(draft)) {
         const b = $("draftBanner");
@@ -480,7 +494,7 @@
         b.innerHTML = `<span>💜 아직 사이트에 안 올린 작업이 있어요. 이어서 할까요?</span>
           <button class="btn btn-main" id="useDraft">이어서 하기</button>
           <button class="btn btn-ghost" id="dropDraft">버리기</button>`;
-        $("useDraft").onclick = () => { data = draft; if (!data.profile) data.profile = clone(SERVER.profile); b.classList.add("hidden"); renderAll(); };
+        $("useDraft").onclick = () => { data = draft; if (!data._base) data._base = BASE_AT_LOAD; if (!data.profile) data.profile = clone(SERVER.profile); b.classList.add("hidden"); renderAll(); };
         $("dropDraft").onclick = () => { if (confirmBox("저장 안 한 작업을 버릴까요? 되돌릴 수 없어요.")) { store.del(DRAFT_KEY); b.classList.add("hidden"); renderAll(); } };
       } else if (draft) { store.del(DRAFT_KEY); }
       renderAll();
@@ -498,7 +512,7 @@
         <div class="item">
           ${p.image ? `<img class="thumb" src="${esc(p.image)}" alt="" />` : `<div class="thumb">${esc((p.name || "?").charAt(0))}</div>`}
           <div class="item-main">
-            <div class="item-title">${esc(p.name || "(이름 없음)")}${p.adult ? `<span class="badge">19+</span>` : ""}${p.status === "asset" ? `<span class="badge st">🔧 교체중</span>` : p.status === "renewal" ? `<span class="badge st re">✨ 리뉴얼</span>` : ""}${isNew(p, "posts") ? `<span class="badge new">NEW</span>` : ""}</div>
+            <div class="item-title">${esc(p.name || "(이름 없음)")}${p.hidden ? `<span class="badge hid">🙈 비공개</span>` : ""}${p.adult ? `<span class="badge">19+</span>` : ""}${p.status === "asset" ? `<span class="badge st">🔧 교체중</span>` : p.status === "renewal" ? `<span class="badge st re">✨ 리뉴얼</span>` : ""}${isNew(p, "posts") ? `<span class="badge new">NEW</span>` : ""}</div>
             <div class="item-sub">${esc(p.date || "")} · ${(p.tags || []).map(t => "#" + esc(t)).join(" ") || "태그 없음"}</div>
             <div class="item-sub">${esc(p.tagline || "")}</div>
           </div>
@@ -545,7 +559,7 @@
     /* ---------- 게시물 편집 ---------- */
     const isDesktop = () => matchMedia("(hover: hover) and (pointer: fine)").matches;
     let edit = null;   // { kind, index, item, srcImg }
-    function closeEditor() { $("overlay").classList.remove("open"); document.body.style.overflow = ""; edit = null; }
+    function closeEditor() { const e = edit; $("overlay").classList.remove("open"); document.body.style.overflow = ""; edit = null; if (e && e.onClose) e.onClose(); }
     $("overlay").addEventListener("click", e => { if (e.target.id === "overlay") closeEditor(); });
 
     // 사진인지 확인 (폰에서 갤러리 앱으로 고를 수 있게 accept 를 안 걸어서 직접 확인해요)
@@ -602,6 +616,7 @@
           <label class="f">첫 인사말 <small>상세 화면에서 캐릭터의 답글처럼 보여요</small><textarea id="f_greet" style="min-height:60px">${esc(item.greeting)}</textarea></label>
           <label class="f">대화하러 가기 링크 <small>위에서 체크한 해시태그(플랫폼)마다 주소 칸이 생겨요 · #합작은 세계관 보기 버튼이 돼요</small><div class="links-box" id="f_links"></div></label>
           <label class="check"><input type="checkbox" id="f_adult" ${item.adult ? "checked" : ""} /> 19+ 배지 달기</label>
+          <label class="check"><input type="checkbox" id="f_hidden" ${item.hidden ? "checked" : ""} /> 🙈 비공개 <small style="font-weight:400;color:var(--sub)">사이트에 안 보이게 숨겨둬요 (준비되면 체크 풀기)</small></label>
           <div class="status-box">
             <label class="check"><input type="checkbox" class="f-status" value="asset" ${item.status === "asset" ? "checked" : ""} /> 🔧 에셋 교체중 표시</label>
             <label class="check"><input type="checkbox" class="f-status" value="renewal" ${item.status === "renewal" ? "checked" : ""} /> ✨ 리뉴얼 중 표시</label>
@@ -883,6 +898,7 @@
       it.tags.forEach(t => { const v = (edit.linkVals[t] || "").trim(); if (v) it.links[t] = v; });
       it.link = it.tags.length ? "" : (edit.linkVals[""] || "").trim();
       it.adult = $("f_adult").checked;
+      if ($("f_hidden").checked) it.hidden = true; else delete it.hidden;
       const st = document.querySelector(".f-status:checked"); if (st) it.status = st.value; else delete it.status;
       it.likes = Math.max(0, parseInt($("f_likes").value) || 0);
       it.rts = Math.max(0, parseInt($("f_rts").value) || 0);
@@ -1203,13 +1219,21 @@
       btn.disabled = true;
       const step = t => { btn.textContent = t; };
       try {
-        const out = clone(data);
+        // 🛡️ 이 화면을 연 뒤에 다른 기기/탭에서 올린 게 있는지 확인
+        step("확인하는 중…");
+        const remote = await fetchRemote();
+        if (H(remote) !== (data._base || H(SERVER))) {
+          const choice = await conflictBox();
+          if (choice === "load") { SERVER = remote; data = clone(remote); data._base = H(remote); store.del(DRAFT_KEY); renderAll(); toast("최신 내용을 불러왔어요"); return; }
+          if (choice !== "force") return;
+        }
+        const out = clone(data); delete out._base;
         const uploads = materialize(out);
         let n = 0;
         for (const u of uploads) { step(`사진 올리는 중 (${++n}/${uploads.length})`); await putFile(u.path, u.bytes, u.label); }
 
         step("글 저장하는 중…");
-        await putFile("data.js", new TextEncoder().encode(siteJs(out)), "게시물 · 공지 · 프로필 업데이트");
+        await putFile("data.js", new TextEncoder().encode(siteJs(out)), `업데이트 · 게시물 ${out.posts.length}개 · 공지 ${out.notices.length}개`);
 
         // 지운 게시물의 사진 정리
         step("정리하는 중…");
@@ -1224,7 +1248,7 @@
           }
         } catch (e) { console.warn("정리 건너뜀", e); }
 
-        SERVER = clone(out); data = out;
+        SERVER = clone(out); data = out; data._base = H(SERVER);
         store.del(DRAFT_KEY); renderAll();
         showPublished();
       } catch (e) {
@@ -1235,6 +1259,95 @@
         btn.disabled = false; btn.textContent = "사이트에 올리기";
       }
     };
+    /* ---------- 🛡️ 덮어쓰기 방지 · 🕘 되돌리기 ---------- */
+    const b64Bytes = b64 => Uint8Array.from(atob(String(b64).replace(/\s/g, "")), c => c.charCodeAt(0));
+    const parseDataJs = text => { const box = {}; new Function("window", text)(box); const d = box.SITE_DATA || {}; return { tags: d.tags || [], profile: d.profile || {}, notices: d.notices || [], posts: d.posts || [] }; };
+    async function fileB64(path, ref) {
+      const r = await gh(`/contents/${path}?ref=${ref}`);
+      return String(r.content || (await gh(`/git/blobs/${r.sha}`)).content).replace(/\s/g, "");
+    }
+    const fetchRemote = async (ref = BRANCH) => parseDataJs(new TextDecoder().decode(b64Bytes(await fileB64("data.js", ref))));
+
+    // 사이트(깃허브 페이지)는 1~2분 늦게 바뀌어서, 열 때 GitHub에서 최신 내용을 한 번 더 확인해요
+    async function syncFromRemote() {
+      if (!getToken()) return;
+      try {
+        const remote = await fetchRemote();
+        if (H(remote) === H(SERVER)) return;
+        const untouched = sameAsServer(data);
+        if (!untouched) return;   // 고치던 게 있으면 그대로 두고, 올릴 때 알려줘요
+        SERVER = remote; data = clone(remote); data._base = H(remote);
+        renderAll(); toast("방금 올린 최신 내용으로 불러왔어요");
+      } catch (e) { console.warn("최신 확인 건너뜀", e); }
+    }
+
+    function conflictBox() {
+      return new Promise(res => {
+        edit = { kind: "conflict", onClose: () => res("cancel") };
+        $("editor").innerHTML = `
+          <div class="ed-top"><h3>⚠️ 그 사이 사이트가 바뀌었어요</h3><button class="icon" data-close aria-label="닫기">${I.x}</button></div>
+          <div class="ed-body">
+            <div>이 화면을 연 뒤에 <b>다른 기기나 다른 탭</b>에서 사이트에 올린 내용이 있어요.</div>
+            <div class="hint">그대로 올리면 그쪽에서 올린 내용이 사라져요. 보통은 "최신 내용 불러오기" 후 다시 고쳐서 올리는 게 안전해요.</div>
+          </div>
+          <div class="ed-foot" style="flex-wrap:wrap">
+            <button class="btn btn-ghost" id="cfForce">그래도 내 걸로 올리기</button>
+            <button class="btn btn-main" id="cfLoad">최신 내용 불러오기</button>
+          </div>`;
+        $("overlay").classList.add("open");
+        const pick = v => { edit.onClose = null; closeEditor(); res(v); };
+        $("cfForce").onclick = () => { if (confirmBox("다른 곳에서 올린 내용이 사라져요. 그래도 올릴까요?")) pick("force"); };
+        $("cfLoad").onclick = () => { if (sameAsServer(data) || confirmBox("지금 고치던 내용은 사라지고 최신 내용으로 바뀌어요. 괜찮을까요?")) pick("load"); };
+      });
+    }
+
+    const whenText = iso => { const d = new Date(iso); const h = d.getHours(); return `${d.getMonth() + 1}월 ${d.getDate()}일 ${h < 12 ? "오전" : "오후"} ${h % 12 || 12}:${String(d.getMinutes()).padStart(2, "0")}`; };
+    $("historyBtn").onclick = openHistory;
+    async function openHistory() {
+      if (!getToken()) { openSettings(true); return; }
+      edit = { kind: "history" };
+      $("editor").innerHTML = `
+        <div class="ed-top"><h3>🕘 올린 기록 · 되돌리기</h3><button class="icon" data-close aria-label="닫기">${I.x}</button></div>
+        <div class="ed-body">
+          <div class="hint">고른 시점의 게시물 · 공지 · 해시태그 · 프로필을 불러와요. 확인한 뒤 <b>사이트에 올리기</b>를 눌러야 실제로 바뀌어요.</div>
+          <div class="hist" id="hList"><div class="hint">불러오는 중…</div></div>
+        </div>`;
+      $("overlay").classList.add("open");
+      try {
+        const list = await gh(`/commits?path=data.js&sha=${BRANCH}&per_page=40`);
+        if (!edit || edit.kind !== "history") return;
+        $("hList").innerHTML = list.map((c, i) => `
+          <div class="hist-row">
+            <div class="hist-main"><b>${whenText(c.commit.author.date)}</b><span>${esc(c.commit.message.split("\n")[0])}</span></div>
+            ${i === 0 ? `<span class="hist-now">지금</span>` : `<button class="btn btn-line btn-sm" data-restore="${c.sha}" data-when="${esc(whenText(c.commit.author.date))}">이때로</button>`}
+          </div>`).join("") || `<div class="hint">기록이 없어요</div>`;
+        $("hList").onclick = e => { const b = e.target.closest("[data-restore]"); if (b) restoreAt(b.dataset.restore, b.dataset.when, b); };
+      } catch (e) { console.error(e); $("hList").innerHTML = `<div class="hint">${esc(ghErrorText(e))}</div>`; }
+    }
+    async function restoreAt(sha, when, btn) {
+      if (!confirmBox(`${when} 상태를 불러올까요?\n지금 화면에서 고치던 내용은 사라져요. (사이트에 올리기 전까지는 사이트는 안 바뀌어요)`)) return;
+      document.querySelectorAll("[data-restore]").forEach(b => b.disabled = true);
+      btn.textContent = "불러오는 중…";
+      try {
+        const [old, now, imgs] = await Promise.all([fetchRemote(sha), fetchRemote(), gh(`/contents/images?ref=${BRANCH}`)]);
+        // 그 뒤에 지워진 사진은 그때 사진을 다시 가져와요 (올릴 때 다시 저장돼요)
+        const have = new Set(imgs.map(f => f.path));
+        const fix = async (o, k) => {
+          const p = o && o[k];
+          if (!p || /^(data:|https?:)/.test(p) || have.has(p)) return;
+          try { o[k] = "data:image/jpeg;base64," + await fileB64(p, sha); } catch (e) { console.warn("사진 못 가져옴", p, e); }
+        };
+        for (const p of old.posts) await fix(p, "image");
+        for (const k of ["avatar", "avatarSmall", "banner"]) await fix(old.profile, k);
+        SERVER = now; data = old; data._base = H(now);
+        saveDraft(); renderAll(); closeEditor();
+        toast(`${when} 상태를 불러왔어요. 확인하고 "사이트에 올리기"를 눌러주세요`);
+      } catch (e) {
+        console.error(e); toast(ghErrorText(e));
+        document.querySelectorAll("[data-restore]").forEach(b => b.disabled = false); btn.textContent = "이때로";
+      }
+    }
+
     function showPublished() {
       edit = { kind: "done" };
       $("editor").innerHTML = `
