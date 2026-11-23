@@ -914,14 +914,24 @@
     const headHTML = (d, label) => `
       <div class="t-head"><b>${esc(profile.name)}</b>${I.verified}<span class="muted">@${esc(profile.handle)} · ${label || shortDate(d)}</span></div>`;
     // ✦ 스포일러 공개 예정일: "12월 3일 공개 예정" (지난 날짜/오늘이면 "오늘 공개")
-    const releaseLabel = d => {
+    const releaseLabel = (d, time) => {
       const dt = toDay(d); if (!d || isNaN(dt)) return "";
       const now = new Date(), today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const diff = Math.round((dt - today) / 86400000);
-      if (diff <= 0) return `<b class="rel-date">오늘 공개</b>`;
-      if (diff === 1) return `<b class="rel-date">내일 공개 예정</b>`;
-      return `<b class="rel-date">${dt.getMonth() + 1}월 ${dt.getDate()}일 공개 예정</b>`;
+      const tm = time ? ` ${time}` : "";
+      if (diff <= 0) return `<b class="rel-date">오늘${tm} 공개</b>`;
+      if (diff === 1) return `<b class="rel-date">내일${tm} 공개 예정</b>`;
+      return `<b class="rel-date">${dt.getMonth() + 1}월 ${dt.getDate()}일${tm} 공개 예정</b>`;
     };
+    // ✦ 공개 시간이 1분 지나면 자동으로 일반 게시물로 열리고, 고정 공지 바로 아래로 올라와요
+    const releaseAt = c => {
+      if (!c || !c.spoiler || !c.releaseDate) return null;
+      const d = toDay(c.releaseDate); if (isNaN(d)) return null;
+      if (c.releaseTime) { const [h, m] = c.releaseTime.split(":"); d.setHours(+h || 0, +m || 0, 0, 0); }
+      return d.getTime();
+    };
+    const isReleased = c => { const t = releaseAt(c); return t !== null && Date.now() >= t + 60000; };
+    const isSpoiler = c => !!(c && c.spoiler && !isReleased(c));
 
     /* ---- 프로필 ---- */
     function renderProfile() {
@@ -953,8 +963,8 @@
     // 🔧 에셋 교체중 / ✨ 리뉴얼 중: 안내를 붙이고 눌러도 안 열려요
     const STATUS = { asset: ["🔧", "에셋 교체중"], renewal: ["✨", "리뉴얼 중"] };
     // ✦ 스포일러: 맨 위(고정 공지 바로 아래)에 반짝이며 보이고, 눌러도 안 열려요
-    const isLocked = c => !!(c && (c.spoiler || STATUS[c.status]));
-    const veilHTML = c => c.spoiler
+    const isLocked = c => !!(c && (isSpoiler(c) || STATUS[c.status]));
+    const veilHTML = c => isSpoiler(c)
       ? `<div class="lock-veil spoil"></div><span class="holo-ribbon">SPOILER</span><span class="holo-spark">✦</span>`
       : (() => { const [ic, t] = STATUS[c.status]; return `<div class="lock-veil st-${c.status}"><span>${ic} ${t}</span></div>`; })();
     function spoilerTweet(c) {
@@ -963,7 +973,7 @@
           ${meAva()}
           <div class="t-main">
             <div class="spoil-tag"><span>✦ SPOILER</span></div>
-            ${headHTML(c.date, releaseLabel(c.releaseDate))}
+            ${headHTML(c.date, releaseLabel(c.releaseDate, c.releaseTime))}
             <p class="t-title">${escH(c.name)}</p>
             ${c.tagline ? `<p class="t-tagline">${fmtText(c.tagline)}</p>` : ""}
             <p class="t-tags">${hashtags(c)}</p>
@@ -972,7 +982,7 @@
         </article>`;
     }
     function lockedTweet(c) {
-      if (c.spoiler) return spoilerTweet(c);
+      if (isSpoiler(c)) return spoilerTweet(c);
       const [ic, t] = STATUS[c.status];
       return `
         <article class="tweet locked st-${c.status}" aria-disabled="true">
@@ -993,7 +1003,7 @@
         <article class="tweet" data-open="${i}">
           ${meAva()}
           <div class="t-main">
-            ${headHTML(c.date)}
+            ${headHTML(isReleased(c) ? c.releaseDate : c.date)}
             <p class="t-title">${escH(c.name)}</p>
             ${c.tagline ? `<p class="t-tagline">${fmtText(c.tagline)}</p>` : ""}
             <p class="t-tags">${hashtags(c)}</p>
@@ -1130,7 +1140,7 @@
     let searchOpen = false, searchQ = "", searchFocus = false;
     const norm = t => String(t || "").toLowerCase().replace(/\*/g, "").replace(/\s+/g, "");
     function matchPost(c, q) {
-      const fields = [c.name, c.world, c.tagline, ...(c.tags || []), ...(c.spoiler ? [] : [c.description, c.greeting])];   // 스포일러는 본문까지는 안 뒤져요
+      const fields = [c.name, c.world, c.tagline, ...(c.tags || []), ...(isSpoiler(c) ? [] : [c.description, c.greeting])];   // 스포일러는 본문까지는 안 뒤져요
       return fields.some(f => norm(f).includes(q));
     }
     function postsHTML() {
@@ -1138,7 +1148,9 @@
       let list = characters.map((c, i) => ({ c, i }));
       if (searchOpen) list = q ? list.filter(({ c }) => matchPost(c, q)) : list;
       else list = list.filter(({ c }) => activeTag === "전체" || c.tags.includes(activeTag));
-      list.sort((a, b) => (b.c.spoiler ? 1 : 0) - (a.c.spoiler ? 1 : 0));   // 스포일러는 맨 위로 (나머지 순서는 그대로)
+      // 맨 위: 방금 공개된 스포일러(최근 공개 순) → 아직 스포일러 → 나머지 (원래 순서 유지)
+      const rank = c => isReleased(c) ? 0 : isSpoiler(c) ? 1 : 2;
+      list.sort((a, b) => rank(a.c) - rank(b.c) || (rank(a.c) === 0 ? releaseAt(b.c) - releaseAt(a.c) : 0));
       // 공지 중 "게시물 상단에 띄우기"를 체크한 것은 게시물 탭 맨 위에 (검색 중엔 숨김)
       const topNotices = !searchOpen && activeTag === "전체" ? notices.filter(n => n.onPosts).map(n => noticeTweet(n, true)).join("") : "";
       const head = searchOpen && q ? `<p class="srch-count">검색 결과 <b>${list.length}</b>개</p>` : "";
@@ -1214,7 +1226,7 @@
           ${c.description ? `<p class="d-text">${fmtText(c.description)}</p>` : ""}
           <p class="d-tags">${hashtags(c)}</p>
           <div class="t-media">${mediaHTML(c)}${c.adult ? `<span class="badge">19+</span>` : ""}</div>
-          <div class="d-time">${longDate(c.date)}${c.world ? ` · ${escH(c.world)}` : ""}</div>
+          <div class="d-time">${longDate(isReleased(c) ? c.releaseDate : c.date)}${c.world ? ` · ${escH(c.world)}` : ""}</div>
           <div class="d-stats"><b>${fmt(c.rts || 0)}</b>재게시 &nbsp; <b data-likes="${i}">${fmt(likeCount(c))}</b>마음에 들어요</div>
           <div class="d-actions">
             <button class="act reply" aria-label="답글">${I.reply}</button>
@@ -1391,6 +1403,20 @@
     // 처음 들어왔을 때: 주소 끝(#media, #post-…)에 맞춰 열고, 뒤로가기하면 홈으로 오게 기록
     // 폰에서 탭을 다시 열었을 때 예전 화면이 그대로 남아있는 경우가 있어서,
     // 돌아올 때마다 최신 data.js를 확인하고 바뀌었으면 새로고침해요 (메시지 쓰는 중이면 건너뜀)
+    // 페이지를 열어둔 채로 공개 시간이 지나면 바로 다시 그려요
+    (function watchRelease() {
+      const opened = () => characters.filter(isReleased).map(c => c.id).join();
+      let last = opened();
+      setInterval(() => {
+        const now = opened();
+        if (now !== last) {
+          last = now;
+          const typing = document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName);
+          if (!typing && (view === "tweets" || view === "media")) renderView();
+        }
+      }, 15000);
+    })();
+
     (function keepFresh() {
       const snap = JSON.stringify(window.SITE_DATA || {});
       let busy = false, last = Date.now();

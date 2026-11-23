@@ -198,6 +198,7 @@
     .rel-row { margin-left: 26px; }
     .rel-in { display: flex; gap: 6px; align-items: center; }
     .rel-in input { flex: 1; min-width: 0; }
+    .rel-in input[type=time] { flex: 0 0 110px; }
     .badge.spo { background: linear-gradient(120deg, #ece5ff, #e3f2fd); color: #7353d6; }
     .hist { display: flex; flex-direction: column; max-height: 55vh; overflow-y: auto; border: 1px solid var(--line); border-radius: 12px; }
     .hist-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-bottom: 1px solid var(--line); }
@@ -699,6 +700,12 @@
       list.addEventListener("touchmove", e => { if (st) e.preventDefault(); }, { passive: false });
     })();
 
+    const spoilerOpened = p => {
+      if (!p.releaseDate) return false;
+      const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(p.releaseDate); if (!m) return false;
+      const [h, mi] = (p.releaseTime || "0:0").split(":");
+      return Date.now() >= new Date(+m[1], m[2] - 1, +m[3], +h || 0, +mi || 0).getTime() + 60000;
+    };
     function renderPosts() {
       const el = $("postList");
       if (!data.posts.length) { el.innerHTML = `<div class="empty">아직 게시물이 없어요.<br/>"+ 새 게시물"을 눌러 첫 캐릭터를 올려보세요!</div>`; return; }
@@ -707,7 +714,7 @@
           ${selMode ? `<span class="pick" aria-hidden="true">✓</span>` : ""}
           ${p.image ? `<img class="thumb" src="${esc(p.image)}" alt="" draggable="false" onerror="${rawFallback}" />` : `<div class="thumb">${esc((p.name || "?").charAt(0))}</div>`}
           <div class="item-main">
-            <div class="item-title">${esc(p.name || "(이름 없음)")}${p.hidden ? `<span class="badge hid">🙈 비공개</span>` : ""}${p.spoiler ? `<span class="badge spo">✦ 스포</span>` : ""}${p.adult ? `<span class="badge">19+</span>` : ""}${p.status === "asset" ? `<span class="badge st">🔧 교체중</span>` : p.status === "renewal" ? `<span class="badge st re">✨ 리뉴얼</span>` : ""}${isNew(p, "posts") ? `<span class="badge new">NEW</span>` : ""}</div>
+            <div class="item-title">${esc(p.name || "(이름 없음)")}${p.hidden ? `<span class="badge hid">🙈 비공개</span>` : ""}${p.spoiler ? (spoilerOpened(p) ? `<span class="badge spo">✦ 공개됨</span>` : `<span class="badge spo">✦ 스포</span>`) : ""}${p.adult ? `<span class="badge">19+</span>` : ""}${p.status === "asset" ? `<span class="badge st">🔧 교체중</span>` : p.status === "renewal" ? `<span class="badge st re">✨ 리뉴얼</span>` : ""}${isNew(p, "posts") ? `<span class="badge new">NEW</span>` : ""}</div>
             <div class="item-sub">${esc(p.date || "")} · ${(p.tags || []).map(t => "#" + esc(t)).join(" ") || "태그 없음"}</div>
             <div class="item-sub">${esc(p.tagline || "")}</div>
           </div>
@@ -829,7 +836,8 @@
           <label class="check"><input type="checkbox" id="f_hidden" ${item.hidden ? "checked" : ""} /> 🙈 비공개 <small style="font-weight:400;color:var(--sub)">사이트에 안 보이게 숨겨둬요 (준비되면 체크 풀기)</small></label>
           <label class="check"><input type="checkbox" id="f_spoiler" ${item.spoiler ? "checked" : ""} /> ✦ 스포일러 <small style="font-weight:400;color:var(--sub)">고정 공지 바로 아래에 홀로그램 카드로 보이고, 눌러도 안 열려요</small></label>
           <label class="f rel-row ${item.spoiler ? "" : "hidden"}" id="f_relRow">📅 공개 예정일 <small>비워두면 올린 날짜(오늘)로 보여요</small>
-            <div class="rel-in"><input type="date" id="f_release" value="${esc(item.releaseDate || "")}" /><button type="button" class="btn btn-ghost btn-sm" id="f_relClear">지우기</button></div>
+            <div class="rel-in"><input type="date" id="f_release" value="${esc(item.releaseDate || "")}" /><input type="time" id="f_releaseTime" value="${esc(item.releaseTime || "")}" /><button type="button" class="btn btn-ghost btn-sm" id="f_relClear">지우기</button></div>
+            <small>⏰ 그 시간 1분 뒤 자동으로 공개돼서 고정 공지 바로 아래로 올라가요 (시간을 비우면 그날 0시)</small>
           </label>
           <div class="status-box">
             <label class="check"><input type="checkbox" class="f-status" value="asset" ${item.status === "asset" ? "checked" : ""} /> 🔧 에셋 교체중 표시</label>
@@ -946,7 +954,7 @@
       // 상태 표시는 하나만 고를 수 있어요
       document.querySelectorAll(".f-status").forEach(cb => cb.onchange = () => { if (cb.checked) document.querySelectorAll(".f-status").forEach(o => { if (o !== cb) o.checked = false; }); });
       $("f_spoiler").onchange = () => $("f_relRow").classList.toggle("hidden", !$("f_spoiler").checked);
-      $("f_relClear").onclick = e => { e.preventDefault(); $("f_release").value = ""; };
+      $("f_relClear").onclick = e => { e.preventDefault(); $("f_release").value = ""; $("f_releaseTime").value = ""; };
       $("savePost").onclick = savePost;
       // 폰에선 키보드가 갑자기 올라오지 않게, 컴퓨터에서 새로 쓸 때만 이름 칸에 커서를 둬요
       if (index < 0 && isDesktop()) $("f_name").focus();
@@ -1125,6 +1133,8 @@
       if ($("f_spoiler").checked) it.spoiler = true; else delete it.spoiler;
       const rel = $("f_release").value;
       if (it.spoiler && rel) it.releaseDate = rel; else delete it.releaseDate;
+      const relT = $("f_releaseTime").value;
+      if (it.spoiler && rel && relT) it.releaseTime = relT; else delete it.releaseTime;
       const st = document.querySelector(".f-status:checked"); if (st) it.status = st.value; else delete it.status;
       it.likes = Math.max(0, parseInt($("f_likes").value) || 0);
       it.rts = Math.max(0, parseInt($("f_rts").value) || 0);
