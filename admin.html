@@ -97,6 +97,16 @@
     .visit-strip { margin: 12px 0 0; width: 100%; display: flex; align-items: center; gap: 12px; padding: 9px 14px; border-radius: 12px; background: #fff; border: 1px solid var(--line); font-size: .8rem; color: var(--sub); white-space: nowrap; overflow: hidden; }
     .visit-strip b { color: var(--accent); font-size: .9rem; margin-left: 2px; }
     .visit-strip .vs-more { margin-left: auto; font-size: 1rem; color: var(--sub); }
+    .vs-ref { border: 1px solid var(--line); border-radius: 14px; padding: 12px; }
+    .vs-ref-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-size: .86rem; }
+    .vs-seg { display: flex; background: var(--soft); border-radius: 999px; padding: 2px; }
+    .vs-seg button { padding: 4px 10px; border-radius: 999px; font-size: .72rem; font-weight: 700; color: var(--sub); }
+    .vs-seg button.on { background: #fff; color: var(--accent); box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+    .ref-row { display: grid; grid-template-columns: 110px 1fr 34px; align-items: center; gap: 8px; padding: 4px 0; font-size: .8rem; }
+    .ref-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ref-bar { height: 8px; background: #f1eefb; border-radius: 4px; overflow: hidden; }
+    .ref-bar i { display: block; height: 100%; background: var(--grad); border-radius: 4px; }
+    .ref-row b { text-align: right; color: var(--accent); }
     .vs-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
     .vs-cards div { background: var(--soft); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 2px; }
     .vs-cards small { font-size: .72rem; color: var(--sub); font-weight: 700; }
@@ -1238,10 +1248,35 @@
           </div>
           <div class="vs-chart">${days.slice().reverse().map(d => { const dt = new Date(d.d + "T00:00:00"); return `
             <div class="vs-col" title="${d.d} · 방문 ${d.uv} · 조회 ${d.pv}"><span class="vs-n">${d.uv || ""}</span><i style="height:${Math.max(3, d.uv / max * 100)}%"></i><span class="vs-d">${dt.getDate()}<br/>${wk[dt.getDay()]}</span></div>`; }).join("")}</div>
+          <div class="vs-ref">
+            <div class="vs-ref-top"><b>🔗 어디서 왔나</b><div class="vs-seg">${["오늘", "7일", "14일", "전체"].map((t, k) => `<button data-ref="${k}" class="${k === 1 ? "on" : ""}">${t}</button>`).join("")}</div></div>
+            <div id="refList"></div>
+            <div class="hint" style="margin-top:6px">💡 링크 끝에 <b>?from=이름</b>을 붙여서 올리면 정확히 구분돼요. 예: heart-notis.github.io/?from=티팟</div>
+          </div>
           <div class="hint">방문 = 그날 들어온 사람 수 (같은 사람은 하루 1번) · 조회 = 사이트를 연 횟수<br/>제작자 페이지를 연 기기의 방문은 세지 않아요. 세기 시작한 날부터 쌓여요.</div>
         </div>`;
       $("overlay").classList.add("open");
+      const drawRefs = k => {
+        const src = k === 3 ? (total.refs || {}) : days.slice(0, [1, 7, 14][k]).reduce((acc, d) => { Object.entries(d.refs || {}).forEach(([h, n]) => acc[h] = (acc[h] || 0) + n); return acc; }, {});
+        const merged = {};
+        Object.entries(src).forEach(([h, n]) => { const nm = refName(h); merged[nm] = (merged[nm] || 0) + n; });
+        const list = Object.entries(merged).sort((a, b) => b[1] - a[1]), sum = list.reduce((a, [, n]) => a + n, 0) || 1;
+        $("refList").innerHTML = list.length ? list.map(([h, n]) => `<div class="ref-row"><span class="ref-name">${esc(h)}</span><span class="ref-bar"><i style="width:${Math.max(4, n / sum * 100)}%"></i></span><b>${n}</b></div>`).join("")
+          : `<div class="hint">아직 기록이 없어요 (이 기능을 켠 뒤부터 쌓여요)</div>`;
+        document.querySelectorAll("[data-ref]").forEach(b => b.classList.toggle("on", +b.dataset.ref === k));
+      };
+      document.querySelectorAll("[data-ref]").forEach(b => b.onclick = () => drawRefs(+b.dataset.ref));
+      drawRefs(1);
     };
+    // 도메인 → 알아보기 쉬운 이름
+    function refName(h) {
+      const m = [
+        [/^(t\.co|x\.com|twitter\.com)$/, "X (트위터)"], [/postype|posty\.pe/, "포스타입"], [/kakao/, "카카오톡"],
+        [/naver/, "네이버"], [/google/, "구글"], [/daum/, "다음"], [/instagram/, "인스타그램"], [/discord/, "디스코드"],
+        [/youtube|youtu\.be/, "유튜브"], [/spin-spin/, "스핀스핀"], [/^direct$/, "직접 · 알 수 없음"]
+      ].find(([re]) => re.test(h));
+      return m ? m[1] : h;
+    }
     async function msgApi(action, extra = {}) {
       const r = await fetch(MSG_API, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action, pw: adminPw, ...extra }) });
       if (r.status === 401) { adminPw = ""; rememberPw(); throw Object.assign(new Error("auth"), { code: "auth" }); }

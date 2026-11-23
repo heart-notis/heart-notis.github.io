@@ -1107,11 +1107,16 @@
     // 📊 방문자 수 세기: 탭 하나당 한 번 · 제작자 기기와 미리보기는 빼요 (개인정보는 안 보내요)
     (function countVisit() {
       try {
-        if (new URLSearchParams(location.search).has("preview")) return;
+        const qs = new URLSearchParams(location.search);
+        if (qs.has("preview")) return;
+        // 어디서 왔는지: 링크 끝의 ?from=티팟 같은 표시가 먼저, 없으면 이전 페이지 주소(도메인만)
+        let src = qs.get("from") || qs.get("utm_source") || "";
+        if (!src) { try { const h = new URL(document.referrer).hostname.replace(/^(www|m|mobile)\./, ""); if (h && h !== location.hostname) src = h; } catch {} }
+        if (qs.has("from") || qs.has("utm_source")) { qs.delete("from"); qs.delete("utm_source"); history.replaceState(history.state, "", location.pathname + (qs.toString() ? "?" + qs : "") + location.hash); }
         if (localStorage.getItem("heart_me") || localStorage.getItem("heart_gh_token")) return;
         if (sessionStorage.getItem("heart_v")) return;
         sessionStorage.setItem("heart_v", "1");
-        fetch(MSG_API, { method: "POST", headers: { "content-type": "text/plain" }, body: JSON.stringify({ action: "visit" }), keepalive: true }).catch(() => {});
+        fetch(MSG_API, { method: "POST", headers: { "content-type": "text/plain" }, body: JSON.stringify({ action: "visit", src }), keepalive: true }).catch(() => {});
       } catch {}
     })();
     const MSG_MAX = 1000, MSG_COOLDOWN = 30;   // 글자 수 제한, 연속 전송 막기(초)
