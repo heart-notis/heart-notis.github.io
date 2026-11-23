@@ -543,6 +543,7 @@
     });
 
     /* ---------- 게시물 편집 ---------- */
+    const isDesktop = () => matchMedia("(hover: hover) and (pointer: fine)").matches;
     let edit = null;   // { kind, index, item, srcImg }
     function closeEditor() { $("overlay").classList.remove("open"); document.body.style.overflow = ""; edit = null; }
     $("overlay").addEventListener("click", e => { if (e.target.id === "overlay") closeEditor(); });
@@ -715,7 +716,8 @@
       // 상태 표시는 하나만 고를 수 있어요
       document.querySelectorAll(".f-status").forEach(cb => cb.onchange = () => { if (cb.checked) document.querySelectorAll(".f-status").forEach(o => { if (o !== cb) o.checked = false; }); });
       $("savePost").onclick = savePost;
-      $("f_name").focus();
+      // 폰에선 키보드가 갑자기 올라오지 않게, 컴퓨터에서 새로 쓸 때만 이름 칸에 커서를 둬요
+      if (index < 0 && isDesktop()) $("f_name").focus();
     }
     // 🎨 게시물 페이지 꾸미기 (사이트 index.html 의 THEMES 와 이름이 같아야 해요)
     const THEMES = [
@@ -924,7 +926,7 @@
         if (edit.index >= 0) data.notices[edit.index] = it; else data.notices.unshift(it);
         closeEditor(); saveDraft(); renderAll(); toast("공지를 저장했어요");
       };
-      $("n_title").focus();
+      if (index < 0 && isDesktop()) $("n_title").focus();
     }
     document.addEventListener("click", e => { if (e.target.closest("[data-close]")) closeEditor(); });
     document.addEventListener("keydown", e => { if (e.key === "Escape" && edit) closeEditor(); });
