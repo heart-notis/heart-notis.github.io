@@ -61,7 +61,8 @@ window.SITE_DATA = {
       "links": {},
       "spoiler": true,
       "theme": "rose",
-      "releaseDate": "2026-11-27"
+      "releaseDate": "2026-11-27",
+      "releaseTime": "21:00"
     },
     {
       "id": "mwso99e36g7y",
