@@ -325,6 +325,19 @@
       background: linear-gradient(120deg, #a98cf3, #7fb5f2, #e79ad0, #a98cf3); background-size: 300% 100%; animation: spoilFlow 4s linear infinite; box-shadow: 0 3px 10px rgba(150,120,240,.35); }
     @keyframes spoilFlow { to { background-position: 300% 0; } }
     .tweet.spoiler .t-title, .tweet.spoiler .t-tagline, .tweet.spoiler .t-tags { opacity: 1; }
+    .t-media.can-talk { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+    .spoil-typing { position: absolute; left: 14px; bottom: 12px; z-index: 3; display: flex; gap: 4px; align-items: center; padding: 9px 12px; border-radius: 16px 16px 16px 4px; background: rgba(255,255,255,.92); box-shadow: 0 4px 14px rgba(80,60,180,.22); transition: opacity .2s, transform .2s; }
+    .spoil-typing i { width: 6px; height: 6px; border-radius: 50%; background: #a98cf3; animation: typing 1.2s ease-in-out infinite; }
+    .spoil-typing i:nth-child(2) { animation-delay: .15s; background: #8fb2f3; }
+    .spoil-typing i:nth-child(3) { animation-delay: .3s; background: #7fcdf2; }
+    @keyframes typing { 0%, 60%, 100% { transform: translateY(0); opacity: .55; } 30% { transform: translateY(-4px); opacity: 1; } }
+    .tweet.spoiler .holo-spark { display: none; }
+    .spoil-bubble { position: absolute; left: 14px; right: 14px; bottom: 14px; z-index: 4; padding: 10px 14px; border-radius: 16px 16px 16px 4px; background: rgba(255,255,255,.95); color: #2b2f35; font-size: .84rem; font-weight: 600; line-height: 1.5; word-break: keep-all; box-shadow: 0 6px 18px rgba(80,60,180,.22);
+      opacity: 0; transform: translateY(14px) scale(.96); transform-origin: left bottom; pointer-events: none; transition: opacity .25s, transform .32s cubic-bezier(.2, 1.3, .4, 1); }
+    .spoil-bubble b { display: block; font-size: .66rem; color: #7353d6; letter-spacing: .06em; margin-bottom: 2px; }
+    .spoil-bubble b::before { content: "✦ "; color: #a98cf3; }
+    .t-media.talk .spoil-bubble { opacity: 1; transform: none; }
+    .t-media.talk .spoil-typing { opacity: 0; transform: scale(.8); }
     .tweet.spoiler .t-media, .m-tile.locked:has(.spoil) { position: relative; overflow: hidden; }
     .tweet.spoiler .t-media .media, .m-tile .lock-veil.spoil ~ .media, .m-tile:has(.spoil) .media { filter: blur(2px) saturate(1.1); }
     .lock-veil.spoil { backdrop-filter: none; -webkit-backdrop-filter: none; mix-blend-mode: soft-light; animation: holo 5s ease-in-out infinite;
@@ -1033,9 +1046,11 @@
             <div class="spoil-tag"><span>✦ SPOILER</span></div>
             ${headHTML(c.date, releaseLabel(c.releaseDate, c.releaseTime))}
             <p class="t-title">${escH(c.name)}</p>
-            ${c.tagline ? `<p class="t-tagline">${fmtText(c.tagline)}</p>` : ""}
             <p class="t-tags">${hashtags(c)}</p>
-            ${c.image ? `<div class="t-media preview" style="--pv:${typeof c.previewPos === "number" ? c.previewPos : 25}%;--px:${typeof c.previewX === "number" ? c.previewX : 50}%;--pz:${typeof c.previewZoom === "number" ? c.previewZoom : 1}">${mediaHTML(c)}${veilHTML(c)}</div>` : ""}
+            ${c.image ? `<div class="t-media preview${c.tagline ? " can-talk" : ""}" style="--pv:${typeof c.previewPos === "number" ? c.previewPos : 25}%;--px:${typeof c.previewX === "number" ? c.previewX : 50}%;--pz:${typeof c.previewZoom === "number" ? c.previewZoom : 1}">${mediaHTML(c)}${veilHTML(c)}${c.tagline ? `
+              <span class="spoil-typing" role="button" aria-label="한마디 보기"><i></i><i></i><i></i></span>
+              <div class="spoil-bubble"><b>${escH(c.name)}</b>${fmtText(c.tagline)}</div>` : ""}</div>`
+              : (c.tagline ? `<p class="t-tagline">${fmtText(c.tagline)}</p>` : "")}
           </div>
         </article>`;
     }
@@ -1466,6 +1481,10 @@
       const arrow = e.target.closest("[data-scroll]");
       if (arrow) { const box = $("chips"); box.scrollBy({ left: +arrow.dataset.scroll * box.clientWidth * 0.6 }); return; }
       if (e.target.closest("#calBtn")) return openCal();
+      // ✦ 스포일러 사진을 누르면 한마디 말풍선이 톡 (다른 곳 누르면 닫혀요)
+      const talk = e.target.closest(".tweet.spoiler .t-media.can-talk");
+      document.querySelectorAll(".t-media.talk").forEach(m => { if (m !== talk) m.classList.remove("talk"); });
+      if (talk) { talk.classList.toggle("talk"); return; }
       if (e.target.closest("[data-search-open]")) { searchOpen = true; searchFocus = true; return renderView(); }
       if (e.target.closest("[data-search-close]")) return closeSearch();
       const chip = e.target.closest(".chip");
