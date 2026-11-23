@@ -968,6 +968,16 @@
     /* ---- 💌 비공개 메시지 (구글 폼으로 전송) ---- */
     // 메시지는 비공개 보관함(Netlify)으로 보내요. 알림도 거기서 보내서, 알림 채널 이름은 여기 없어요.
     const MSG_API = "https://heart-notis.netlify.app/api/messages";
+    // 📊 방문자 수 세기: 탭 하나당 한 번 · 제작자 기기와 미리보기는 빼요 (개인정보는 안 보내요)
+    (function countVisit() {
+      try {
+        if (new URLSearchParams(location.search).has("preview")) return;
+        if (localStorage.getItem("heart_me") || localStorage.getItem("heart_gh_token")) return;
+        if (sessionStorage.getItem("heart_v")) return;
+        sessionStorage.setItem("heart_v", "1");
+        fetch(MSG_API, { method: "POST", headers: { "content-type": "text/plain" }, body: JSON.stringify({ action: "visit" }), keepalive: true }).catch(() => {});
+      } catch {}
+    })();
     const MSG_MAX = 1000, MSG_COOLDOWN = 30;   // 글자 수 제한, 연속 전송 막기(초)
     let msgDraft = { nick: "", body: "" }, msgSent = false;
     function renderMessage(el) {

@@ -94,6 +94,20 @@
     .btn-danger { color: var(--danger); background: #fdecf2; }
     .btn:disabled { opacity: .5; cursor: default; }
 
+    .visit-strip { margin: 12px 0 0; width: 100%; display: flex; align-items: center; gap: 12px; padding: 9px 14px; border-radius: 12px; background: #fff; border: 1px solid var(--line); font-size: .8rem; color: var(--sub); white-space: nowrap; overflow: hidden; }
+    .visit-strip b { color: var(--accent); font-size: .9rem; margin-left: 2px; }
+    .visit-strip .vs-more { margin-left: auto; font-size: 1rem; color: var(--sub); }
+    .vs-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .vs-cards div { background: var(--soft); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 2px; }
+    .vs-cards small { font-size: .72rem; color: var(--sub); font-weight: 700; }
+    .vs-cards b { font-size: 1.25rem; color: #2b2f35; }
+    .vs-cards em { font-style: normal; font-size: .7rem; color: var(--sub); }
+    .vs-chart { display: flex; align-items: flex-end; gap: 4px; height: 150px; padding: 18px 4px 0; border-bottom: 1px solid var(--line); margin-bottom: 26px; }
+    .vs-col { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; position: relative; }
+    .vs-col i { width: 100%; max-width: 22px; border-radius: 6px 6px 2px 2px; background: var(--grad); display: block; }
+    .vs-col:last-child i { box-shadow: 0 0 0 2px #fff, 0 0 0 3px var(--accent); }
+    .vs-n { font-size: .62rem; color: var(--sub); margin-bottom: 2px; }
+    .vs-d { position: absolute; top: 100%; margin-top: 3px; font-size: .58rem; color: var(--sub); text-align: center; line-height: 1.2; }
     .banner {
       margin: 14px 0 0; padding: 12px 14px; border-radius: 12px;
       background: var(--soft); color: #4b3fb8; font-size: .86rem;
@@ -296,6 +310,7 @@
 
     <div class="wrap">
       <div class="banner hidden" id="draftBanner"></div>
+      <button class="visit-strip hidden" id="visitStrip" type="button"></button>
 
       <nav class="tabs">
         <button class="tab active" data-tab="posts">게시물</button>
@@ -524,7 +539,9 @@
 
     const BASE_AT_LOAD = H(SERVER);
     function initApp() {
+      try { localStorage.setItem("heart_me", "1"); } catch {}   // 이 기기의 방문은 방문자 수에서 빼요
       loadMessages(true);
+      loadVisits();
       syncFromRemote();
       const draft = store.get(DRAFT_KEY);
       if (draft && draft.posts && !sameAsServer(draft)) {
@@ -1149,6 +1166,35 @@
     try { adminPw = sessionStorage.getItem("heart_admin_pw") || ""; } catch {}
     function rememberPw() { try { adminPw ? sessionStorage.setItem("heart_admin_pw", adminPw) : sessionStorage.removeItem("heart_admin_pw"); } catch {} }
     let msgCache = [];
+    /* ---------- 📊 방문자 수 (제작자 페이지에서만 보여요) ---------- */
+    let visitCache = null;
+    async function loadVisits() {
+      if (!adminPw) return;
+      try { visitCache = await msgApi("stats"); } catch { return; }
+      const { total, days } = visitCache;
+      const el = $("visitStrip");
+      el.innerHTML = `<span class="vs-ic">📊</span><span>오늘 <b>${days[0].uv.toLocaleString()}</b>명</span><span>어제 <b>${days[1].uv.toLocaleString()}</b>명</span><span>전체 <b>${total.uv.toLocaleString()}</b>명</span><span class="vs-more">›</span>`;
+      el.classList.remove("hidden");
+    }
+    $("visitStrip").onclick = () => {
+      if (!visitCache) return;
+      const { total, days } = visitCache, max = Math.max(1, ...days.map(d => d.uv));
+      const wk = ["일", "월", "화", "수", "목", "금", "토"];
+      edit = { kind: "visits" };
+      $("editor").innerHTML = `
+        <div class="ed-top"><h3>📊 방문자</h3><button class="icon" data-close aria-label="닫기">${I.x}</button></div>
+        <div class="ed-body">
+          <div class="vs-cards">
+            <div><small>오늘</small><b>${days[0].uv.toLocaleString()}</b><em>조회 ${days[0].pv.toLocaleString()}</em></div>
+            <div><small>최근 7일</small><b>${days.slice(0, 7).reduce((a, d) => a + d.uv, 0).toLocaleString()}</b><em>조회 ${days.slice(0, 7).reduce((a, d) => a + d.pv, 0).toLocaleString()}</em></div>
+            <div><small>전체</small><b>${total.uv.toLocaleString()}</b><em>조회 ${total.pv.toLocaleString()}</em></div>
+          </div>
+          <div class="vs-chart">${days.slice().reverse().map(d => { const dt = new Date(d.d + "T00:00:00"); return `
+            <div class="vs-col" title="${d.d} · 방문 ${d.uv} · 조회 ${d.pv}"><span class="vs-n">${d.uv || ""}</span><i style="height:${Math.max(3, d.uv / max * 100)}%"></i><span class="vs-d">${dt.getDate()}<br/>${wk[dt.getDay()]}</span></div>`; }).join("")}</div>
+          <div class="hint">방문 = 그날 들어온 사람 수 (같은 사람은 하루 1번) · 조회 = 사이트를 연 횟수<br/>제작자 페이지를 연 기기의 방문은 세지 않아요. 세기 시작한 날부터 쌓여요.</div>
+        </div>`;
+      $("overlay").classList.add("open");
+    };
     async function msgApi(action, extra = {}) {
       const r = await fetch(MSG_API, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action, pw: adminPw, ...extra }) });
       if (r.status === 401) { adminPw = ""; rememberPw(); throw Object.assign(new Error("auth"), { code: "auth" }); }
@@ -1205,7 +1251,7 @@
     $("hdrBadge").onclick = () => document.querySelector('.tab[data-tab="messages"]').click();
     // 페이지를 열어두면 1분마다 새 메시지 확인
     setInterval(() => { if (adminPw && !document.hidden && !$("appView").classList.contains("hidden")) loadMessages(true).then(() => { if (tab === "messages" && msgCache.some(m => !m.read)) renderMessages(); }); }, 60000);
-    document.addEventListener("visibilitychange", () => { if (!document.hidden && adminPw && !$("appView").classList.contains("hidden")) loadMessages(true); });
+    document.addEventListener("visibilitychange", () => { if (!document.hidden && adminPw && !$("appView").classList.contains("hidden")) { loadMessages(true); loadVisits(); } });
     document.addEventListener("click", async e => {
       const b = e.target.closest("[data-msgdel]"); if (!b) return;
       if (!(await confirmBox("이 메시지를 지울까요?\n되돌릴 수 없어요.", { ok: "지우기", danger: true }))) return;
