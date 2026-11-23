@@ -1197,7 +1197,7 @@
       for (let k = 0; k < N; k++) {
         const p = document.createElement("i"); p.className = "petal";
         const dur = 7 + Math.random() * 6;
-        p.style.cssText = `left:${Math.random() * 100}%;--sz:${.85 + Math.random() * .6};--drift:${(Math.random() - .3) * 70}px;--spin:${(Math.random() < .5 ? -1 : 1) * (240 + Math.random() * 300)}deg;animation-duration:${dur}s;animation-delay:${-Math.random() * dur}s;opacity:${.55 + Math.random() * .4}`;
+        p.style.cssText = `left:${Math.random() * 100}%;--sz:${.55 + Math.random() * .4};--drift:${(Math.random() - .3) * 70}px;--spin:${(Math.random() < .5 ? -1 : 1) * (240 + Math.random() * 300)}deg;animation-duration:${dur}s;animation-delay:${-Math.random() * dur}s;opacity:${.55 + Math.random() * .4}`;
         layer.appendChild(p);
       }
     })();
