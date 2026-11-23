@@ -142,6 +142,61 @@
       transition: background .15s;
     }
     .follow:hover { background: var(--blue-soft); }
+    .p-btns { display: flex; align-items: center; gap: 8px; }
+    .cal-btn { width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid #ddd3fb; background: #fff; color: #7a5ce0; display: inline-flex; align-items: center; justify-content: center; position: relative; box-shadow: 0 2px 8px rgba(140,120,240,.12); transition: transform .15s; }
+    .cal-btn:active { transform: scale(.92); }
+    .cal-btn svg { width: 18px; height: 18px; }
+    .cal-dot { position: absolute; top: -3px; right: -3px; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 999px; font-size: 9px; font-weight: 800; color: #fff; background: linear-gradient(120deg, #a98cf3, #7fb5f2); display: flex; align-items: center; justify-content: center; border: 2px solid #fff; }
+    /* 📅 제작 달력 (아래에서 올라오는 창) */
+    .cs-back { position: fixed; inset: 0; z-index: 90; background: rgba(40,32,80,.32); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); opacity: 0; transition: opacity .3s; overscroll-behavior: contain; touch-action: none; }
+    .cs-back.show { opacity: 1; }
+    .cs { position: fixed; left: 50%; bottom: 0; z-index: 91; width: min(600px, 100%); max-height: 88vh; display: flex; flex-direction: column; background: #fff; border-radius: 24px 24px 0 0; box-shadow: 0 -10px 40px rgba(80,60,180,.2);
+      transform: translate(-50%, 105%); transition: transform .38s cubic-bezier(.2, .9, .25, 1); }
+    .cs.show { transform: translate(-50%, 0); }
+    .cs.dragging { transition: none; }
+    .cs-grab { padding: 8px 0 2px; touch-action: none; cursor: grab; }
+    .cs-hdl { width: 40px; height: 4px; border-radius: 2px; background: #e2ddf3; margin: 2px auto 8px; }
+    .cs-ct { display: flex; align-items: center; justify-content: space-between; padding: 4px 16px 8px; }
+    .cs-ct b { font-size: 1.02rem; }
+    .cs-nav { display: flex; gap: 6px; }
+    .cs-nav button { width: 30px; height: 30px; border-radius: 50%; background: #f4f1ff; color: #7a5ce0; font-weight: 800; font-size: 1rem; }
+    .cs-body { overflow-y: auto; overscroll-behavior: contain; padding-bottom: calc(18px + env(safe-area-inset-bottom)); }
+    .cs-wk { display: grid; grid-template-columns: repeat(7, 1fr); padding: 0 10px; font-size: .68rem; color: #9aa0a8; text-align: center; margin-bottom: 4px; }
+    .cs-wk span:first-child { color: #f08aa8; } .cs-wk span:last-child { color: #7fa8f0; }
+    .cs-gr { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; padding: 0 10px; }
+    .cd { height: 48px; border-radius: 11px; padding: 4px; font-size: .7rem; color: #4b5563; position: relative; background: #faf9fd; text-align: left; }
+    .cd.mute { background: transparent; }
+    .cd.today { background: #f1ecff; box-shadow: inset 0 0 0 1.5px #b9a2f6; }
+    .cd.sel { box-shadow: inset 0 0 0 2px #8b6fe8; }
+    .cd .n { font-weight: 700; }
+    .cd .th { position: absolute; left: 50%; bottom: 5px; transform: translateX(-50%); display: flex; }
+    .cd .th img { width: 17px; height: 17px; border-radius: 50%; object-fit: cover; border: 1.5px solid #fff; margin-left: -7px; }
+    .cd .th img:first-child { margin-left: 0; }
+    .cd .cnt { position: absolute; right: 3px; top: 3px; font-size: .55rem; font-weight: 800; color: #fff; padding: 0 4px; border-radius: 999px; background: linear-gradient(120deg, #a993f4, #74c6f0); }
+    .cd.spo { background: linear-gradient(135deg, #efe9ff, #e6f4ff, #fdeaf6); box-shadow: inset 0 0 0 1.5px #c9b8fa; }
+    .cd.spo .star { position: absolute; left: 0; right: 0; bottom: 4px; text-align: center; font-size: .56rem; font-weight: 800; color: #7353d6; line-height: 1.15; }
+    .cd.spo .star em { display: block; font-style: normal; font-size: .9rem; color: #a98cf3; text-shadow: 0 0 6px #c9b8fa; }
+    .cs-day { margin: 10px 12px 0; padding: 10px; border-radius: 14px; background: #f7f4ff; }
+    .cs-day h5 { font-size: .8rem; margin-bottom: 8px; }
+    .cs-day h5 small { color: #9aa0a8; font-weight: 600; }
+    .cs-day .row { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+    .cs-day .row button { flex: 0 0 auto; width: 52px; text-align: center; font-size: .62rem; color: #4b5563; }
+    .cs-day .row img { width: 52px; height: 64px; border-radius: 10px; object-fit: cover; display: block; margin-bottom: 3px; }
+    .cs-sec { margin: 14px 16px 6px; padding-top: 12px; border-top: 1px solid #eceaf5; font-weight: 800; font-size: .9rem; display: flex; align-items: center; gap: 6px; }
+    .cs-sec small { font-weight: 600; color: #9aa0a8; font-size: .72rem; }
+    .cs-tl { padding: 0 16px 0 32px; position: relative; }
+    .cs-tl::before { content: ""; position: absolute; left: 20px; top: 10px; bottom: 10px; width: 2px; background: linear-gradient(#c9b8fa, #bde3f7); }
+    .cs-tg { position: relative; padding: 6px 0 8px; }
+    .cs-tg::before { content: "✦"; position: absolute; left: -17px; top: 4px; color: #a98cf3; font-size: 15px; text-shadow: 0 0 6px #d9ccff; }
+    .cs-tg h4 { font-size: .84rem; display: flex; gap: 6px; align-items: center; }
+    .cs-tg h4 small { font-weight: 600; color: #9aa0a8; font-size: .72rem; }
+    .cs-dd { margin-left: auto; font-size: .66rem; font-weight: 800; color: #fff; padding: 2px 8px; border-radius: 999px; background: linear-gradient(120deg, #a98cf3, #7fb5f2, #e79ad0); }
+    .cs-sp { margin-top: 6px; display: flex; gap: 10px; align-items: center; padding: 8px; border-radius: 14px; background: linear-gradient(90deg, #eef6ff, #f3f0ff); box-shadow: inset -3px 0 0 #9ab9f5; position: relative; overflow: hidden; }
+    .cs-sp img, .cs-sp .ph { width: 46px; height: 56px; border-radius: 10px; object-fit: cover; filter: blur(2px); flex-shrink: 0; background: #e9e4fb; }
+    .cs-sp b { font-size: .86rem; } .cs-sp span { display: block; font-size: .72rem; color: #7353d6; font-weight: 700; }
+    .cs-sp .rib { position: absolute; top: 8px; right: -30px; transform: rotate(35deg); width: 110px; text-align: center; font-size: .5rem; font-weight: 900; letter-spacing: .18em; color: #fff; padding: 2px 0; background: linear-gradient(90deg, #a98cf3, #7fb5f2); }
+    .cs-soon { position: relative; padding: 8px 0 4px; font-size: .78rem; font-weight: 800; letter-spacing: .2em; background: linear-gradient(90deg, #b9a2f6, #7fcdf2, #e79ad0, #b9a2f6); background-size: 300% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: spoilFlow 4s linear infinite; }
+    .cs-soon::before { content: "✦"; position: absolute; left: -17px; top: 6px; color: #d6cdf3; font-size: 14px; letter-spacing: 0; }
     .follow.on { background: var(--grad-strong); border-color: transparent; color: #fff; }
     .follow.on:hover { filter: brightness(.95); }
     .p-name { margin-top: 10px; font-size: 1.3rem; font-weight: 800; display: flex; align-items: center; gap: 4px; line-height: 1.25; }
@@ -758,7 +813,10 @@
     <section class="p-wrap">
       <div class="p-row">
         <div class="avatar" id="pAvatar"></div>
-        <button class="follow" id="followBtn">팔로우</button>
+        <div class="p-btns">
+          <button class="cal-btn" id="calBtn" aria-label="제작 달력"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M12 16.6s-2.2-1.3-2.6-2.6c-.3-1 .3-1.9 1.2-1.9.6 0 1 .3 1.4.8.4-.5.8-.8 1.4-.8.9 0 1.5.9 1.2 1.9-.4 1.3-2.6 2.6-2.6 2.6z" fill="currentColor" stroke="none"/></svg><span class="cal-dot hidden" id="calDot"></span></button>
+          <button class="follow" id="followBtn">팔로우</button>
+        </div>
       </div>
       <h1 class="p-name"><span id="pName"></span>
         <svg class="verified" viewBox="0 0 24 24"><path fill="url(#hg)" d="M12 21.5s-9-5.4-10.8-11C.1 6.4 2.7 2.5 6.7 2.5c2.3 0 4.1 1.2 5.3 3.1 1.2-1.9 3-3.1 5.3-3.1 4 0 6.6 3.9 5.5 8C21 16.1 12 21.5 12 21.5z"/><path d="M8 11.6l2.7 2.7 5.3-5.3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -1253,6 +1311,96 @@
       document.documentElement.classList.remove("modal-open");
     }
 
+    /* ---- 📅 제작 달력: 올라온 날 + ✦ 스포일러 공개일 · 아래엔 공개 예정 스포일러만 ---- */
+    let calMonth = (() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1); })();
+    let calSel = "", calEls = null;
+    const ymd = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    const upcoming = () => characters.map((c, i) => ({ c, i })).filter(({ c }) => isSpoiler(c))
+      .sort((a, b) => (releaseAt(a.c) ?? Infinity) - (releaseAt(b.c) ?? Infinity));
+    function updateCalDot() {
+      const n = upcoming().length, d = $("calDot"); if (!d) return;
+      d.textContent = n; d.classList.toggle("hidden", !n);
+    }
+    function calHTML() {
+      const byDay = {}, spDay = {};
+      characters.forEach((c, i) => {
+        if (isSpoiler(c)) { if (c.releaseDate) (spDay[c.releaseDate] = spDay[c.releaseDate] || []).push(c); return; }
+        const d = isReleased(c) ? c.releaseDate : c.date;
+        (byDay[d] = byDay[d] || []).push({ c, i });
+      });
+      const y = calMonth.getFullYear(), m = calMonth.getMonth(), first = new Date(y, m, 1).getDay(), last = new Date(y, m + 1, 0).getDate();
+      const todayK = ymd(new Date());
+      let g = "";
+      for (let k = 0; k < first; k++) g += `<div class="cd mute"></div>`;
+      for (let d = 1; d <= last; d++) {
+        const k = ymd(new Date(y, m, d)), ps = byDay[k] || [], sp = spDay[k];
+        g += `<button class="cd ${k === todayK ? "today" : ""} ${k === calSel ? "sel" : ""} ${sp ? "spo" : ""}" ${ps.length ? `data-cal-day="${k}"` : "disabled"}><span class="n">${d}</span>${ps.length && !sp ? `<span class="cnt">${ps.length}</span><span class="th">${ps.slice(0, 3).map(({ c }) => c.image ? `<img src="${esc(c.image)}" alt="" />` : "").join("")}</span>` : ""}${sp ? `<span class="star"><em>✦</em>${esc(sp[0].releaseTime || "")}</span>` : ""}</button>`;
+      }
+      const selList = calSel && byDay[calSel] ? byDay[calSel] : null;
+      const sd = calSel ? toDay(calSel) : null;
+      const up = upcoming();
+      const now = new Date(), today0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      return `
+        <div class="cs-wk">${"일월화수목금토".split("").map(x => `<span>${x}</span>`).join("")}</div>
+        <div class="cs-gr">${g}</div>
+        ${selList ? `<div class="cs-day"><h5>${sd.getMonth() + 1}월 ${sd.getDate()}일 <small>게시물 ${selList.length}개 · 누르면 열려요</small></h5><div class="row">${selList.map(({ c, i }) => `<button data-cal-open="${i}">${c.image ? `<img src="${esc(c.image)}" alt="" />` : ""}${escH(c.name)}</button>`).join("")}</div></div>` : ""}
+        <div class="cs-sec">✦ 공개 예정 <small>스포일러만 모아봤어요</small></div>
+        <div class="cs-tl">
+          ${up.map(({ c }) => {
+            const dt = c.releaseDate ? toDay(c.releaseDate) : null;
+            const dd = dt ? Math.round((dt - today0) / 86400000) : null;
+            const wk = dt ? "일월화수목금토"[dt.getDay()] : "";
+            return `<div class="cs-tg"><h4>${dt ? `${dt.getMonth() + 1}월 ${dt.getDate()}일 (${wk})` : "날짜 미정"} ${c.releaseTime ? `<small>${esc(c.releaseTime)}</small>` : ""}${dd !== null ? `<span class="cs-dd">${dd <= 0 ? "D-DAY" : "D-" + dd}</span>` : ""}</h4>
+              <div class="cs-sp">${c.image ? `<img src="${esc(c.image)}" alt="" />` : `<div class="ph"></div>`}<div><b>${escH(c.name)}</b><span>✦ ${dt ? `${c.releaseTime ? esc(c.releaseTime) + " " : ""}공개 예정` : "곧 공개"}</span></div><span class="rib">SPOILER</span></div></div>`;
+          }).join("")}
+          <div class="cs-soon">COMING SOON……</div>
+        </div>`;
+    }
+    function drawCal() {
+      if (!calEls) return;
+      calEls.sheet.querySelector(".cs-title").textContent = `📅 제작 달력 · ${calMonth.getFullYear()}년 ${calMonth.getMonth() + 1}월`;
+      calEls.sheet.querySelector(".cs-body").innerHTML = calHTML();
+    }
+    function showCal() {
+      if (calEls) return;
+      const back = document.createElement("div"); back.className = "cs-back";
+      const sheet = document.createElement("div"); sheet.className = "cs"; sheet.setAttribute("role", "dialog"); sheet.setAttribute("aria-label", "제작 달력");
+      sheet.innerHTML = `<div class="cs-grab"><div class="cs-hdl"></div><div class="cs-ct"><b class="cs-title"></b><div class="cs-nav"><button data-cal-mv="-1" aria-label="이전 달">‹</button><button data-cal-mv="1" aria-label="다음 달">›</button></div></div></div><div class="cs-body"></div>`;
+      document.body.append(back, sheet);
+      calEls = { back, sheet };
+      drawCal();
+      document.documentElement.classList.add("modal-open");   // 뒤 화면은 안 움직여요
+      requestAnimationFrame(() => requestAnimationFrame(() => { back.classList.add("show"); sheet.classList.add("show"); }));
+      back.onclick = () => closeCal();
+      sheet.onclick = e => {
+        const mv = e.target.closest("[data-cal-mv]");
+        if (mv) { calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth() + +mv.dataset.calMv, 1); calSel = ""; return drawCal(); }
+        const day = e.target.closest("[data-cal-day]");
+        if (day) { calSel = calSel === day.dataset.calDay ? "" : day.dataset.calDay; return drawCal(); }
+        const op = e.target.closest("[data-cal-open]");
+        if (op) { hideCal(true); openTweet(+op.dataset.calOpen); }
+      };
+      // 손잡이를 아래로 끌어내리면 닫혀요
+      const grab = sheet.querySelector(".cs-grab");
+      let y0 = null, dy = 0;
+      grab.onpointerdown = e => { y0 = e.clientY; dy = 0; sheet.classList.add("dragging"); grab.setPointerCapture(e.pointerId); };
+      grab.onpointermove = e => { if (y0 === null) return; dy = Math.max(0, e.clientY - y0); sheet.style.transform = `translate(-50%, ${dy}px)`; };
+      grab.onpointerup = grab.onpointercancel = () => {
+        if (y0 === null) return; y0 = null; sheet.classList.remove("dragging"); sheet.style.transform = "";
+        if (dy > 90) closeCal();
+      };
+    }
+    function hideCal(instant) {
+      if (!calEls) return;
+      const { back, sheet } = calEls; calEls = null;
+      if (!$("overlay").classList.contains("open")) document.documentElement.classList.remove("modal-open");
+      if (instant) { back.remove(); sheet.remove(); return; }
+      back.classList.remove("show"); sheet.classList.remove("show");
+      setTimeout(() => { back.remove(); sheet.remove(); }, 400);
+    }
+    function openCal() { calSel = ""; showCal(); history.pushState({ heart: "cal", view }, "", baseUrl() + "#calendar"); }
+    function closeCal() { if (history.state && history.state.heart === "cal") history.back(); else hideCal(); }
+
     /* ---- 뒤로가기: 게시물 → 목록, 탭 → 이전 탭 (사이트를 나가지 않게) ---- */
     const baseUrl = () => location.pathname + location.search;
     const postKey = i => characters[i] && (characters[i].id || String(i));
@@ -1275,6 +1423,8 @@
     }
     window.addEventListener("popstate", () => {
       const st = history.state || {};
+      if (st.heart === "cal") { hideTweet(); showCal(); return; }
+      hideCal();
       if (st.view && st.view !== view) setView(st.view, false);
       if (st.heart === "post" && characters[st.i] && !isLocked(characters[st.i])) showTweet(st.i);
       else hideTweet();
@@ -1310,6 +1460,7 @@
       if (sh) return share(characters[+sh.dataset.share].name);
       const arrow = e.target.closest("[data-scroll]");
       if (arrow) { const box = $("chips"); box.scrollBy({ left: +arrow.dataset.scroll * box.clientWidth * 0.6 }); return; }
+      if (e.target.closest("#calBtn")) return openCal();
       if (e.target.closest("[data-search-open]")) { searchOpen = true; searchFocus = true; return renderView(); }
       if (e.target.closest("[data-search-close]")) return closeSearch();
       const chip = e.target.closest(".chip");
@@ -1404,6 +1555,7 @@
     // 폰에서 탭을 다시 열었을 때 예전 화면이 그대로 남아있는 경우가 있어서,
     // 돌아올 때마다 최신 data.js를 확인하고 바뀌었으면 새로고침해요 (메시지 쓰는 중이면 건너뜀)
     // 페이지를 열어둔 채로 공개 시간이 지나면 바로 다시 그려요
+    updateCalDot();
     (function watchRelease() {
       const opened = () => characters.filter(isReleased).map(c => c.id).join();
       let last = opened();
@@ -1413,6 +1565,7 @@
           last = now;
           const typing = document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName);
           if (!typing && (view === "tweets" || view === "media")) renderView();
+          updateCalDot(); drawCal();
         }
       }, 15000);
     })();
