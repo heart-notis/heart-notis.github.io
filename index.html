@@ -249,9 +249,9 @@
     .tweet.locked:hover .t-media.preview .media { transform: scale(var(--pz, 1)); }
     .m-tile.locked { cursor: default; }
     /* ✦ 스포일러: 홀로그램 카드 */
-    /* 고정 공지(연보라→하늘)와 구분되게 핑크→복숭아 그라데이션 */
-    .tweet.spoiler { background: linear-gradient(90deg, #fff0f7 0%, #fff5f0 60%, #fff 100%); box-shadow: inset 3px 0 0 #f3a6c8; }
-    .tweet.spoiler:hover { background: linear-gradient(90deg, #ffeaf4 0%, #fff0ea 60%, #fffcfb 100%); }
+    /* 사이트 색(연보라·연하늘)에 맞춘 그라데이션 · 고정 공지와는 방향만 반대로 (하늘→연보라) */
+    .tweet.spoiler { background: linear-gradient(90deg, #eef6ff 0%, #f3f0ff 60%, #fff 100%); box-shadow: inset 3px 0 0 #9ab9f5; }
+    .tweet.spoiler:hover { background: linear-gradient(90deg, #e8f2ff 0%, #eee9ff 60%, #fbfcff 100%); }
     .spoil-tag { margin: 0 0 6px; }
     .rel-date { font-weight: 800; background: linear-gradient(120deg, #8b6fe8, #5fa8ea); -webkit-background-clip: text; background-clip: text; color: transparent; }
     .spoil-tag span { display: inline-block; padding: 4px 11px; border-radius: 999px; font-size: .7rem; font-weight: 800; letter-spacing: .12em; color: #fff;
