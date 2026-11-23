@@ -349,7 +349,10 @@ window.SITE_DATA = {
       "links": {
         "POSTYPE": "https://posty.pe/phc9b17yd"
       },
-      "previewPos": 29
+      "previewPos": 29,
+      "previewX": 50,
+      "previewZoom": 1,
+      "theme": "home"
     },
     {
       "id": "mwrpmrvpy9l0",
@@ -370,7 +373,10 @@ window.SITE_DATA = {
       "links": {
         "POSTYPE": "https://posty.pe/phos71v8d"
       },
-      "previewPos": 33
+      "previewPos": 33,
+      "previewX": 50,
+      "previewZoom": 1,
+      "theme": "home"
     },
     {
       "id": "mwrpqewk3sy6",
@@ -390,7 +396,11 @@ window.SITE_DATA = {
       "link": "",
       "links": {
         "POSTYPE": "https://posty.pe/phcsqfrjd"
-      }
+      },
+      "previewPos": 25,
+      "previewX": 50,
+      "previewZoom": 1,
+      "theme": "home"
     },
     {
       "id": "mwrpoipi2f62",
@@ -411,7 +421,10 @@ window.SITE_DATA = {
       "links": {
         "POSTYPE": "https://posty.pe/phf69mmdd"
       },
-      "previewPos": 54
+      "previewPos": 54,
+      "previewX": 50,
+      "previewZoom": 1,
+      "theme": "home"
     },
     {
       "id": "mwrpfr95ttut",
