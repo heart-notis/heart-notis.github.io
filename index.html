@@ -185,6 +185,8 @@
     html.dark .to-top { background: #1d1b2b; }
     /* 🎂 생일 */
     .bday-tag { display: inline-flex; align-items: center; gap: 3px; margin-left: 7px; padding: 1px 8px; border-radius: 999px; font-size: .68rem; font-weight: 800; color: #c0498a; background: #ffeef6; border: 1px solid #ffc6e1; vertical-align: 2px; }
+    .bday-tag.soon { background: #fff7fb; border-style: dashed; opacity: .9; }
+    html.dark .bday-tag.soon { background: #2a1a24; }
     html.dark .bday-tag { background: #3a1f30; border-color: #6b2f52; color: #ffb3d6; }
     .tweet.bday { position: relative; background: linear-gradient(90deg, #fff4fa 0%, #fbf6ff 60%, #fff 100%); }
     html.dark .tweet.bday { background: linear-gradient(90deg, #2a1d2c 0%, #211d33 60%, #15151e 100%); }
@@ -330,6 +332,10 @@
     .chips-wrap .edge.left { left: 0; justify-content: flex-start; padding-left: 4px; background: linear-gradient(90deg, #fff 45%, rgba(255,255,255,0)); }
     .chips-wrap .edge.right { right: 0; justify-content: flex-end; padding-right: 4px; background: linear-gradient(270deg, #fff 45%, rgba(255,255,255,0)); }
     .chips-wrap.can-left .edge.left, .chips-wrap.can-right .edge.right { opacity: 1; pointer-events: auto; }
+    /* 해시태그 줄 끝을 흐리게: 옆에 더 있다는 힌트 */
+    .chips-wrap.can-right .chips { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 90px), transparent calc(100% - 10px)); mask-image: linear-gradient(90deg, #000 calc(100% - 90px), transparent calc(100% - 10px)); }
+    .chips-wrap.can-left .chips { -webkit-mask-image: linear-gradient(90deg, transparent 10px, #000 90px); mask-image: linear-gradient(90deg, transparent 10px, #000 90px); }
+    .chips-wrap.can-left.can-right .chips { -webkit-mask-image: linear-gradient(90deg, transparent 10px, #000 90px, #000 calc(100% - 90px), transparent calc(100% - 10px)); mask-image: linear-gradient(90deg, transparent 10px, #000 90px, #000 calc(100% - 90px), transparent calc(100% - 10px)); }
     .edge button {
       width: 26px; height: 26px; border-radius: 50%;
       background: #fff; color: var(--blue);
@@ -1273,6 +1279,7 @@
     // ✦ 24시간 안에 설정이 바뀐 캐릭터: "UPDATE" (+ 오늘 적은 업데이트 기록이 있으면 그 내용)
     // 🎂 생일 (birthday: "MM-DD")
     const mmdd = d => `${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    const isBdayTmr = c => { const t = new Date(); t.setDate(t.getDate() + 1); return !!(c && c.birthday && c.birthday === mmdd(t) && !isSpoiler(c)); };
     const isBday = c => !!(c && c.birthday && c.birthday === mmdd(new Date()) && !isSpoiler(c));   // 스포일러는 생일 숨김
     const portEnd = c => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec((c && c.portDate) || ""); if (!m) return 0; if (c.portTime) { const [h, mi] = c.portTime.split(":"); return new Date(+m[1], m[2] - 1, +m[3], +h || 0, +mi || 0).getTime(); } return new Date(+m[1], m[2] - 1, +m[3] + 1).getTime(); };
     const isPort = c => !!(c && c.port && !isSpoiler(c) && (!portEnd(c) || Date.now() < portEnd(c)));
@@ -1473,7 +1480,7 @@
           <div class="t-main">
             ${isPort(c) ? `<div class="port-tag"><span>↪ 이식 예정</span>${portInfo(c) ? `<em>${escH(portInfo(c))}</em>` : ""}</div>` : ""}
             ${headHTML(isReleased(c) ? c.releaseDate : c.date)}${updBadge(c) || logMini(c)}
-            <p class="t-title">${escH(c.name)}${isBday(c) ? `<span class="bday-tag">🎂 생일</span>` : ""}</p>
+            <p class="t-title">${escH(c.name)}${isBday(c) ? `<span class="bday-tag">🎂 생일</span>` : isBdayTmr(c) ? `<span class="bday-tag soon">🎂 내일 생일</span>` : ""}</p>
             ${c.tagline ? `<p class="t-tagline">${fmtText(c.tagline)}</p>` : ""}
             <p class="t-tags">${hashtags(c)}</p>
             <div class="t-media preview" style="--pv:${typeof c.previewPos === "number" ? c.previewPos : 25}%;--px:${typeof c.previewX === "number" ? c.previewX : 50}%;--pz:${typeof c.previewZoom === "number" ? c.previewZoom : 1}">${mediaHTML(c)}${c.adult ? `<span class="badge">19+</span>` : ""}${allImgs(c).length > 1 ? `<span class="many">${I.photos}${allImgs(c).length}</span>` : ""}<span class="expand">♡ 전체 보기</span></div>
@@ -1550,7 +1557,7 @@
         <form class="msg-card" id="msgForm" autocomplete="off">
           <h3>💌 비공개 메시지</h3>
           <div class="msg-hint">제작자에게만 전달되는 메시지예요.<br/>닉네임은 공란으로 비워둘 수 있습니다.</div>
-          <div class="mcat"><p>어떤 메시지인가요?<small>안 골라도 보낼 수 있어요</small></p><div id="msgCats">${[["port", "↪ 이식 요청"], ["ask", "❓ 문의"], ["cheer", "💜 응원"], ["etc", "💬 기타"]].map(([k, t]) => `<button type="button" data-cat="${k}" class="${msgDraft.cat === k ? "on" : ""}">${t}</button>`).join("")}</div></div>
+          <div class="mcat"><p>어떤 메시지인가요?<small>안 골라도 보낼 수 있어요</small></p><div id="msgCats">${[["port", "↪ 이식 요청"], ["ask", "❓ 문의"], ["cheer", "💜 응원"], ["etc", "📝 후기"]].map(([k, t]) => `<button type="button" data-cat="${k}" class="${msgDraft.cat === k ? "on" : ""}">${t}</button>`).join("")}</div></div>
           <input id="msgNick" maxlength="30" placeholder="닉네임" />
           <textarea id="msgBody" maxlength="${MSG_MAX}" placeholder="하고 싶은 말을 자유롭게 남겨주세요"></textarea>
           <input class="msg-hp" id="msgHp" tabindex="-1" aria-hidden="true" />
@@ -1591,7 +1598,7 @@
     }
 
     /* ---- 💬 공개 답장 모아보기 ---- */
-    const QA_CAT = { port: "↪ 이식 요청", ask: "❓ 문의", cheer: "💜 응원", etc: "💬 기타" };
+    const QA_CAT = { port: "↪ 이식 요청", ask: "❓ 문의", cheer: "💜 응원", etc: "📝 후기" };
     async function loadQa() {
       if (qaCache) return drawQa();
       try { const r = await fetch(MSG_API, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "qa" }) }); if (!r.ok) return; qaCache = (await r.json()).qa || []; drawQa(); } catch {}
@@ -1737,7 +1744,7 @@
             <div><div class="name">${esc(profile.name)}${I.verified}</div><div class="handle">@${esc(profile.handle)}</div></div>
           </div>
           ${isPort(c) ? `<div class="port-tag" style="margin-bottom:8px"><span>↪ 이식 예정</span>${portInfo(c) ? `<em>${escH(portInfo(c))}</em>` : ""}</div>` : ""}
-          <div class="d-title">${escH(c.name)}${isBday(c) ? `<span class="bday-tag">🎂 생일</span>` : ""}${c.world ? `<span class="d-world" data-world-go="${esc(c.world)}" role="button" title="이 세계관 캐릭터 모아보기">${escH(c.world)}<em class="dw-go">›</em></span>` : ""}</div>
+          <div class="d-title">${escH(c.name)}${isBday(c) ? `<span class="bday-tag">🎂 생일</span>` : isBdayTmr(c) ? `<span class="bday-tag soon">🎂 내일 생일</span>` : ""}${c.world ? `<span class="d-world" data-world-go="${esc(c.world)}" role="button" title="이 세계관 캐릭터 모아보기">${escH(c.world)}<em class="dw-go">›</em></span>` : ""}</div>
           ${c.tagline ? `<div class="d-tagline">${fmtText(c.tagline)}</div>` : ""}
           ${Array.isArray(c.lines) && c.lines.length ? `<div class="lines" data-lines="${i}"><button class="line-btn" data-line-next>💬 한마디 더 듣기 <span class="line-cnt"></span></button><div class="line-bub" aria-live="polite"></div></div>` : ""}
           ${c.description ? `<p class="d-text">${fmtText(c.description)}</p>` : ""}

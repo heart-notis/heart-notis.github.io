@@ -1688,7 +1688,7 @@
         else $("msgArea").innerHTML = `<div class="empty">메시지를 못 불러왔어요. 인터넷 연결을 확인하고 새로고침해주세요.</div>`;
       }
     }
-    const MCAT = { port: ["↪", "이식 요청"], ask: ["❓", "문의"], cheer: ["💜", "응원"], etc: ["💬", "기타"] };
+    const MCAT = { port: ["↪", "이식 요청"], ask: ["❓", "문의"], cheer: ["💜", "응원"], etc: ["📝", "후기"] };
     let msgFilter = "all";
     function renderMessages() {
       if (!msgCache.length) { $("msgArea").innerHTML = `<div class="empty">아직 받은 메시지가 없어요 💌</div>`; return; }
