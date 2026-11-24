@@ -233,6 +233,11 @@
     .cd .cnt { position: absolute; right: 3px; top: 3px; font-size: .55rem; font-weight: 800; color: #fff; padding: 0 4px; border-radius: 999px; background: linear-gradient(120deg, #a993f4, #74c6f0); }
     .cd.spo { background: linear-gradient(135deg, #efe9ff, #e6f4ff, #fdeaf6); box-shadow: inset 0 0 0 1.5px #c9b8fa; }
     .cd.spo .star { position: absolute; left: 0; right: 0; bottom: 4px; text-align: center; font-size: .56rem; font-weight: 800; color: #7353d6; line-height: 1.15; }
+    .cd.port { background: linear-gradient(135deg, #e6f4ff, #efe9ff); box-shadow: inset 0 0 0 1.5px #a9cdf5; }
+    .cd.port .star, .cd.port .star em { color: #4f8fdc; }
+    .cs-sp.port { cursor: pointer; }
+    .cs-sp.port .rib { background: linear-gradient(120deg, #7fb5f2, #a98cf3); }
+    .cs-sp.port img { filter: none !important; }
     .cd.spo .star em { display: block; font-style: normal; font-size: .9rem; color: #a98cf3; text-shadow: 0 0 6px #c9b8fa; }
     .cs-day { margin: 10px 12px 0; padding: 10px; border-radius: 14px; background: #f7f4ff; }
     .cs-day h5 { font-size: .8rem; margin-bottom: 8px; }
@@ -1006,6 +1011,7 @@
     html.dark .cd { background: #1d1c28; color: #c9cad8; }
     html.dark .cd.today { background: #262040; }
     html.dark .cd.spo { background: linear-gradient(135deg, #2a2346, #1d2a40, #36223a); }
+    html.dark .cd.port { background: linear-gradient(135deg, #1d2a40, #2a2346); } html.dark .cd.port .star, html.dark .cd.port .star em { color: #8fc0f5; }
     html.dark .cs-nav button, html.dark .cs-day { background: #222033; }
     html.dark .cs-sp { background: linear-gradient(90deg, #1b2234, #221d38); }
     html.dark .cs-hdl { background: #3a3650; }
@@ -1770,14 +1776,17 @@
     let calMonth = (() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1); })();
     let calSel = "", calEls = null;
     const ymd = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-    const upcoming = () => characters.map((c, i) => ({ c, i })).filter(({ c }) => isSpoiler(c))
-      .sort((a, b) => (releaseAt(a.c) ?? Infinity) - (releaseAt(b.c) ?? Infinity));
+    // 공개 예정: 스포일러 + 이식 예정 (둘 다 체크면 스포일러가 끝난 뒤에 이식으로 바뀌어요)
+    const portAt = c => { if (!c.portDate) return null; const d = toDay(c.portDate); if (isNaN(d)) return null; if (c.portTime) { const [h, mi] = c.portTime.split(":"); d.setHours(+h || 0, +mi || 0, 0, 0); } return d.getTime(); };
+    const upcoming = () => characters.map((c, i) => ({ c, i, kind: isSpoiler(c) ? "sp" : isPort(c) ? "port" : "" })).filter(x => x.kind)
+      .map(x => ({ ...x, at: (x.kind === "sp" ? releaseAt(x.c) : portAt(x.c)) ?? Infinity })).sort((a, b) => a.at - b.at);
     function updateCalDot() {
       const n = upcoming().length, d = $("calDot"); if (!d) return;
       d.textContent = n; d.classList.toggle("hidden", !n);
     }
     function calHTML() {
-      const byDay = {}, spDay = {};
+      const byDay = {}, spDay = {}, portDay = {};
+      characters.forEach(c => { if (isPort(c) && c.portDate) (portDay[c.portDate] = portDay[c.portDate] || []).push(c); });
       characters.forEach((c, i) => {
         if (isSpoiler(c)) { if (c.releaseDate) (spDay[c.releaseDate] = spDay[c.releaseDate] || []).push(c); return; }
         const d = isReleased(c) ? c.releaseDate : c.date;
@@ -1789,8 +1798,8 @@
       let g = "";
       for (let k = 0; k < first; k++) g += `<div class="cd mute"></div>`;
       for (let d = 1; d <= last; d++) {
-        const k = ymd(new Date(y, m, d)), ps = byDay[k] || [], sp = spDay[k], bd = bdOf(d);
-        g += `<button class="cd ${k === todayK ? "today" : ""} ${k === calSel ? "sel" : ""} ${sp ? "spo" : ""} ${bd.length ? "has-bd" : ""}" ${ps.length || bd.length ? `data-cal-day="${k}"` : "disabled"}>${bd.length ? `<span class="cake" title="${esc(bd.map(x => x.c.name).join(", "))} 생일">🎂</span>` : ""}<span class="n">${d}</span>${ps.length && !sp ? `<span class="cnt">${ps.length}</span><span class="th">${ps.slice(0, 3).map(({ c }) => c.image ? `<img src="${esc(c.image)}" alt="" />` : "").join("")}</span>` : ""}${sp ? `<span class="star"><em>✦</em>${esc(sp[0].releaseTime || "")}</span>` : ""}</button>`;
+        const k = ymd(new Date(y, m, d)), ps = byDay[k] || [], sp = spDay[k], pt = !sp && portDay[k], bd = bdOf(d);
+        g += `<button class="cd ${k === todayK ? "today" : ""} ${k === calSel ? "sel" : ""} ${sp ? "spo" : ""} ${pt ? "spo port" : ""} ${bd.length ? "has-bd" : ""}" ${ps.length || bd.length ? `data-cal-day="${k}"` : "disabled"}>${bd.length ? `<span class="cake" title="${esc(bd.map(x => x.c.name).join(", "))} 생일">🎂</span>` : ""}<span class="n">${d}</span>${pt ? `<span class="star"><em>↪</em>${esc(pt[0].portTime || "이식")}</span>` : ""}${ps.length && !sp && !pt ? `<span class="cnt">${ps.length}</span><span class="th">${ps.slice(0, 3).map(({ c }) => c.image ? `<img src="${esc(c.image)}" alt="" />` : "").join("")}</span>` : ""}${sp ? `<span class="star"><em>✦</em>${esc(sp[0].releaseTime || "")}</span>` : ""}</button>`;
       }
       const selList = calSel && byDay[calSel] ? byDay[calSel] : null;
       const sd = calSel ? toDay(calSel) : null;
@@ -1802,9 +1811,14 @@
         <div class="cs-gr">${g}</div>
         ${selBd.length ? `<div class="cs-day bd"><h5>🎂 ${sd.getMonth() + 1}월 ${sd.getDate()}일 생일</h5><div class="row">${selBd.map(({ c, i }) => `<button data-cal-open="${i}">${c.image ? `<img src="${esc(c.image)}" alt="" />` : ""}${escH(c.name)}</button>`).join("")}</div></div>` : ""}
         ${selList ? `<div class="cs-day"><h5>${sd.getMonth() + 1}월 ${sd.getDate()}일 <small>게시물 ${selList.length}개 · 누르면 열려요</small></h5><div class="row">${selList.map(({ c, i }) => `<button data-cal-open="${i}">${c.image ? `<img src="${esc(c.image)}" alt="" />` : ""}${escH(c.name)}</button>`).join("")}</div></div>` : ""}
-        <div class="cs-sec">✦ 공개 예정 <small>스포일러만 모아봤어요</small></div>
+        <div class="cs-sec">✦ 공개 예정 <small>스포일러 · 이식 예정</small></div>
         <div class="cs-tl">
-          ${up.map(({ c }) => {
+          ${up.map(({ c, i, kind }) => {
+            if (kind === "port") {
+              const dt = c.portDate ? toDay(c.portDate) : null, dd = dt ? Math.round((dt - today0) / 86400000) : null, wk = dt ? "일월화수목금토"[dt.getDay()] : "";
+              return `<div class="cs-tg"><h4>${dt ? `${dt.getMonth() + 1}월 ${dt.getDate()}일 (${wk})` : "날짜 미정"} ${c.portTime ? `<small>${esc(c.portTime)}</small>` : ""}${dd !== null ? `<span class="cs-dd">${dd <= 0 ? "D-DAY" : "D-" + dd}</span>` : ""}</h4>
+                <div class="cs-sp port" data-cal-open="${i}" role="button">${c.image ? `<img src="${esc(c.image)}" alt="" />` : `<div class="ph"></div>`}<div><b>${escH(c.name)}</b><span>↪ ${c.portNote ? escH(c.portNote) : "이식 예정"}</span></div><span class="rib">이식 예정</span></div></div>`;
+            }
             const dt = c.releaseDate ? toDay(c.releaseDate) : null;
             const dd = dt ? Math.round((dt - today0) / 86400000) : null;
             const wk = dt ? "일월화수목금토"[dt.getDay()] : "";
