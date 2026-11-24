@@ -228,6 +228,10 @@
     input.sw:checked::after { left: 22px; }
     .tg-sub:empty, .tg-sub:not(:has(> :not(.hidden))) { display: none; }
     .tg-sub { margin: -6px 0 0 10px; padding: 4px 0 4px 12px; border-left: 2px solid #ddd3fb; display: flex; flex-direction: column; gap: 10px; }
+    .today-bar { display: flex; gap: 6px; overflow-x: auto; margin: 0 0 10px; padding-bottom: 2px; scrollbar-width: none; }
+    .today-bar::-webkit-scrollbar { display: none; }
+    .today-bar button { flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px; height: 36px; padding: 0 12px; border-radius: 13px; background: #fff; border: 1px solid #ebe7f6; font-size: .78rem; font-weight: 700; color: #4b5563; cursor: pointer; }
+    .today-bar b { color: #7353d6; font-weight: 900; }
     .lb-bar { display: flex; gap: 6px; overflow-x: auto; margin: 0 0 12px; padding-bottom: 2px; scrollbar-width: none; }
     .lb-bar::-webkit-scrollbar { display: none; }
     .lb-bar button { flex-shrink: 0; height: 36px; padding: 0 13px; border-radius: 999px; font-size: .8rem; font-weight: 800; background: #fff; border: 1px solid var(--line); color: #5b6070; cursor: pointer; }
@@ -465,6 +469,7 @@
       <div class="banner hidden" id="draftBanner"></div>
       <button class="visit-strip hidden" id="visitStrip" type="button"></button>
 
+      <div class="today-bar hidden" id="todayBar"></div>
       <nav class="tabs">
         <button class="tab active" data-tab="posts">게시물</button>
         <button class="tab" data-tab="notices">공지</button>
@@ -756,7 +761,32 @@
       });
     }
 
-    function renderAll() { renderPosts(); renderNotices(); renderProfile(); $("tagInput").value = data.tags.join(", "); renderWorlds(); renderStatus(); }
+    function renderAll() { renderPosts(); renderNotices(); renderProfile(); $("tagInput").value = data.tags.join(", "); renderWorlds(); renderStatus(); renderToday(); }
+    /* ---------- 📋 오늘 챙길 것 (탭 위 한 줄) ---------- */
+    function renderToday() {
+      const bar = $("todayBar"); if (!bar) return;
+      const now = new Date(), d0 = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+      const dday = ymd => { const [y, m, d] = ymd.split("-").map(Number); const n = Math.round((new Date(y, m - 1, d).getTime() - d0) / 864e5); return n <= 0 ? "오늘" : n === 1 ? "내일" : "D-" + n; };
+      const md = dt => `${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
+      const tm = new Date(d0 + 864e5), chips = [];
+      let unread = 0; try { unread = msgCache.filter(m => !m.read).length; } catch {}
+      if (unread) chips.push(["💌", "안 읽은 메시지", unread, "msg"]);
+      data.posts.forEach((p, i) => {
+        if (p.spoiler && p.releaseDate && !spoilerOpened(p)) { const v = dday(p.releaseDate); if (v === "오늘" || v === "내일" || +v.slice(2) <= 7) chips.push(["✦", `${p.name} 공개`, v + (p.releaseTime ? " " + p.releaseTime : ""), "p" + i]); }
+        else if (p.port && p.portDate) { const end = p.portTime ? new Date(p.portDate + "T" + p.portTime).getTime() : new Date(p.portDate + "T00:00").getTime() + 864e5; const v = dday(p.portDate); if (Date.now() < end && (v === "오늘" || v === "내일" || +v.slice(2) <= 7)) chips.push(["↪", `${p.name} 이식`, v, "p" + i]); }
+        if (p.birthday && !p.spoiler && (p.birthday === md(now) || p.birthday === md(tm))) chips.push(["🎂", `${p.name} 생일`, p.birthday === md(now) ? "오늘" : "내일", "p" + i]);
+      });
+      data.notices.forEach((n, i) => { const w = noticeWait(n); if (w) chips.push(["⏰", "예약 공지", w, "n" + i]); });
+      bar.classList.toggle("hidden", !chips.length);
+      bar.innerHTML = chips.map(([ic, t, v, go]) => `<button data-today="${go}">${ic} ${esc(t)} <b>${esc(String(v))}</b></button>`).join("");
+    }
+    document.addEventListener("click", e => {
+      const b = e.target.closest("[data-today]"); if (!b) return;
+      const g = b.dataset.today;
+      if (g === "msg") return document.querySelector('.tab[data-tab="messages"]').click();
+      if (g[0] === "p") { document.querySelector('.tab[data-tab="posts"]').click(); return openPost(+g.slice(1)); }
+      if (g[0] === "n") { document.querySelector('.tab[data-tab="notices"]').click(); return openNotice(+g.slice(1)); }
+    });
 
     const noticeWait = n => { if (!n.publishDate) return ""; const [y, m, d] = n.publishDate.split("-").map(Number); const [h, mi] = (n.publishTime || "0:0").split(":"); if (Date.now() >= new Date(y, m - 1, d, +h || 0, +mi || 0).getTime()) return ""; return `${m}/${d}${n.publishTime ? " " + n.publishTime : ""}`; };
     const isNew = (item, list) => !SERVER[list].some(x => x.id && x.id === item.id);
@@ -1679,7 +1709,7 @@
       try {
         const { messages } = await msgApi("list");
         msgCache = messages || [];
-        setBadge(msgCache.filter(m => !m.read).length);
+        setBadge(msgCache.filter(m => !m.read).length); renderToday();
         if (!quiet) renderMessages();
       } catch (e) {
         if (quiet) return;
