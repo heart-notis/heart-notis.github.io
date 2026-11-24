@@ -74,7 +74,11 @@ window.SITE_DATA = {
         "images/post-mwspzf0v78ao-mwueotpe-2.webp",
         "images/post-mwspzf0v78ao-mwueotpe-3.webp",
         "images/post-mwspzf0v78ao-mwueotpe-4.webp"
-      ]
+      ],
+      "port": true,
+      "portNote": "BLOOM · 12월 3일",
+      "portDate": "2026-12-03",
+      "portTime": "21:00"
     },
     {
       "id": "mwso99e36g7y",
