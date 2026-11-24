@@ -242,6 +242,12 @@
     .tag-pick button.on { background: var(--grad); border-color: transparent; color: #fff; }
 
     .img-box { display: flex; gap: 14px; align-items: flex-start; }
+    .fold-sec { margin-top: 18px; }
+    .fold-sec > summary { list-style: none; display: flex; align-items: flex-start; gap: 10px; cursor: pointer; padding: 12px 14px; border-radius: 14px; background: #fff; border: 1px solid var(--line); margin-bottom: 10px; }
+    .fold-sec > summary::-webkit-details-marker { display: none; }
+    .fold-sec > summary > div { flex: 1; min-width: 0; }
+    .fold-ic { flex-shrink: 0; font-size: .76rem; font-weight: 800; color: var(--accent); padding-top: 4px; }
+    .fold-sec[open] .fold-ic { font-size: 0; } .fold-sec[open] .fold-ic::after { content: "접기 ▴"; font-size: .76rem; }
     .log-list { display: flex; flex-direction: column; gap: 4px; }
     .log-it { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 10px; background: var(--soft); font-size: .8rem; font-weight: 500; }
     .log-it b { color: var(--accent); flex-shrink: 0; }
@@ -470,13 +476,13 @@
           </label>
           <button class="btn btn-line" id="saveTags" style="align-self:flex-end">해시태그 저장</button>
         </div>
-        <div class="section-head" style="margin-top:18px">
-          <div><h2>세계관</h2><div class="hint">게시물 상세에서 세계관 뱃지를 누르면 그 세계관 캐릭터만 모아서 보여줘요 · 여기 적은 소개가 맨 위에 떠요</div></div>
-        </div>
-        <div class="item" style="flex-direction:column;align-items:stretch;gap:10px">
-          <div id="worldList" style="display:flex;flex-direction:column;gap:8px"></div>
-          <button class="btn btn-line" id="saveWorlds" style="align-self:flex-end">세계관 소개 저장</button>
-        </div>
+        <details class="fold-sec">
+          <summary><div><h2>세계관</h2><div class="hint">게시물 상세에서 세계관 뱃지를 누르면 그 세계관 캐릭터만 모아서 보여줘요 · 여기 적은 소개가 맨 위에 떠요</div></div><span class="fold-ic">펼치기 ▾</span></summary>
+          <div class="item" style="flex-direction:column;align-items:stretch;gap:10px">
+            <div id="worldList" style="display:flex;flex-direction:column;gap:8px"></div>
+            <button class="btn btn-line" id="saveWorlds" style="align-self:flex-end">세계관 소개 저장</button>
+          </div>
+        </details>
       </section>
     </div>
 
@@ -684,7 +690,8 @@
       ["asset", "🔧 교체중", p => p.status === "asset"],
       ["renewal", "✨ 리뉴얼", p => p.status === "renewal"],
       ["hidden", "🙈 비공개", p => !!p.hidden],
-      ["spoiler", "✦ 스포일러", p => !!p.spoiler]
+      ["spoiler", "✦ 스포일러", p => !!p.spoiler],
+      ["port", "↪ 이식 예정", p => !!p.port]
     ];
     function renderSelBar() {
       const bar = $("selBar");
@@ -809,7 +816,7 @@
           ${selMode ? `<span class="pick" aria-hidden="true">✓</span>` : ""}
           ${p.image ? `<img class="thumb" src="${esc(p.image)}" alt="" draggable="false" onerror="${rawFallback}" />` : `<div class="thumb">${esc((p.name || "?").charAt(0))}</div>`}
           <div class="item-main">
-            <div class="item-title"><span class="nm">${esc(p.name || "(이름 없음)")}</span>${p.hidden ? `<span class="badge hid">🙈 비공개</span>` : ""}${p.spoiler ? (spoilerOpened(p) ? `<span class="badge spo">✦ 공개됨</span>` : `<span class="badge spo">✦ 스포</span>`) : ""}${p.birthday ? `<span class="badge bd">🎂 ${+p.birthday.split("-")[0]}/${+p.birthday.split("-")[1]}</span>` : ""}${p.adult ? `<span class="badge">19+</span>` : ""}${p.status === "asset" ? `<span class="badge st">🔧 교체중</span>` : p.status === "renewal" ? `<span class="badge st re">✨ 리뉴얼</span>` : ""}${isNew(p, "posts") ? `<span class="badge new">NEW</span>` : ""}</div>
+            <div class="item-title"><span class="nm">${esc(p.name || "(이름 없음)")}</span>${p.hidden ? `<span class="badge hid">🙈 비공개</span>` : ""}${p.spoiler ? (spoilerOpened(p) ? `<span class="badge spo">✦ 공개됨</span>` : `<span class="badge spo">✦ 스포</span>`) : ""}${p.port ? `<span class="badge spo">↪ 이식</span>` : ""}${p.birthday ? `<span class="badge bd">🎂 ${+p.birthday.split("-")[0]}/${+p.birthday.split("-")[1]}</span>` : ""}${p.adult ? `<span class="badge">19+</span>` : ""}${p.status === "asset" ? `<span class="badge st">🔧 교체중</span>` : p.status === "renewal" ? `<span class="badge st re">✨ 리뉴얼</span>` : ""}${isNew(p, "posts") ? `<span class="badge new">NEW</span>` : ""}</div>
             <div class="item-sub">${esc(p.date || "")} · ${(p.tags || []).map(t => "#" + esc(t)).join(" ") || "태그 없음"}</div>
             <div class="item-sub">${esc(p.tagline || "")}</div>
           </div>
@@ -942,6 +949,8 @@
           <label class="check"><input type="checkbox" id="f_adult" ${item.adult ? "checked" : ""} /> 19+ 배지 달기</label>
           ${index >= 0 ? `<label class="check"><input type="checkbox" id="f_quiet" /> 🤫 조용히 수정 <small style="font-weight:400;color:var(--sub)">오타 고치기처럼 사소한 수정이면 체크 · UPDATE 표시가 안 떠요</small></label>` : ""}
           <label class="check"><input type="checkbox" id="f_hidden" ${item.hidden ? "checked" : ""} /> 🙈 비공개 <small style="font-weight:400;color:var(--sub)">사이트에 안 보이게 숨겨둬요 (준비되면 체크 풀기)</small></label>
+          <label class="check"><input type="checkbox" id="f_port" ${item.port ? "checked" : ""} /> ↪ 이식 예정 <small style="font-weight:400;color:var(--sub)">다른 플랫폼에 추가 공개 예정이면 체크 · 고정 공지 바로 아래로 올라가고, 눌러서 볼 수 있어요</small></label>
+          <label class="f rel-row ${item.port ? "" : "hidden"}" id="f_portRow">이식 안내 <small>예: BLOOM · 12월 3일 (비워두면 "이식 예정"만 보여요)</small><input type="text" id="f_portNote" maxlength="40" value="${esc(item.portNote || "")}" /></label>
           <label class="check"><input type="checkbox" id="f_spoiler" ${item.spoiler ? "checked" : ""} /> ✦ 스포일러 <small style="font-weight:400;color:var(--sub)">고정 공지 바로 아래에 홀로그램 카드로 보이고, 눌러도 안 열려요</small></label>
           <label class="f rel-row ${item.spoiler ? "" : "hidden"}" id="f_relRow">📅 공개 예정일 <small>비워두면 올린 날짜(오늘)로 보여요</small>
             <div class="rel-in"><input type="date" id="f_release" value="${esc(item.releaseDate || "")}" /><input type="time" id="f_releaseTime" value="${esc(item.releaseTime || "")}" /><button type="button" class="btn btn-ghost btn-sm" id="f_relClear">지우기</button></div>
@@ -974,6 +983,7 @@
         const b = e.target.closest("[data-theme-key]"); if (!b) return;
         document.querySelectorAll("#f_theme button").forEach(x => x.classList.toggle("on", x === b));
         $("f_themeNow").textContent = themeName(b.dataset.themeKey);
+        $("f_themeFold").open = false;   // 고르면 다시 접혀요
       };
       $("f_tags").onclick = e => { const b = e.target.closest("[data-tag]"); if (!b) return; readLinkInputs(); b.classList.toggle("on"); renderLinkInputs(); };
       // 목록 미리보기(3:1) 위치: 0 = 맨 위, 100 = 맨 아래
@@ -1064,6 +1074,7 @@
       if ($("imgRemove")) $("imgRemove").onclick = () => { edit.item.image = ""; delete edit.item.wm; edit.rawMain = null; drawPv(); if ($("imgRecrop")) $("imgRecrop").remove(); $("imgPrev").innerHTML = "이미지<br/>없음"; $("imgRemove").remove(); };
       // 상태 표시는 하나만 고를 수 있어요
       document.querySelectorAll(".f-status").forEach(cb => cb.onchange = () => { if (cb.checked) document.querySelectorAll(".f-status").forEach(o => { if (o !== cb) o.checked = false; }); });
+      $("f_port").onchange = () => $("f_portRow").classList.toggle("hidden", !$("f_port").checked);
       $("f_spoiler").onchange = () => $("f_relRow").classList.toggle("hidden", !$("f_spoiler").checked);
       $("f_relClear").onclick = e => { e.preventDefault(); $("f_release").value = ""; $("f_releaseTime").value = ""; };
       // 🛠️ 업데이트 기록
@@ -1314,6 +1325,7 @@
       if ($("f_hidden").checked) it.hidden = true; else delete it.hidden;
       if (Array.isArray(it.images) && !it.images.length) delete it.images;
       if ($("f_spoiler").checked) it.spoiler = true; else delete it.spoiler;
+      if ($("f_port").checked) { it.port = true; const pn = $("f_portNote").value.trim(); if (pn) it.portNote = pn; else delete it.portNote; } else { delete it.port; delete it.portNote; }
       const rel = $("f_release").value;
       if (it.spoiler && rel) it.releaseDate = rel; else delete it.releaseDate;
       const relT = $("f_releaseTime").value;

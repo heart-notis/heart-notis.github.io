@@ -375,6 +375,16 @@
     .m-tile.locked { cursor: default; }
     /* ✦ 스포일러: 홀로그램 카드 */
     /* 사이트 색(연보라·연하늘)에 맞춘 그라데이션 · 고정 공지와는 방향만 반대로 (하늘→연보라) */
+    .tweet.porting { background: linear-gradient(90deg, #eef6ff 0%, #f3f0ff 60%, #fff 100%); box-shadow: inset -3px 0 0 #b9a2f6; }
+    .tweet.porting:hover { background: linear-gradient(90deg, #e8f2ff 0%, #eee9ff 60%, #fbfcff 100%); }
+    html.dark .tweet.porting { background: linear-gradient(90deg, #1b2234 0%, #221d38 60%, #15151e 100%); }
+    .port-tag { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 0 0 6px; }
+    .port-tag span { display: inline-block; padding: 4px 11px; border-radius: 999px; font-size: .7rem; font-weight: 800; letter-spacing: .06em; color: #fff; background: linear-gradient(120deg, #7fb5f2, #a98cf3); box-shadow: 0 3px 10px rgba(120,140,240,.3); }
+    .port-tag em { font-style: normal; font-size: .78rem; font-weight: 800; background: linear-gradient(120deg, #8b6fe8, #5fa8ea); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .upd-mini { display: flex; align-items: center; gap: 5px; margin: 1px 0 2px; font-size: .72rem; color: var(--sub); min-width: 0; }
+    .upd-mini b { color: var(--blue); }
+    .upd-mini span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+    html.modal-open .to-top { display: none; }
     .tweet.spoiler { background: linear-gradient(90deg, #eef6ff 0%, #f3f0ff 60%, #fff 100%); box-shadow: inset -3px 0 0 #9ab9f5; }   /* 색 바는 오른쪽 */
     .tweet.spoiler:hover { background: linear-gradient(90deg, #e8f2ff 0%, #eee9ff 60%, #fbfcff 100%); }
     .spoil-tag { margin: 0 0 6px; }
@@ -1210,13 +1220,20 @@
     // ✦ 24시간 안에 설정이 바뀐 캐릭터: "UPDATE" (+ 오늘 적은 업데이트 기록이 있으면 그 내용)
     // 🎂 생일 (birthday: "MM-DD")
     const mmdd = d => `${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-    const isBday = c => !!(c && c.birthday && c.birthday === mmdd(new Date()));
+    const isBday = c => !!(c && c.birthday && c.birthday === mmdd(new Date()) && !isSpoiler(c));   // 스포일러는 생일 숨김
+    const isPort = c => !!(c && c.port && !isSpoiler(c));
     const isUpdated = c => { const t = Date.parse(c.updatedAt || ""); return !isNaN(t) && Date.now() - t < 86400000; };
     const updBadge = c => {
       if (!isUpdated(c)) return "";
       const d = new Date(c.updatedAt), k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
       const note = (Array.isArray(c.log) ? c.log : []).find(l => l.d === k);
       return `<div class="upd"><span class="upd-tag">✦ UPDATE</span>${note ? `<span class="upd-note">${escH(note.t)}</span>` : ""}</div>`;
+    };
+    // 🛠️ 업데이트 기록이 있으면 목록에 작게 (24시간 UPDATE 뱃지가 떠 있을 땐 그것만)
+    const logMini = c => {
+      const L = Array.isArray(c.log) ? c.log.slice().sort((a, b) => String(b.d).localeCompare(String(a.d))) : [];
+      if (!L.length) return "";
+      return `<div class="upd-mini">🛠️ 업데이트 <b>${esc(String(L[0].d).slice(5).replace("-", "/"))}</b><span>${escH(L[0].t)}</span></div>`;
     };
     const headHTML = (d, label) => `
       <div class="t-head"><b>${esc(profile.name)}</b>${I.verified}<span class="muted">@${esc(profile.handle)} · ${label || shortDate(d)}</span></div>`;
@@ -1384,10 +1401,11 @@
     function charTweet(c, i) {
       if (isLocked(c)) return lockedTweet(c);
       return `
-        <article class="tweet${isBday(c) ? " bday" : ""}" data-open="${i}">${isBday(c) ? `<div class="bday-petals" aria-hidden="true">${Array.from({ length: 10 }, (_, k) => `<i style="left:${(k * 37 + 7) % 96}%;animation-duration:${7 + (k * 7) % 5}s;animation-delay:-${(k * 1.7) % 7}s;--sz:${.55 + ((k * 13) % 5) / 10}"></i>`).join("")}</div>` : ""}
+        <article class="tweet${isBday(c) ? " bday" : ""}${isPort(c) ? " porting" : ""}" data-open="${i}">${isBday(c) ? `<div class="bday-petals" aria-hidden="true">${Array.from({ length: 10 }, (_, k) => `<i style="left:${(k * 37 + 7) % 96}%;animation-duration:${7 + (k * 7) % 5}s;animation-delay:-${(k * 1.7) % 7}s;--sz:${.55 + ((k * 13) % 5) / 10}"></i>`).join("")}</div>` : ""}
           ${meAva()}
           <div class="t-main">
-            ${headHTML(isReleased(c) ? c.releaseDate : c.date)}${updBadge(c)}
+            ${isPort(c) ? `<div class="port-tag"><span>↪ 이식 예정</span>${c.portNote ? `<em>${escH(c.portNote)}</em>` : ""}</div>` : ""}
+            ${headHTML(isReleased(c) ? c.releaseDate : c.date)}${updBadge(c) || logMini(c)}
             <p class="t-title">${escH(c.name)}${isBday(c) ? `<span class="bday-tag">🎂 생일</span>` : ""}</p>
             ${c.tagline ? `<p class="t-tagline">${fmtText(c.tagline)}</p>` : ""}
             <p class="t-tags">${hashtags(c)}</p>
@@ -1554,7 +1572,8 @@
       else list = list.filter(({ c }) => activeTag === "전체" || c.tags.includes(activeTag));
       // 맨 위: 방금 공개된 스포일러(최근 공개 순) → 아직 스포일러 → 나머지 (원래 순서 유지)
       // 맨 위: 🎂 오늘 생일 → 방금 공개된 스포일러 → 아직 스포일러 → 나머지 (원래 순서 유지)
-      const rank = c => isBday(c) && !isSpoiler(c) ? -1 : isReleased(c) ? 0 : isSpoiler(c) ? 1 : 2;
+      // 맨 위(고정 공지 바로 아래): ✦ 스포일러 · ↪ 이식 예정 → 🎂 생일 → 방금 공개된 스포일러 → 나머지
+      const rank = c => isSpoiler(c) || isPort(c) ? -2 : isBday(c) ? -1 : isReleased(c) ? 0 : 2;
       list.sort((a, b) => rank(a.c) - rank(b.c) || (rank(a.c) === 0 ? releaseAt(b.c) - releaseAt(a.c) : 0));
       // 공지 중 "게시물 상단에 띄우기"를 체크한 것은 게시물 탭 맨 위에 (검색 중엔 숨김)
       const topNotices = !searchOpen && activeTag === "전체" ? notices.filter(n => n.onPosts).map(n => noticeTweet(n, true)).join("") : "";
@@ -1626,6 +1645,7 @@
             ${meAva()}
             <div><div class="name">${esc(profile.name)}${I.verified}</div><div class="handle">@${esc(profile.handle)}</div></div>
           </div>
+          ${isPort(c) ? `<div class="port-tag" style="margin-bottom:8px"><span>↪ 이식 예정</span>${c.portNote ? `<em>${escH(c.portNote)}</em>` : ""}</div>` : ""}
           <div class="d-title">${escH(c.name)}${isBday(c) ? `<span class="bday-tag">🎂 생일</span>` : ""}${c.world ? `<span class="d-world" data-world-go="${esc(c.world)}" role="button" title="이 세계관 캐릭터 모아보기">${escH(c.world)}<em class="dw-go">›</em></span>` : ""}</div>
           ${c.tagline ? `<div class="d-tagline">${fmtText(c.tagline)}</div>` : ""}
           ${Array.isArray(c.lines) && c.lines.length ? `<div class="lines" data-lines="${i}"><button class="line-btn" data-line-next>💬 한마디 더 듣기 <span class="line-cnt"></span></button><div class="line-bub" aria-live="polite"></div></div>` : ""}
