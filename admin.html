@@ -195,6 +195,56 @@
     .ed-foot { display: flex; gap: 8px; justify-content: flex-end; padding: 12px 16px; border-top: 1px solid var(--line); background: #fbfcfd; }
     div.f { display: flex; flex-direction: column; gap: 5px; font-size: .82rem; font-weight: 700; color: #3d4650; }
     div.f small { font-weight: 400; color: var(--sub); }
+    /* 칸 나눠 접기 · 엄지 닿는 편집 */
+    .overlay.full { padding: 0; }
+    @media (min-width: 640px) { .overlay.full { padding: 4vh 12px; } }
+    .editor.full { overflow: visible; min-height: 100%; border-radius: 0; display: flex; flex-direction: column; }
+    @media (min-width: 640px) { .editor.full { min-height: 0; border-radius: 18px; } }
+    .editor.full .ed-top { position: sticky; top: 0; z-index: 3; background: #fff; }
+    .editor.full .ed-body { flex: 1; gap: 10px; background: #f6f5fb; }
+    .editor.full .ed-foot { position: sticky; bottom: 0; z-index: 3; padding: 10px 12px calc(12px + env(safe-area-inset-bottom)); background: #fff; }
+    .editor.full .ed-foot .btn { height: 50px; border-radius: 15px; font-size: .98rem; }
+    .editor.full .ed-foot .btn-ghost { flex: 0 0 92px; }
+    .editor.full .ed-foot .btn-main { flex: 1; }
+    .editor.full .img-box { background: #fff; border-radius: 16px; padding: 12px; }
+    .jump { position: sticky; top: 49px; z-index: 2; display: flex; gap: 6px; overflow-x: auto; margin: 0 -16px; padding: 8px 16px; background: rgba(246,245,251,.94); backdrop-filter: blur(6px); scrollbar-width: none; }
+    .jump::-webkit-scrollbar { display: none; }
+    .jump button { flex-shrink: 0; height: 34px; padding: 0 13px; border-radius: 999px; border: 0; background: #fff; color: #6b6f80; font-weight: 800; font-size: .8rem; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+    .jump button.on { background: #ece5ff; color: #7353d6; }
+    details.sec { background: #fff; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.04); scroll-margin-top: 110px; }
+    details.sec > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 15px 14px; min-height: 54px; }
+    details.sec > summary::-webkit-details-marker { display: none; }
+    .sec-t { font-weight: 800; font-size: .95rem; white-space: nowrap; }
+    .sec-sum { flex: 1; min-width: 0; text-align: right; font-size: .76rem; color: var(--sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sec-ar::before { content: "▾"; font-style: normal; color: #b0a8d8; font-size: .85rem; }
+    details.sec[open] .sec-ar::before { content: "▴"; }
+    .sec-in { padding: 0 14px 16px; display: flex; flex-direction: column; gap: 14px; }
+    label.tg { display: flex; align-items: center; gap: 10px; padding: 11px 12px; border-radius: 14px; background: #faf9ff; border: 1px solid #eee9fb; cursor: pointer; min-height: 56px; }
+    label.tg .t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+    label.tg b { font-size: .92rem; }
+    label.tg small { font-size: .74rem; color: var(--sub); font-weight: 400; line-height: 1.4; }
+    input.sw { appearance: none; -webkit-appearance: none; flex-shrink: 0; width: 48px; height: 29px; border-radius: 999px; background: #ddd6f5; position: relative; cursor: pointer; transition: background .2s; margin: 0; }
+    input.sw::after { content: ""; position: absolute; left: 3px; top: 3px; width: 23px; height: 23px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.2); transition: left .2s; }
+    input.sw:checked { background: linear-gradient(120deg, #a98cf3, #7fb5f2); }
+    input.sw:checked::after { left: 22px; }
+    .tg-sub:empty, .tg-sub:not(:has(> :not(.hidden))) { display: none; }
+    .tg-sub { margin: -6px 0 0 10px; padding: 4px 0 4px 12px; border-left: 2px solid #ddd3fb; display: flex; flex-direction: column; gap: 10px; }
+    .more-btn { width: 42px; height: 42px; border-radius: 50%; border: 0; background: #f6f5fb; color: #6b6f80; font-size: 1.25rem; font-weight: 900; line-height: 1; cursor: pointer; }
+    #postList .item[data-id] { cursor: pointer; }
+    .sheet-wrap { position: fixed; inset: 0; z-index: 60; }
+    .sheet-dim { position: absolute; inset: 0; background: rgba(40,32,80,.35); opacity: 0; transition: opacity .2s; }
+    .sheet { position: absolute; left: 0; right: 0; bottom: 0; max-width: 560px; margin: 0 auto; background: #fff; border-radius: 24px 24px 0 0; padding: 10px 12px calc(14px + env(safe-area-inset-bottom)); box-shadow: 0 -10px 30px rgba(80,60,160,.2); transform: translateY(100%); transition: transform .22s ease; }
+    .sheet-wrap.show .sheet { transform: none; } .sheet-wrap.show .sheet-dim { opacity: 1; }
+    .sheet-hdl { width: 40px; height: 4px; border-radius: 2px; background: #e2ddf3; margin: 2px auto 12px; }
+    .sheet-t { display: flex; align-items: center; gap: 10px; padding: 0 4px 12px; font-size: 1rem; }
+    .sheet-t img { width: 40px; height: 48px; border-radius: 9px; object-fit: cover; }
+    .sheet-gr { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 8px; }
+    .sheet-gr button { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 12px 0; border: 0; border-radius: 14px; background: #f6f5fb; font-size: .76rem; font-weight: 800; color: #4b5563; cursor: pointer; }
+    .sheet-gr button:disabled { opacity: .35; }
+    .sheet-gr em { font-style: normal; font-size: 1.3rem; }
+    .sheet-li button { display: block; width: 100%; text-align: left; padding: 15px 8px; border: 0; border-bottom: 1px solid #f1eef9; background: none; font-size: .95rem; font-weight: 700; color: #1f2329; cursor: pointer; }
+    .sheet-li .del { color: #e0527a; border-bottom: 0; }
+    .sheet-cancel { width: 100%; height: 50px; margin-top: 6px; border: 0; border-radius: 15px; background: #f3f1fb; color: #5b5770; font-weight: 800; font-size: .95rem; cursor: pointer; }
     .theme-fold { border: 1px solid var(--line); border-radius: 12px; background: #fff; }
     .theme-fold summary { list-style: none; cursor: pointer; padding: 10px 12px; display: flex; align-items: center; gap: 6px; font-weight: 700; }
     .theme-fold summary::-webkit-details-marker { display: none; }
@@ -821,12 +871,7 @@
             <div class="item-sub">${esc(p.date || "")} · ${(p.tags || []).map(t => "#" + esc(t)).join(" ") || "태그 없음"}</div>
             <div class="item-sub">${esc(p.tagline || "")}</div>
           </div>
-          <div class="item-actions">
-            <button class="icon" data-act="up" data-list="posts" data-i="${i}" ${i === 0 ? "disabled" : ""} aria-label="위로">${I.up}</button>
-            <button class="icon" data-act="down" data-list="posts" data-i="${i}" ${i === data.posts.length - 1 ? "disabled" : ""} aria-label="아래로">${I.down}</button>
-            <button class="icon" data-act="edit" data-list="posts" data-i="${i}" aria-label="수정">${I.edit}</button>
-            <button class="icon del" data-act="del" data-list="posts" data-i="${i}" aria-label="삭제">${I.del}</button>
-          </div>
+          <div class="item-actions">${selMode ? "" : `<button class="more-btn" data-more="${i}" aria-label="메뉴">⋯</button>`}</div>
         </div>`).join("");
     }
     function renderNotices() {
@@ -861,10 +906,91 @@
       saveDraft(); renderAll();
     });
 
+    /* ---------- 게시물 편집: 칸 나눠 접기 ---------- */
+    function secSummary() {
+      if (!$("sec_basic")) return;
+      const set = (k, v) => { const el = document.querySelector(`[data-sum="${k}"]`); if (el) el.textContent = v; };
+      const bm = $("f_bm").value, bd = $("f_bd").value;
+      set("sec_basic", [$("f_world").value.trim(), bm && bd ? `🎂 ${bm}/${bd}` : ""].filter(Boolean).join(" · ") || "이름 · 세계관 · 생일");
+      const ex = $("exRow") ? $("exRow").querySelectorAll("img").length : 0;
+      set("sec_photo", ex ? `추가 ${ex}장 · 목록 위치` : "추가 사진 · 목록 위치");
+      const ln = $("f_lines").value.split("\n").filter(x => x.trim()).length;
+      set("sec_text", [$("f_tagline").value.trim() ? "한 줄 ✓" : "", ln ? `대사 ${ln}` : "", $("f_desc").value.trim() ? "본문 ✓" : ""].filter(Boolean).join(" · ") || "한 줄 · 대사 · 본문");
+      set("sec_link", [...document.querySelectorAll("#f_tags .on")].map(b => b.textContent).join(" ") || "태그 고르기");
+      set("sec_theme", $("f_themeNow").textContent);
+      const on = [["f_spoiler", "✦ 스포"], ["f_port", "↪ 이식"], ["f_adult", "19+"], ["f_hidden", "🙈 비공개"], ["f_quiet", "🤫"]].filter(([id]) => $(id) && $(id).checked).map(([, t]) => t);
+      const st = document.querySelector(".f-status:checked"); if (st) on.push(st.value === "asset" ? "🔧 교체중" : "✨ 리뉴얼");
+      set("sec_show", on.join(" · ") || "기본");
+      const lg = $("logList") ? $("logList").children.length : 0;
+      set("sec_log", lg ? `기록 ${lg}개` : "기록 · 하트 수");
+    }
+    function setupSections() {
+      let t = null; const upd = () => { clearTimeout(t); t = setTimeout(secSummary, 60); };
+      $("editor").addEventListener("input", upd); $("editor").addEventListener("change", upd); $("editor").addEventListener("click", upd);
+      secSummary();
+      $("secJump").style.top = document.querySelector(".editor.full .ed-top").offsetHeight + "px";
+      $("secJump").onclick = e => {
+        const b = e.target.closest("[data-jump]"); if (!b) return;
+        const d = $(b.dataset.jump); d.open = true;
+        document.querySelectorAll("#secJump button").forEach(x => x.classList.toggle("on", x === b));
+        const ov = $("overlay"), top = d.getBoundingClientRect().top - ov.getBoundingClientRect().top + ov.scrollTop - $("secJump").offsetHeight - document.querySelector(".editor.full .ed-top").offsetHeight - 6;
+        ov.scrollTo({ top, behavior: "smooth" });
+      };
+    }
+
+    /* ---------- ⋯ 엄지 메뉴 (아래에서 올라오는 시트) ---------- */
+    function closeSheet() { const sh = $("sheet"); if (!sh) return; sh.classList.remove("show"); setTimeout(() => sh.remove(), 220); }
+    function openSheet(html, onPick) {
+      if ($("sheet")) $("sheet").remove();
+      const sh = document.createElement("div"); sh.id = "sheet"; sh.className = "sheet-wrap";
+      sh.innerHTML = `<div class="sheet-dim" data-sheet-close></div><div class="sheet"><div class="sheet-hdl"></div>${html}<button class="sheet-cancel" data-sheet-close>닫기</button></div>`;
+      document.body.appendChild(sh); requestAnimationFrame(() => sh.classList.add("show"));
+      sh.onclick = e => { if (e.target.closest("[data-sheet-close]")) return closeSheet(); const b = e.target.closest("[data-pick]"); if (b) { closeSheet(); onPick(b.dataset.pick); } };
+    }
+    function postMenu(i) {
+      const p = data.posts[i]; if (!p) return;
+      openSheet(`
+        <div class="sheet-t">${p.image ? `<img src="${esc(p.image)}" alt="" onerror="${rawFallback}" />` : ""}<b>${esc(p.name || "(이름 없음)")}</b></div>
+        <div class="sheet-gr">
+          <button data-pick="edit"><em>✏️</em>수정</button><button data-pick="preview"><em>👁</em>미리보기</button>
+          <button data-pick="top" ${i === 0 ? "disabled" : ""}><em>⬆️</em>맨 위로</button><button data-pick="link"><em>🔗</em>링크 복사</button>
+        </div>
+        <div class="sheet-li">
+          <button data-pick="spoiler">✦ ${p.spoiler ? "스포일러 끄기" : "스포일러로 바꾸기"}</button>
+          <button data-pick="hidden">🙈 ${p.hidden ? "비공개 풀기" : "비공개로 바꾸기"}</button>
+          <button data-pick="dup">📄 복제해서 새로 만들기</button>
+          <button data-pick="del" class="del">🗑 지우기</button>
+        </div>`, async act => {
+        const p = data.posts[i];
+        if (act === "edit") return openPost(i);
+        if (act === "preview") { if (!store.set(DRAFT_KEY, data)) { toast("미리보기 공간이 부족해요"); return; } window.open(`index.html?preview=1#post-${encodeURIComponent(p.id)}`, "_blank"); return; }
+        if (act === "link") { const u = `https://heart-notis.github.io/#post-${encodeURIComponent(p.id)}`; try { await navigator.clipboard.writeText(u); toast("링크를 복사했어요"); } catch { prompt("링크를 복사해주세요", u); } return; }
+        if (act === "top") { data.posts.splice(i, 1); data.posts.unshift(p); toast("맨 위로 올렸어요"); }
+        if (act === "spoiler") { if (p.spoiler) delete p.spoiler; else p.spoiler = true; toast(p.spoiler ? "스포일러로 바꿨어요 · 공개 날짜는 수정에서 정해요" : "스포일러를 껐어요"); }
+        if (act === "hidden") { if (p.hidden) delete p.hidden; else p.hidden = true; toast(p.hidden ? "비공개로 바꿨어요" : "비공개를 풀었어요"); }
+        if (act === "dup") {
+          const c = clone(p); c.id = uid(); c.name = (p.name || "") + " (복사)"; c.createdAt = new Date().toISOString(); c.date = today(); delete c.updatedAt; delete c.log;
+          data.posts.splice(i + 1, 0, c); saveDraft(); renderAll(); toast("복제했어요"); return openPost(i + 1);
+        }
+        if (act === "del") {
+          if (!(await confirmBox(`"${p.name || "이 항목"}"을(를) 지울까요?\n사이트에 올리기 전까지는 사이트에서 안 지워져요`, { ok: "지우기", danger: true }))) return;
+          data.posts.splice(i, 1);
+        }
+        saveDraft(); renderAll();
+      });
+    }
+    $("postList").addEventListener("click", e => {
+      if (selMode) return;
+      const m = e.target.closest("[data-more]"); if (m) { postMenu(+m.dataset.more); return; }
+      if (e.target.closest("button, a, input, label")) return;
+      const it = e.target.closest(".item[data-id]"); if (!it) return;
+      const i = data.posts.findIndex(p => p.id === it.dataset.id); if (i >= 0) openPost(i);
+    });
+
     /* ---------- 게시물 편집 ---------- */
     const isDesktop = () => matchMedia("(hover: hover) and (pointer: fine)").matches;
     let edit = null;   // { kind, index, item, srcImg }
-    function closeEditor() { const e = edit; $("overlay").classList.remove("open"); document.body.style.overflow = ""; edit = null; if (e && e.onClose) e.onClose(); }
+    function closeEditor() { const e = edit; $("overlay").classList.remove("open", "full"); $("editor").classList.remove("full"); $("sheet") && closeSheet(); document.body.style.overflow = ""; edit = null; if (e && e.onClose) e.onClose(); }
     // ✋ 쓰던 내용이 있으면 닫기 전에 물어봐요 (옆을 잘못 눌러도 안 날아가게)
     const formSnap = () => JSON.stringify([
       [...document.querySelectorAll("#editor input, #editor textarea, #editor select")].map(el => el.type === "checkbox" ? el.checked : el.value),
@@ -908,6 +1034,19 @@
               <div class="tiny" style="white-space:normal">987×1216 비율로 잘려요 · 🔒 사진 정보(EXIF) 자동 삭제${index < 0 ? "<br/>📷 여러 장 고르면 한 장씩 따로 게시물이 돼요" : ""}</div>
             </div>
           </div>
+          <nav class="jump" id="secJump"><button type="button" data-jump="sec_basic">기본</button><button type="button" data-jump="sec_photo">사진</button><button type="button" data-jump="sec_text">소개·대사</button><button type="button" data-jump="sec_link">링크·태그</button><button type="button" data-jump="sec_theme">꾸미기</button><button type="button" data-jump="sec_show">표시</button><button type="button" data-jump="sec_log">기록</button></nav>
+          <details class="sec" id="sec_basic" ${true ? "open" : ""}><summary><span class="sec-t">📝 기본 정보</span><span class="sec-sum" data-sum="sec_basic"></span><i class="sec-ar"></i></summary><div class="sec-in">
+          <label class="f">캐릭터 이름 *<input type="text" id="f_name" value="${esc(item.name)}" /></label>
+          <div class="row">
+            <label class="f">세계관 · 장소<input type="text" id="f_world" value="${esc(item.world)}" /></label>
+            <label class="f">올린 날짜<input type="date" id="f_date" value="${esc(item.date)}" /></label>
+          </div>
+          <div class="f">🎂 생일 <small>적어두면 그날 하루 "생일" 표시 · 꽃잎 · 맨 위로 올라오고 달력에도 표시돼요 · 비워두면 지금처럼</small>
+            <div class="rel-in"><select id="f_bm"><option value="">월</option>${Array.from({ length: 12 }, (_, k) => `<option ${+(item.birthday || "").split("-")[0] === k + 1 ? "selected" : ""} value="${k + 1}">${k + 1}월</option>`).join("")}</select>
+            <select id="f_bd"><option value="">일</option>${Array.from({ length: 31 }, (_, k) => `<option ${+(item.birthday || "").split("-")[1] === k + 1 ? "selected" : ""} value="${k + 1}">${k + 1}일</option>`).join("")}</select>
+            <button type="button" class="btn btn-ghost btn-sm" id="f_bclr">지우기</button></div></div>
+          </div></details>
+          <details class="sec" id="sec_photo" ${index < 0 ? "open" : ""}><summary><span class="sec-t">🖼️ 사진</span><span class="sec-sum" data-sum="sec_photo"></span><i class="sec-ar"></i></summary><div class="sec-in">
           <div class="f ex-wrap" id="exWrap">🖼️ 추가 사진 <small>게시물 안에서 옆으로 넘겨 볼 수 있어요 · 1장이면 지금처럼 보여요 · 사진을 끌어서 순서 바꾸기</small>
             <div class="ex-row" id="exRow"></div>
           </div>
@@ -921,59 +1060,59 @@
               <button type="button" class="btn btn-ghost btn-sm pv-reset" id="pvReset">처음대로</button>
             </div>
           </div>
-          <label class="f">캐릭터 이름 *<input type="text" id="f_name" value="${esc(item.name)}" /></label>
+          </div></details>
+          <details class="sec" id="sec_text" ${index < 0 ? "open" : ""}><summary><span class="sec-t">💬 소개 · 대사</span><span class="sec-sum" data-sum="sec_text"></span><i class="sec-ar"></i></summary><div class="sec-in">
+          <label class="f">한 줄 소개<input type="text" id="f_tagline" value="${esc(item.tagline)}" /></label>
+          <label class="f">💬 명대사 더 넣기 <small>한 줄에 하나씩 · 적으면 상세 화면에 "한마디 더 듣기" 버튼이 생겨요 · 비워두면 지금처럼</small><textarea id="f_lines" style="min-height:70px" placeholder="짐의 곁에 남겠다면, 그 정도 각오는 하고 온 거겠지.&#10;…">${esc((item.lines || []).join("\n"))}</textarea></label>
+          <div class="hint" style="margin-bottom:-6px">✍️ 글 꾸미기: <i>*기울기*</i> · <b>**두껍게**</b></div>
+          <label class="f">자세한 소개<textarea id="f_desc">${esc(item.description)}</textarea></label>
+          <label class="f">첫 인사말 <small>상세 화면에서 캐릭터의 답글처럼 보여요</small><textarea id="f_greet" style="min-height:60px">${esc(item.greeting)}</textarea></label>
+          </div></details>
+          <details class="sec" id="sec_link" ${index < 0 ? "open" : ""}><summary><span class="sec-t">🔗 대화 링크 · 태그</span><span class="sec-sum" data-sum="sec_link"></span><i class="sec-ar"></i></summary><div class="sec-in">
+          <label class="f">해시태그<div class="tag-pick" id="f_tags">${data.tags.map(t => `<button type="button" class="${(item.tags || []).includes(t) ? "on" : ""}" data-tag="${esc(t)}">#${esc(t)}</button>`).join("") || `<small>해시태그 탭에서 먼저 태그를 만들어주세요</small>`}</div></label>
+          <label class="f">대화하러 가기 링크 <small>위에서 체크한 해시태그(플랫폼)마다 주소 칸이 생겨요 · #합작은 세계관 보기 버튼이 돼요</small><div class="links-box" id="f_links"></div></label>
+          </div></details>
+          <details class="sec" id="sec_theme" ${false ? "open" : ""}><summary><span class="sec-t">🎨 꾸미기</span><span class="sec-sum" data-sum="sec_theme"></span><i class="sec-ar"></i></summary><div class="sec-in">
           <div class="f">🎨 페이지 꾸미기 <small>게시물을 눌렀을 때 열리는 페이지의 색감이에요. "미리보기"로 확인할 수 있어요.</small>
             <details class="theme-fold" id="f_themeFold">
               <summary>지금: <b id="f_themeNow">${esc(themeName(item.theme))}</b><span class="tf-hint">눌러서 바꾸기</span></summary>
               <div id="f_theme">${THEME_GROUPS.map(([g, label]) => `<p class="tf-group">${label}</p><div class="theme-pick">${THEMES.filter(t => (t.group || "color") === g).map(t => themeBtn(t, item.theme || "")).join("")}</div>`).join("")}</div>
             </details>
           </div>
-          <div class="row">
-            <label class="f">세계관 · 장소<input type="text" id="f_world" value="${esc(item.world)}" /></label>
-            <label class="f">올린 날짜<input type="date" id="f_date" value="${esc(item.date)}" /></label>
-          </div>
-          <div class="f">🎂 생일 <small>적어두면 그날 하루 "생일" 표시 · 꽃잎 · 맨 위로 올라오고 달력에도 표시돼요 · 비워두면 지금처럼</small>
-            <div class="rel-in"><select id="f_bm"><option value="">월</option>${Array.from({ length: 12 }, (_, k) => `<option ${+(item.birthday || "").split("-")[0] === k + 1 ? "selected" : ""} value="${k + 1}">${k + 1}월</option>`).join("")}</select>
-            <select id="f_bd"><option value="">일</option>${Array.from({ length: 31 }, (_, k) => `<option ${+(item.birthday || "").split("-")[1] === k + 1 ? "selected" : ""} value="${k + 1}">${k + 1}일</option>`).join("")}</select>
-            <button type="button" class="btn btn-ghost btn-sm" id="f_bclr">지우기</button></div></div>
-          <label class="f">한 줄 소개<input type="text" id="f_tagline" value="${esc(item.tagline)}" /></label>
-          <label class="f">💬 명대사 더 넣기 <small>한 줄에 하나씩 · 적으면 상세 화면에 "한마디 더 듣기" 버튼이 생겨요 · 비워두면 지금처럼</small><textarea id="f_lines" style="min-height:70px" placeholder="짐의 곁에 남겠다면, 그 정도 각오는 하고 온 거겠지.&#10;…">${esc((item.lines || []).join("\n"))}</textarea></label>
-          <label class="f">해시태그<div class="tag-pick" id="f_tags">${data.tags.map(t => `<button type="button" class="${(item.tags || []).includes(t) ? "on" : ""}" data-tag="${esc(t)}">#${esc(t)}</button>`).join("") || `<small>해시태그 탭에서 먼저 태그를 만들어주세요</small>`}</div></label>
-          <div class="hint" style="margin-bottom:-6px">✍️ 글 꾸미기: <i>*기울기*</i> · <b>**두껍게**</b></div>
-          <label class="f">자세한 소개<textarea id="f_desc">${esc(item.description)}</textarea></label>
-          <label class="f">첫 인사말 <small>상세 화면에서 캐릭터의 답글처럼 보여요</small><textarea id="f_greet" style="min-height:60px">${esc(item.greeting)}</textarea></label>
+          </div></details>
+          <details class="sec" id="sec_show" ${false ? "open" : ""}><summary><span class="sec-t">👁️ 표시 설정</span><span class="sec-sum" data-sum="sec_show"></span><i class="sec-ar"></i></summary><div class="sec-in">
+          <label class="tg"><span class="t"><b>✦ 스포일러</b><small>흐린 홀로그램 카드 · 고정 공지 아래 · 눌러도 안 열려요</small></span><input type="checkbox" class="sw" id="f_spoiler" ${item.spoiler ? "checked" : ""} /></label>
+          <div class="tg-sub"><label class="f rel-row ${item.spoiler ? "" : "hidden"}" id="f_relRow">📅 공개 예정일 <small>비워두면 올린 날짜(오늘)로 보여요</small>
+            <div class="rel-in"><input type="date" id="f_release" value="${esc(item.releaseDate || "")}" /><input type="time" id="f_releaseTime" value="${esc(item.releaseTime || "")}" /><button type="button" class="btn btn-ghost btn-sm" id="f_relClear">지우기</button></div>
+            <small>⏰ 그 시간 1분 뒤 자동으로 공개돼서 고정 공지 바로 아래로 올라가요 (시간을 비우면 그날 0시)</small>
+          </label></div>
+          <label class="tg"><span class="t"><b>↪ 이식 예정</b><small>다른 플랫폼에 추가 공개 · 고정 공지 아래 · 눌러서 볼 수 있어요</small></span><input type="checkbox" class="sw" id="f_port" ${item.port ? "checked" : ""} /></label>
+          <div class="tg-sub"><label class="f rel-row ${item.port ? "" : "hidden"}" id="f_portRow">이식 안내 <small>예: BLOOM · 12월 3일 (비워두면 "이식 예정"만 보여요)</small><input type="text" id="f_portNote" maxlength="40" value="${esc(item.portNote || "")}" /></label>
+          <label class="f rel-row ${item.port ? "" : "hidden"}" id="f_portDateRow">이식 날짜 <small>이 날이 지나면 이식 예정 딱지가 자동으로 떨어져요 (비워두면 직접 끌 때까지 유지)</small><div class="rel-in"><input type="date" id="f_portDate" value="${esc(item.portDate || "")}" /><button type="button" class="btn btn-ghost btn-sm" id="f_portDateClr">지우기</button></div></label></div>
+          <label class="tg"><span class="t"><b>🔞 19+ 배지</b></span><input type="checkbox" class="sw" id="f_adult" ${item.adult ? "checked" : ""} /></label>
+          <label class="tg"><span class="t"><b>🙈 비공개</b><small>사이트에서 숨겨둬요 (준비되면 끄기)</small></span><input type="checkbox" class="sw" id="f_hidden" ${item.hidden ? "checked" : ""} /></label>
+          <label class="tg"><span class="t"><b>🔧 에셋 교체중</b><small>안내가 붙고 눌러도 안 열려요 · 리뉴얼과 둘 중 하나만</small></span><input type="checkbox" class="sw f-status" value="asset" ${item.status === "asset" ? "checked" : ""} /></label>
+          <label class="tg"><span class="t"><b>✨ 리뉴얼 중</b><small>안내가 붙고 눌러도 안 열려요 · 교체중과 둘 중 하나만</small></span><input type="checkbox" class="sw f-status" value="renewal" ${item.status === "renewal" ? "checked" : ""} /></label>
+          ${index >= 0 ? `<label class="tg"><span class="t"><b>🤫 조용히 수정</b><small>오타 고치기처럼 사소한 수정 · UPDATE 표시가 안 떠요</small></span><input type="checkbox" class="sw" id="f_quiet"  /></label>` : ""}
+          </div></details>
+          <details class="sec" id="sec_log" ${false ? "open" : ""}><summary><span class="sec-t">🛠️ 업데이트 기록 · 숫자</span><span class="sec-sum" data-sum="sec_log"></span><i class="sec-ar"></i></summary><div class="sec-in">
           <div class="f">🛠️ 업데이트 기록 <small>상세 화면 사진 아래에 작게 보여요 · 비워두면 안 보여요</small>
             <div id="logList" class="log-list"></div>
             <div class="rel-in log-add"><input type="date" id="logDate" /><input type="text" id="logText" placeholder="예: 에셋 교체 (표정 6종)" /><button type="button" class="btn btn-line btn-sm" id="logAdd">추가</button></div>
-          </div>
-          <label class="f">대화하러 가기 링크 <small>위에서 체크한 해시태그(플랫폼)마다 주소 칸이 생겨요 · #합작은 세계관 보기 버튼이 돼요</small><div class="links-box" id="f_links"></div></label>
-          <label class="check"><input type="checkbox" id="f_adult" ${item.adult ? "checked" : ""} /> 19+ 배지 달기</label>
-          ${index >= 0 ? `<label class="check"><input type="checkbox" id="f_quiet" /> 🤫 조용히 수정 <small style="font-weight:400;color:var(--sub)">오타 고치기처럼 사소한 수정이면 체크 · UPDATE 표시가 안 떠요</small></label>` : ""}
-          <label class="check"><input type="checkbox" id="f_hidden" ${item.hidden ? "checked" : ""} /> 🙈 비공개 <small style="font-weight:400;color:var(--sub)">사이트에 안 보이게 숨겨둬요 (준비되면 체크 풀기)</small></label>
-          <label class="check"><input type="checkbox" id="f_port" ${item.port ? "checked" : ""} /> ↪ 이식 예정 <small style="font-weight:400;color:var(--sub)">다른 플랫폼에 추가 공개 예정이면 체크 · 고정 공지 바로 아래로 올라가고, 눌러서 볼 수 있어요</small></label>
-          <label class="f rel-row ${item.port ? "" : "hidden"}" id="f_portRow">이식 안내 <small>예: BLOOM · 12월 3일 (비워두면 "이식 예정"만 보여요)</small><input type="text" id="f_portNote" maxlength="40" value="${esc(item.portNote || "")}" /></label>
-          <label class="f rel-row ${item.port ? "" : "hidden"}" id="f_portDateRow">이식 날짜 <small>이 날이 지나면 이식 예정 딱지가 자동으로 떨어져요 (비워두면 직접 끌 때까지 유지)</small><div class="rel-in"><input type="date" id="f_portDate" value="${esc(item.portDate || "")}" /><button type="button" class="btn btn-ghost btn-sm" id="f_portDateClr">지우기</button></div></label>
-          <label class="check"><input type="checkbox" id="f_spoiler" ${item.spoiler ? "checked" : ""} /> ✦ 스포일러 <small style="font-weight:400;color:var(--sub)">고정 공지 바로 아래에 홀로그램 카드로 보이고, 눌러도 안 열려요</small></label>
-          <label class="f rel-row ${item.spoiler ? "" : "hidden"}" id="f_relRow">📅 공개 예정일 <small>비워두면 올린 날짜(오늘)로 보여요</small>
-            <div class="rel-in"><input type="date" id="f_release" value="${esc(item.releaseDate || "")}" /><input type="time" id="f_releaseTime" value="${esc(item.releaseTime || "")}" /><button type="button" class="btn btn-ghost btn-sm" id="f_relClear">지우기</button></div>
-            <small>⏰ 그 시간 1분 뒤 자동으로 공개돼서 고정 공지 바로 아래로 올라가요 (시간을 비우면 그날 0시)</small>
-          </label>
-          <div class="status-box">
-            <label class="check"><input type="checkbox" class="f-status" value="asset" ${item.status === "asset" ? "checked" : ""} /> 🔧 에셋 교체중 표시</label>
-            <label class="check"><input type="checkbox" class="f-status" value="renewal" ${item.status === "renewal" ? "checked" : ""} /> ✨ 리뉴얼 중 표시</label>
-            <small>체크하면 홈페이지에서 게시물 위에 안내가 붙고, 게시물·미디어에서 눌러도 열리지 않아요</small>
           </div>
           <div class="row" style="align-items:flex-end">
             <label class="f">마음에 들어요 수<input type="number" min="0" id="f_likes" value="${+item.likes || 0}" /></label>
             <label class="f">재게시 수<input type="number" min="0" id="f_rts" value="${+item.rts || 0}" /></label>
             <button type="button" class="btn btn-line" id="dice" style="flex:0 0 auto" title="숫자 랜덤으로 다시 뽑기">🎲 랜덤</button>
           </div>
-        </div>
+          </div></details>
+          </div>
         <div class="ed-foot">
           <button class="btn btn-ghost" data-close>취소</button>
           <button class="btn btn-main" id="savePost">${index >= 0 ? "수정 완료" : "게시물 추가"}</button>
         </div>`;
-      $("overlay").classList.add("open"); document.body.style.overflow = "hidden";
+      $("overlay").classList.add("open", "full"); $("editor").classList.add("full"); document.body.style.overflow = "hidden";
+      setupSections();
 
       $("dice").onclick = () => { const r = randomCounts(); $("f_likes").value = r.likes; $("f_rts").value = r.rts; };
       // 대화 링크 칸: 체크한 태그마다 하나씩, 아무것도 안 체크하면 기본 칸 하나
