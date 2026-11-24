@@ -228,10 +228,22 @@
     input.sw:checked::after { left: 22px; }
     .tg-sub:empty, .tg-sub:not(:has(> :not(.hidden))) { display: none; }
     .tg-sub { margin: -6px 0 0 10px; padding: 4px 0 4px 12px; border-left: 2px solid #ddd3fb; display: flex; flex-direction: column; gap: 10px; }
-    .today-bar { display: flex; gap: 6px; overflow-x: auto; margin: 0 0 10px; padding-bottom: 2px; scrollbar-width: none; }
+    .live-box { position: fixed; left: 50%; bottom: 84px; z-index: 45; width: min(536px, calc(100% - 24px)); transform: translate(-50%, 20px); opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; background: #2b2840; color: #fff; border-radius: 16px; padding: 12px 14px; box-shadow: 0 8px 24px rgba(30,20,60,.3); }
+    .live-box.show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+    .live-box .lb-t { display: flex; align-items: center; gap: 8px; font-size: .84rem; font-weight: 800; }
+    .live-box .lb-t span { flex: 1; } .live-box .lb-t em { font-style: normal; font-weight: 600; opacity: .7; font-size: .78rem; }
+    .live-box .lb-t a { color: #c9bbff; font-size: .8rem; text-decoration: none; }
+    .live-box .lb-t button { border: 0; background: none; color: #fff; opacity: .6; font-size: .9rem; cursor: pointer; }
+    .live-box .lb-bar { height: 6px; border-radius: 9px; background: rgba(255,255,255,.15); margin-top: 9px; overflow: hidden; }
+    .live-box .lb-bar i { display: block; height: 100%; border-radius: 9px; background: linear-gradient(90deg, #b9a2f6, #7fcdf2); transition: width .8s ease; }
+    .live-box.done .lb-bar i { background: linear-gradient(90deg, #7fe0b0, #7fcdf2); }
+    .live-box .lb-s { font-size: .72rem; opacity: .75; margin-top: 7px; }
+    .today-bar { display: flex; gap: 6px; overflow-x: auto; margin: 12px 0 14px; padding-bottom: 2px; scrollbar-width: none; }
     .today-bar::-webkit-scrollbar { display: none; }
     .today-bar button { flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px; height: 36px; padding: 0 12px; border-radius: 13px; background: #fff; border: 1px solid #ebe7f6; font-size: .78rem; font-weight: 700; color: #4b5563; cursor: pointer; }
     .today-bar b { color: #7353d6; font-weight: 900; }
+    .today-bar button.warn { background: #fffaf0; border-color: #fde2b5; } .today-bar button.warn b { color: #c27a14; }
+    .badge.miss { background: #fff4e0; color: #b4690e; }
     .lb-bar { display: flex; gap: 6px; overflow-x: auto; margin: 0 0 12px; padding-bottom: 2px; scrollbar-width: none; }
     .lb-bar::-webkit-scrollbar { display: none; }
     .lb-bar button { flex-shrink: 0; height: 36px; padding: 0 13px; border-radius: 999px; font-size: .8rem; font-weight: 800; background: #fff; border: 1px solid var(--line); color: #5b6070; cursor: pointer; }
@@ -763,6 +775,7 @@
 
     function renderAll() { renderPosts(); renderNotices(); renderProfile(); $("tagInput").value = data.tags.join(", "); renderWorlds(); renderStatus(); renderToday(); }
     /* ---------- 📋 오늘 챙길 것 (탭 위 한 줄) ---------- */
+    const missLink = p => !(p.link || Object.values(p.links || {}).some(v => String(v || "").trim()));
     function renderToday() {
       const bar = $("todayBar"); if (!bar) return;
       const now = new Date(), d0 = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
@@ -777,8 +790,12 @@
         if (p.birthday && !p.spoiler && (p.birthday === md(now) || p.birthday === md(tm))) chips.push(["🎂", `${p.name} 생일`, p.birthday === md(now) ? "오늘" : "내일", "p" + i]);
       });
       data.notices.forEach((n, i) => { const w = noticeWait(n); if (w) chips.push(["⏰", "예약 공지", w, "n" + i]); });
+      const noLink = [], noLine = [];
+      data.posts.forEach((p, i) => { if (p.hidden || (p.spoiler && !spoilerOpened(p))) return; if (missLink(p)) noLink.push(i); if (!(p.tagline || "").trim()) noLine.push(i); });
+      if (noLink.length) chips.push(["🔗", "대화 링크 없음", noLink.length, "p" + noLink[0], "warn"]);
+      if (noLine.length) chips.push(["💬", "한 줄 소개 없음", noLine.length, "p" + noLine[0], "warn"]);
       bar.classList.toggle("hidden", !chips.length);
-      bar.innerHTML = chips.map(([ic, t, v, go]) => `<button data-today="${go}">${ic} ${esc(t)} <b>${esc(String(v))}</b></button>`).join("");
+      bar.innerHTML = chips.map(([ic, t, v, go, cls]) => `<button class="${cls || ""}" data-today="${go}">${ic} ${esc(t)} <b>${esc(String(v))}</b></button>`).join("");
     }
     document.addEventListener("click", e => {
       const b = e.target.closest("[data-today]"); if (!b) return;
@@ -927,7 +944,7 @@
           ${selMode ? `<span class="pick" aria-hidden="true">✓</span>` : ""}
           ${p.image ? `<img class="thumb" src="${esc(p.image)}" alt="" draggable="false" onerror="${rawFallback}" />` : `<div class="thumb">${esc((p.name || "?").charAt(0))}</div>`}
           <div class="item-main">
-            <div class="item-title"><span class="nm">${esc(p.name || "(이름 없음)")}</span>${p.hidden ? `<span class="badge hid">🙈 비공개</span>` : ""}${p.spoiler ? (spoilerOpened(p) ? `<span class="badge spo">✦ 공개됨</span>` : `<span class="badge spo">✦ 스포</span>`) : ""}${p.port ? (p.portDate && Date.now() >= (p.portTime ? new Date(p.portDate + "T" + p.portTime).getTime() : new Date(p.portDate + "T00:00").getTime() + 864e5) ? `<span class="badge">↪ 이식 끝</span>` : `<span class="badge spo">↪ 이식${p.portDate ? " " + (+p.portDate.split("-")[1]) + "/" + (+p.portDate.split("-")[2]) + (p.portTime ? " " + p.portTime : "") : ""}</span>`) : ""}${p.birthday ? `<span class="badge bd">🎂 ${+p.birthday.split("-")[0]}/${+p.birthday.split("-")[1]}</span>` : ""}${p.adult ? `<span class="badge">19+</span>` : ""}${p.status === "asset" ? `<span class="badge st">🔧 교체중</span>` : p.status === "renewal" ? `<span class="badge st re">✨ 리뉴얼</span>` : ""}${isNew(p, "posts") ? `<span class="badge new">NEW</span>` : ""}</div>
+            <div class="item-title"><span class="nm">${esc(p.name || "(이름 없음)")}</span>${p.hidden ? `<span class="badge hid">🙈 비공개</span>` : ""}${p.spoiler ? (spoilerOpened(p) ? `<span class="badge spo">✦ 공개됨</span>` : `<span class="badge spo">✦ 스포</span>`) : ""}${p.port ? (p.portDate && Date.now() >= (p.portTime ? new Date(p.portDate + "T" + p.portTime).getTime() : new Date(p.portDate + "T00:00").getTime() + 864e5) ? `<span class="badge">↪ 이식 끝</span>` : `<span class="badge spo">↪ 이식${p.portDate ? " " + (+p.portDate.split("-")[1]) + "/" + (+p.portDate.split("-")[2]) + (p.portTime ? " " + p.portTime : "") : ""}</span>`) : ""}${p.birthday ? `<span class="badge bd">🎂 ${+p.birthday.split("-")[0]}/${+p.birthday.split("-")[1]}</span>` : ""}${p.adult ? `<span class="badge">19+</span>` : ""}${p.status === "asset" ? `<span class="badge st">🔧 교체중</span>` : p.status === "renewal" ? `<span class="badge st re">✨ 리뉴얼</span>` : ""}${!p.hidden && !(p.spoiler && !spoilerOpened(p)) && missLink(p) ? `<span class="badge miss">🔗 링크 없음</span>` : ""}${isNew(p, "posts") ? `<span class="badge new">NEW</span>` : ""}</div>
             <div class="item-sub">${esc(p.date || "")} · ${(p.tags || []).map(t => "#" + esc(t)).join(" ") || "태그 없음"}</div>
             <div class="item-sub">${esc(p.tagline || "")}</div>
           </div>
@@ -2155,7 +2172,8 @@
           const html = new TextDecoder().decode(b64Bytes(await fileB64("index.html", BRANCH)));
           uploads.push({ path: "index.html", bytes: new TextEncoder().encode(patchShareMeta(html, shareOf(out.profile))), label: "공유 카드" });
         }
-        uploads.push({ path: "data.js", bytes: new TextEncoder().encode(siteJs(out)), label: "data" });
+        const outJs = siteJs(out);
+        uploads.push({ path: "data.js", bytes: new TextEncoder().encode(outJs), label: "data" });
         const np = uploads.length - 1;
         // 📦 사진 + 글 + 정리를 "한 번에" 올려요 → 사이트가 한 번만 새로 만들어져서 훨씬 빨리 반영돼요
         await commitAll(uploads, referenced(out),
@@ -2164,7 +2182,7 @@
 
         SERVER = clone(out); data = out; data._base = H(SERVER);
         store.del(DRAFT_KEY); renderAll();
-        showPublished();
+        watchLive(outJs);
       } catch (e) {
         console.error(e);
         toast(ghErrorText(e));
@@ -2262,6 +2280,35 @@
       }
     }
 
+    /* ---------- 🚀 사이트 반영 확인: 실제로 사이트에 뜰 때까지 보여줘요 ---------- */
+    let liveTimer = null;
+    function watchLive(expected) {
+      clearInterval(liveTimer);
+      let box = $("liveBox"); if (!box) { box = document.createElement("div"); box.id = "liveBox"; box.className = "live-box"; document.body.appendChild(box); }
+      const t0 = Date.now(), EST = 55000, LIMIT = 240000;
+      const url = (/heart-notis\.github\.io$/.test(location.hostname) ? "" : "https://heart-notis.github.io/") + "data.js";
+      const draw = (pct, title, sub, done) => {
+        box.className = "live-box show" + (done ? " done" : "");
+        box.innerHTML = `<div class="lb-t"><span>${title}</span>${done ? `<a href="index.html" target="_blank" rel="noopener">사이트 보기 ↗</a>` : `<em>${sub}</em>`}<button aria-label="닫기" data-live-x>✕</button></div><div class="lb-bar"><i style="width:${pct}%"></i></div><div class="lb-s">${done ? "✓ 올리기 완료 · ✓ 사이트에 반영 완료" : "✓ 올리기 완료 · ◌ 사이트에 뜨는 중"}</div>`;
+      };
+      const tick = () => {
+        const el = Date.now() - t0, pct = Math.min(95, Math.round(el / EST * 90) + 5), left = Math.max(5, Math.round((EST - el) / 1000));
+        draw(pct, "🚀 사이트에 반영 중…", el < EST ? `약 ${left}초` : "거의 다 됐어요");
+      };
+      const check = async () => {
+        if (Date.now() - t0 > LIMIT) { clearInterval(liveTimer); draw(95, "⏳ 조금 늦어지고 있어요", "", false); box.querySelector(".lb-s").textContent = "잠시 뒤 사이트를 새로고침해 보세요 · 올린 내용은 안전하게 저장됐어요"; return; }
+        tick();
+        try {
+          const r = await fetch(url + "?x=" + Date.now(), { cache: "no-store" }); if (!r.ok) return;
+          if ((await r.text()).trim() === expected.trim()) {
+            clearInterval(liveTimer); draw(100, "✨ 사이트에 반영 완료!", "", true);
+            setTimeout(() => { if (box.classList.contains("done")) box.classList.remove("show"); }, 8000);
+          }
+        } catch {}
+      };
+      tick(); liveTimer = setInterval(check, 4000);
+    }
+    document.addEventListener("click", e => { if (e.target.closest("[data-live-x]")) { const b = $("liveBox"); if (b) b.classList.remove("show"); } });
     function showPublished() {
       edit = { kind: "done" };
       $("editor").innerHTML = `
