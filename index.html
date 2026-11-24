@@ -382,7 +382,6 @@
     .lock-note b { color: var(--st-ink); }
     .lock-veil { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: var(--st-veil, rgba(255,255,255,.45)); backdrop-filter: blur(4px) grayscale(.5); -webkit-backdrop-filter: blur(4px) grayscale(.5); }
     .lock-veil span { padding: 6px 14px; border-radius: 999px; background: rgba(255,255,255,.92); border: 1px solid var(--st-line, transparent); color: var(--st-ink, #b4690e); font-size: .8rem; font-weight: 800; box-shadow: 0 3px 12px rgba(0,0,0,.12); }
-    .tweet.locked:hover .t-media.preview .media { transform: scale(var(--pz, 1)); }
     .m-tile.locked { cursor: default; }
     /* ✦ 스포일러: 홀로그램 카드 */
     /* 사이트 색(연보라·연하늘)에 맞춘 그라데이션 · 고정 공지와는 방향만 반대로 (하늘→연보라) */
@@ -473,9 +472,9 @@
       ::-webkit-scrollbar-track { background: transparent; }
       ::-webkit-scrollbar-thumb { border-radius: 9px; background: linear-gradient(180deg, #b9a2f6, #7fcdf2); border: 2px solid transparent; background-clip: padding-box; }
       .t-media { transition: box-shadow .35s; }
-      .tweet:not(.locked):hover .t-media { box-shadow: 0 10px 26px rgba(110,90,220,.2); }
+      .tweet:hover .t-media { box-shadow: 0 10px 26px rgba(110,90,220,.2); }
       .t-media:not(.preview) .media { transition: transform .4s; }
-      .tweet:not(.locked):hover .t-media:not(.preview) .media { transform: scale(1.03); }
+      .tweet:hover .t-media:not(.preview) .media { transform: scale(1.03); }
     }
     /* 사진 뜨기 전: 연보라 빛이 지나가요 (사진이 뜨면 가려져요) */
     .t-media, .m-tile:not(.ld) { background-image: linear-gradient(105deg, transparent 30%, rgba(255,255,255,.75) 47%, rgba(205,228,255,.5) 54%, transparent 70%), linear-gradient(#f0ebfd, #f0ebfd); background-size: 250% 100%, 100% 100%; background-repeat: no-repeat; animation: shimmer 1.6s linear infinite; }
