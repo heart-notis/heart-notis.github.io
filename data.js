@@ -10,8 +10,8 @@ window.SITE_DATA = {
   ],
   "profile": {
     "bio": "✦ 티팟을 메인으로 천천히 제작하고 있습니다.\n이식 요청은 하단의 메시지 탭으로 전송해주세요. ✨\n\n늘 감사하고, 사랑합니다. (ㅅ•᎑•*)♥",
-    "link": "",
-    "linkLabel": "",
+    "link": "https://teapotchat.com/user/VupRUNb9tKg4J0TQloxDpw1Ze7x1",
+    "linkLabel": "티팟♥",
     "avatar": "images/profile-mwrt2j4d.jpg",
     "avatarSmall": "images/profile-sm-mwrt2j4d.jpg",
     "avatarPosition": "center",
