@@ -69,7 +69,12 @@ window.SITE_DATA = {
       "theme": "rose",
       "releaseDate": "2026-11-27",
       "releaseTime": "21:00",
-      "wm": true
+      "wm": true,
+      "images": [
+        "images/post-mwspzf0v78ao-mwueotpe-2.webp",
+        "images/post-mwspzf0v78ao-mwueotpe-3.webp",
+        "images/post-mwspzf0v78ao-mwueotpe-4.webp"
+      ]
     },
     {
       "id": "mwso99e36g7y",
