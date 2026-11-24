@@ -1692,7 +1692,7 @@
     // 도메인 → 알아보기 쉬운 이름
     function refName(h) {
       const m = [
-        [/^(t\.co|x\.com|twitter\.com)$/, "X (트위터)"], [/postype|posty\.pe/, "포스타입"], [/kakao/, "카카오톡"],
+        [/^(x|t\.co|x\.com|twitter\.com)$/, "X (트위터)"], [/heart-notis\.netlify\.app/, "예전 주소 (이사 전 링크)"], [/postype|posty\.pe/, "포스타입"], [/kakao/, "카카오톡"],
         [/naver/, "네이버"], [/google/, "구글"], [/daum/, "다음"], [/instagram/, "인스타그램"], [/discord/, "디스코드"],
         [/youtube|youtu\.be/, "유튜브"], [/spin-spin/, "스핀스핀"], [/^direct$/, "직접 · 알 수 없음"]
       ].find(([re]) => re.test(h));
