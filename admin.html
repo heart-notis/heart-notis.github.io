@@ -678,6 +678,7 @@
 
     function renderAll() { renderPosts(); renderNotices(); renderProfile(); $("tagInput").value = data.tags.join(", "); renderWorlds(); renderStatus(); }
 
+    const noticeWait = n => { if (!n.publishDate) return ""; const [y, m, d] = n.publishDate.split("-").map(Number); const [h, mi] = (n.publishTime || "0:0").split(":"); if (Date.now() >= new Date(y, m - 1, d, +h || 0, +mi || 0).getTime()) return ""; return `${m}/${d}${n.publishTime ? " " + n.publishTime : ""}`; };
     const isNew = (item, list) => !SERVER[list].some(x => x.id && x.id === item.id);
 
     // 방금 올린 사진이 아직 사이트에 반영 전이면 GitHub 원본에서 보여줘요
@@ -816,7 +817,7 @@
           ${selMode ? `<span class="pick" aria-hidden="true">✓</span>` : ""}
           ${p.image ? `<img class="thumb" src="${esc(p.image)}" alt="" draggable="false" onerror="${rawFallback}" />` : `<div class="thumb">${esc((p.name || "?").charAt(0))}</div>`}
           <div class="item-main">
-            <div class="item-title"><span class="nm">${esc(p.name || "(이름 없음)")}</span>${p.hidden ? `<span class="badge hid">🙈 비공개</span>` : ""}${p.spoiler ? (spoilerOpened(p) ? `<span class="badge spo">✦ 공개됨</span>` : `<span class="badge spo">✦ 스포</span>`) : ""}${p.port ? `<span class="badge spo">↪ 이식</span>` : ""}${p.birthday ? `<span class="badge bd">🎂 ${+p.birthday.split("-")[0]}/${+p.birthday.split("-")[1]}</span>` : ""}${p.adult ? `<span class="badge">19+</span>` : ""}${p.status === "asset" ? `<span class="badge st">🔧 교체중</span>` : p.status === "renewal" ? `<span class="badge st re">✨ 리뉴얼</span>` : ""}${isNew(p, "posts") ? `<span class="badge new">NEW</span>` : ""}</div>
+            <div class="item-title"><span class="nm">${esc(p.name || "(이름 없음)")}</span>${p.hidden ? `<span class="badge hid">🙈 비공개</span>` : ""}${p.spoiler ? (spoilerOpened(p) ? `<span class="badge spo">✦ 공개됨</span>` : `<span class="badge spo">✦ 스포</span>`) : ""}${p.port ? (p.portDate && Date.now() >= new Date(p.portDate + "T00:00").getTime() + 864e5 ? `<span class="badge">↪ 이식 끝</span>` : `<span class="badge spo">↪ 이식${p.portDate ? " " + (+p.portDate.split("-")[1]) + "/" + (+p.portDate.split("-")[2]) : ""}</span>`) : ""}${p.birthday ? `<span class="badge bd">🎂 ${+p.birthday.split("-")[0]}/${+p.birthday.split("-")[1]}</span>` : ""}${p.adult ? `<span class="badge">19+</span>` : ""}${p.status === "asset" ? `<span class="badge st">🔧 교체중</span>` : p.status === "renewal" ? `<span class="badge st re">✨ 리뉴얼</span>` : ""}${isNew(p, "posts") ? `<span class="badge new">NEW</span>` : ""}</div>
             <div class="item-sub">${esc(p.date || "")} · ${(p.tags || []).map(t => "#" + esc(t)).join(" ") || "태그 없음"}</div>
             <div class="item-sub">${esc(p.tagline || "")}</div>
           </div>
@@ -834,8 +835,8 @@
       el.innerHTML = data.notices.map((n, i) => `
         <div class="item">
           <div class="item-main">
-            <div class="item-title">${n.pinned ? "📌 " : ""}${n.onPosts ? "📣 " : ""}${esc(n.title || "(제목 없음)")}${isNew(n, "notices") ? `<span class="badge new">NEW</span>` : ""}</div>
-            <div class="item-sub">${esc(n.date || "")} · ${esc((n.body || "").split("\n")[0])}</div>
+            <div class="item-title"><span class="nm">${n.pinned ? "📌 " : ""}${n.onPosts ? "📣 " : ""}${esc(n.title || "(제목 없음)")}</span>${isNew(n, "notices") ? `<span class="badge new">NEW</span>` : ""}</div>
+            <div class="item-sub">${noticeWait(n) ? `<b style="color:#7353d6">⏰ ${noticeWait(n)} 예약</b>` : esc(n.date || "")} · ${esc((n.body || "").split("\n")[0])}</div>
           </div>
           <div class="item-actions">
             <button class="icon" data-act="up" data-list="notices" data-i="${i}" ${i === 0 ? "disabled" : ""} aria-label="위로">${I.up}</button>
@@ -951,6 +952,7 @@
           <label class="check"><input type="checkbox" id="f_hidden" ${item.hidden ? "checked" : ""} /> 🙈 비공개 <small style="font-weight:400;color:var(--sub)">사이트에 안 보이게 숨겨둬요 (준비되면 체크 풀기)</small></label>
           <label class="check"><input type="checkbox" id="f_port" ${item.port ? "checked" : ""} /> ↪ 이식 예정 <small style="font-weight:400;color:var(--sub)">다른 플랫폼에 추가 공개 예정이면 체크 · 고정 공지 바로 아래로 올라가고, 눌러서 볼 수 있어요</small></label>
           <label class="f rel-row ${item.port ? "" : "hidden"}" id="f_portRow">이식 안내 <small>예: BLOOM · 12월 3일 (비워두면 "이식 예정"만 보여요)</small><input type="text" id="f_portNote" maxlength="40" value="${esc(item.portNote || "")}" /></label>
+          <label class="f rel-row ${item.port ? "" : "hidden"}" id="f_portDateRow">이식 날짜 <small>이 날이 지나면 이식 예정 딱지가 자동으로 떨어져요 (비워두면 직접 끌 때까지 유지)</small><div class="rel-in"><input type="date" id="f_portDate" value="${esc(item.portDate || "")}" /><button type="button" class="btn btn-ghost btn-sm" id="f_portDateClr">지우기</button></div></label>
           <label class="check"><input type="checkbox" id="f_spoiler" ${item.spoiler ? "checked" : ""} /> ✦ 스포일러 <small style="font-weight:400;color:var(--sub)">고정 공지 바로 아래에 홀로그램 카드로 보이고, 눌러도 안 열려요</small></label>
           <label class="f rel-row ${item.spoiler ? "" : "hidden"}" id="f_relRow">📅 공개 예정일 <small>비워두면 올린 날짜(오늘)로 보여요</small>
             <div class="rel-in"><input type="date" id="f_release" value="${esc(item.releaseDate || "")}" /><input type="time" id="f_releaseTime" value="${esc(item.releaseTime || "")}" /><button type="button" class="btn btn-ghost btn-sm" id="f_relClear">지우기</button></div>
@@ -1074,7 +1076,8 @@
       if ($("imgRemove")) $("imgRemove").onclick = () => { edit.item.image = ""; delete edit.item.wm; edit.rawMain = null; drawPv(); if ($("imgRecrop")) $("imgRecrop").remove(); $("imgPrev").innerHTML = "이미지<br/>없음"; $("imgRemove").remove(); };
       // 상태 표시는 하나만 고를 수 있어요
       document.querySelectorAll(".f-status").forEach(cb => cb.onchange = () => { if (cb.checked) document.querySelectorAll(".f-status").forEach(o => { if (o !== cb) o.checked = false; }); });
-      $("f_port").onchange = () => $("f_portRow").classList.toggle("hidden", !$("f_port").checked);
+      $("f_port").onchange = () => { $("f_portRow").classList.toggle("hidden", !$("f_port").checked); $("f_portDateRow").classList.toggle("hidden", !$("f_port").checked); };
+      $("f_portDateClr").onclick = () => { $("f_portDate").value = ""; };
       $("f_spoiler").onchange = () => $("f_relRow").classList.toggle("hidden", !$("f_spoiler").checked);
       $("f_relClear").onclick = e => { e.preventDefault(); $("f_release").value = ""; $("f_releaseTime").value = ""; };
       // 🛠️ 업데이트 기록
@@ -1325,7 +1328,7 @@
       if ($("f_hidden").checked) it.hidden = true; else delete it.hidden;
       if (Array.isArray(it.images) && !it.images.length) delete it.images;
       if ($("f_spoiler").checked) it.spoiler = true; else delete it.spoiler;
-      if ($("f_port").checked) { it.port = true; const pn = $("f_portNote").value.trim(); if (pn) it.portNote = pn; else delete it.portNote; } else { delete it.port; delete it.portNote; }
+      if ($("f_port").checked) { it.port = true; const pn = $("f_portNote").value.trim(); if (pn) it.portNote = pn; else delete it.portNote; const pd = $("f_portDate").value; if (pd) it.portDate = pd; else delete it.portDate; } else { delete it.port; delete it.portNote; delete it.portDate; }
       const rel = $("f_release").value;
       if (it.spoiler && rel) it.releaseDate = rel; else delete it.releaseDate;
       const relT = $("f_releaseTime").value;
@@ -1363,6 +1366,8 @@
           <label class="f">내용 <small>✍️ *기울기* · **두껍게**</small><textarea id="n_body" style="min-height:140px">${esc(item.body)}</textarea></label>
           <label class="check"><input type="checkbox" id="n_pin" ${item.pinned ? "checked" : ""} /> 📌 공지 탭 맨 위에 고정</label>
           <label class="check"><input type="checkbox" id="n_onposts" ${item.onPosts ? "checked" : ""} /> 📣 게시물 탭 맨 위에도 띄우기</label>
+          <label class="check"><input type="checkbox" id="n_sched" ${item.publishDate ? "checked" : ""} /> ⏰ 예약해서 올리기 <small style="font-weight:400;color:var(--sub)">정한 시간이 되면 사이트에 자동으로 나타나요 · 그 전엔 안 보여요</small></label>
+          <div class="f rel-row ${item.publishDate ? "" : "hidden"}" id="n_schedRow"><div class="rel-in"><input type="date" id="n_pubDate" value="${esc(item.publishDate || "")}" /><input type="time" id="n_pubTime" value="${esc(item.publishTime || "")}" /></div></div>
         </div>
         <div class="ed-foot">
           <button class="btn btn-ghost" data-close>취소</button>
@@ -1377,9 +1382,14 @@
         it.body = $("n_body").value.trim();
         it.pinned = $("n_pin").checked;
         it.onPosts = $("n_onposts").checked;
+        if ($("n_sched").checked) {
+          const pd = $("n_pubDate").value; if (!pd) { toast("예약 날짜를 골라주세요"); return; }
+          it.publishDate = pd; it.date = pd; const pt = $("n_pubTime").value; if (pt) it.publishTime = pt; else delete it.publishTime;
+        } else { delete it.publishDate; delete it.publishTime; }
         if (edit.index >= 0) data.notices[edit.index] = it; else data.notices.unshift(it);
         closeEditor(); saveDraft(); renderAll(); toast("공지를 저장했어요");
       };
+      $("n_sched").onchange = () => { $("n_schedRow").classList.toggle("hidden", !$("n_sched").checked); if ($("n_sched").checked && !$("n_pubDate").value) $("n_pubDate").value = today(); };
       if (index < 0 && isDesktop()) $("n_title").focus();
       markClean();
     }

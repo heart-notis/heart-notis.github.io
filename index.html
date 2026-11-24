@@ -1088,7 +1088,9 @@
     if (new URLSearchParams(location.search).has("preview")) {
       try { const d = JSON.parse(localStorage.getItem("heart_admin_draft")); if (d && d.posts) SITE = d; } catch {}
     }
-    const notices = SITE.notices || [];
+    // ⏰ 예약 공지: 정한 시간이 되기 전에는 안 보여요
+    const pubAt = n => { if (!n || !n.publishDate) return 0; const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(n.publishDate); if (!m) return 0; const [h, mi] = (n.publishTime || "0:0").split(":"); return new Date(+m[1], m[2] - 1, +m[3], +h || 0, +mi || 0).getTime(); };
+    const notices = (SITE.notices || []).filter(n => Date.now() >= pubAt(n));
     const characters = (SITE.posts || []).filter(c => !c.hidden);   // 🙈 비공개 게시물은 숨겨요
     const tagList = SITE.tags || [];
     // 제작자 페이지에서 바꾼 프로필(프사 · 헤더 · 소개글 · 링크)이 있으면 그걸로 덮어쓰기
@@ -1221,7 +1223,9 @@
     // 🎂 생일 (birthday: "MM-DD")
     const mmdd = d => `${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
     const isBday = c => !!(c && c.birthday && c.birthday === mmdd(new Date()) && !isSpoiler(c));   // 스포일러는 생일 숨김
-    const isPort = c => !!(c && c.port && !isSpoiler(c));
+    const portEnd = c => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec((c && c.portDate) || ""); return m ? new Date(+m[1], m[2] - 1, +m[3] + 1).getTime() : 0; };
+    const isPort = c => !!(c && c.port && !isSpoiler(c) && (!portEnd(c) || Date.now() < portEnd(c)));
+    const portInfo = c => c.portNote || (c.portDate ? (() => { const [, m, d] = c.portDate.split("-"); return `${+m}월 ${+d}일 이식`; })() : "");
     const isUpdated = c => { const t = Date.parse(c.updatedAt || ""); return !isNaN(t) && Date.now() - t < 86400000; };
     const updBadge = c => {
       if (!isUpdated(c)) return "";
@@ -1404,7 +1408,7 @@
         <article class="tweet${isBday(c) ? " bday" : ""}${isPort(c) ? " porting" : ""}" data-open="${i}">${isBday(c) ? `<div class="bday-petals" aria-hidden="true">${Array.from({ length: 10 }, (_, k) => `<i style="left:${(k * 37 + 7) % 96}%;animation-duration:${7 + (k * 7) % 5}s;animation-delay:-${(k * 1.7) % 7}s;--sz:${.55 + ((k * 13) % 5) / 10}"></i>`).join("")}</div>` : ""}
           ${meAva()}
           <div class="t-main">
-            ${isPort(c) ? `<div class="port-tag"><span>↪ 이식 예정</span>${c.portNote ? `<em>${escH(c.portNote)}</em>` : ""}</div>` : ""}
+            ${isPort(c) ? `<div class="port-tag"><span>↪ 이식 예정</span>${portInfo(c) ? `<em>${escH(portInfo(c))}</em>` : ""}</div>` : ""}
             ${headHTML(isReleased(c) ? c.releaseDate : c.date)}${updBadge(c) || logMini(c)}
             <p class="t-title">${escH(c.name)}${isBday(c) ? `<span class="bday-tag">🎂 생일</span>` : ""}</p>
             ${c.tagline ? `<p class="t-tagline">${fmtText(c.tagline)}</p>` : ""}
@@ -1422,6 +1426,7 @@
     // 공지 NEW: 올린 지 24시간 안 (createdAt 이 없으면 날짜 기준 하루)
     const NEW_MS = 24 * 60 * 60 * 1000;
     function noticeTime(n) {
+      if (pubAt(n)) return pubAt(n);
       const t = Date.parse(n.createdAt || "");
       if (!isNaN(t)) return t;
       const [y, m, d] = String(n.date || "").split("-").map(Number);
@@ -1645,7 +1650,7 @@
             ${meAva()}
             <div><div class="name">${esc(profile.name)}${I.verified}</div><div class="handle">@${esc(profile.handle)}</div></div>
           </div>
-          ${isPort(c) ? `<div class="port-tag" style="margin-bottom:8px"><span>↪ 이식 예정</span>${c.portNote ? `<em>${escH(c.portNote)}</em>` : ""}</div>` : ""}
+          ${isPort(c) ? `<div class="port-tag" style="margin-bottom:8px"><span>↪ 이식 예정</span>${portInfo(c) ? `<em>${escH(portInfo(c))}</em>` : ""}</div>` : ""}
           <div class="d-title">${escH(c.name)}${isBday(c) ? `<span class="bday-tag">🎂 생일</span>` : ""}${c.world ? `<span class="d-world" data-world-go="${esc(c.world)}" role="button" title="이 세계관 캐릭터 모아보기">${escH(c.world)}<em class="dw-go">›</em></span>` : ""}</div>
           ${c.tagline ? `<div class="d-tagline">${fmtText(c.tagline)}</div>` : ""}
           ${Array.isArray(c.lines) && c.lines.length ? `<div class="lines" data-lines="${i}"><button class="line-btn" data-line-next>💬 한마디 더 듣기 <span class="line-cnt"></span></button><div class="line-bub" aria-live="polite"></div></div>` : ""}
