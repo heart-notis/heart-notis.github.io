@@ -1,0 +1,24 @@
+# ✦ 스포일러 공개 알림을 정확한 시간에 보내요
+# 1시간마다(그리고 사이트에 올릴 때마다) 곧 공개될 스포일러를 확인하고,
+# 있으면 공개 시간까지 기다렸다가 알림 서버를 딱 한 번 불러요.
+name: 스포일러 공개 알림
+on:
+  schedule:
+    - cron: "17 * * * *"
+  push:
+    branches: [main]
+    paths: [data.js]
+  workflow_dispatch:
+concurrency:
+  group: release-push
+  cancel-in-progress: true
+jobs:
+  wait-and-send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node .github/scripts/release-wait.mjs
