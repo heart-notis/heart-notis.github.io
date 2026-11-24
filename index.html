@@ -575,6 +575,26 @@
     }
     .msg-card input:focus, .msg-card textarea:focus { border-color: #b9a7f6; box-shadow: 0 0 0 3px var(--blue-soft); }
     .msg-card textarea { min-height: 140px; resize: vertical; line-height: 1.6; margin-top: 8px; }
+    .mcat { margin: 0 0 10px; } .mcat p { font-size: .78rem; font-weight: 800; color: #7b7f8c; margin: 0 2px 7px; } .mcat p small { font-weight: 500; color: #a3a7b0; margin-left: 5px; }
+    .mcat > div { display: flex; flex-wrap: wrap; gap: 6px; }
+    .mcat button { padding: 7px 12px; border-radius: 999px; font-size: .8rem; font-weight: 800; border: 1px solid var(--line); color: #6b6f80; background: #fff; cursor: pointer; transition: all .15s; }
+    .mcat button.on { background: linear-gradient(120deg, #a993f4, #74c6f0); color: #fff; border-color: transparent; box-shadow: 0 3px 10px rgba(120,120,240,.28); }
+    .msg-pubnote { margin-top: 12px; padding: 9px 12px; border-radius: 12px; font-size: .78rem; font-weight: 700; color: #7c6be6; background: linear-gradient(120deg, #f3efff, #eaf5fd); }
+    .qa-sec { margin-top: 18px; } .qa-hd { display: flex; align-items: baseline; gap: 8px; margin: 0 4px 10px; } .qa-hd b { font-size: 1rem; } .qa-hd small { color: var(--sub); font-size: .76rem; }
+    .qa { border: 1px solid var(--line); border-radius: 16px; padding: 14px 14px 12px; margin-bottom: 10px; background: #fff; }
+    .qa-tg { display: inline-block; font-size: .68rem; font-weight: 800; padding: 2px 9px; border-radius: 999px; background: #f1ecff; color: #7353d6; margin: 0 0 6px 22px; }
+    .qa .q { display: flex; gap: 8px; font-size: .9rem; line-height: 1.6; white-space: pre-wrap; word-break: keep-all; overflow-wrap: anywhere; }
+    .qa .q i { flex-shrink: 0; font-style: normal; font-weight: 900; background: linear-gradient(120deg, #a98cf3, #7fb5f2); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .qa .qm { font-size: .72rem; color: var(--sub); margin: 4px 0 10px 22px; }
+    .qa .a { display: flex; gap: 9px; padding: 11px 12px; border-radius: 14px; background: linear-gradient(120deg, #f3efff, #eaf5fd); }
+    .qa .a img, .qa .a > i { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+    .qa .a > i { display: flex; align-items: center; justify-content: center; font-style: normal; color: #fff; background: linear-gradient(135deg, #b9a2f6, #7fcdf2); }
+    .qa .a b { font-size: .82rem; } .qa .a b em { font-style: normal; font-weight: 500; color: var(--sub); font-size: .72rem; margin-left: 5px; }
+    .qa .a p { font-size: .88rem; line-height: 1.6; margin-top: 2px; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .qa-more { display: block; width: 100%; padding: 12px; border-radius: 14px; border: 1px dashed #d8cff7; background: none; color: #7c6be6; font-weight: 800; font-size: .85rem; cursor: pointer; }
+    html.dark .mcat button { background: #15151e; color: #b8b4cc; } html.dark .mcat button.on { background: linear-gradient(120deg, #a993f4, #74c6f0); color: #fff; }
+    html.dark .msg-pubnote { background: linear-gradient(120deg, #231f38, #1a2433); color: #c4b5fd; }
+    html.dark .qa { background: #15151e; } html.dark .qa .a { background: linear-gradient(120deg, #231f38, #1a2433); } html.dark .qa-tg { background: #2a2442; color: #c4b5fd; } html.dark .qa-more { border-color: #3a3358; color: #b9a8f7; }
     .msg-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; gap: 10px; }
     .msg-count { font-size: .75rem; color: var(--faint); }
     .msg-send { background: var(--grad-strong); color: #fff; font-weight: 800; font-size: .88rem; padding: 9px 22px; border-radius: 999px; box-shadow: 0 3px 10px rgba(150, 140, 240, .28); }
@@ -1475,7 +1495,7 @@
       try { fetch(MSG_API, { method: "POST", headers: { "content-type": "text/plain" }, body: JSON.stringify({ action, ...extra }), keepalive: true }).catch(() => {}); } catch {}
     }
     const MSG_MAX = 1000, MSG_COOLDOWN = 30;   // 글자 수 제한, 연속 전송 막기(초)
-    let msgDraft = { nick: "", body: "" }, msgSent = false;
+    let msgDraft = { nick: "", body: "", cat: "" }, msgSent = false, qaCache = null, qaOpen = false;
     function renderMessage(el) {
       el.className = "msg-wrap";
       if (msgSent) {
@@ -1486,12 +1506,17 @@
       el.innerHTML = `
         <form class="msg-card" id="msgForm" autocomplete="off">
           <h3>💌 비공개 메시지</h3>
-          <div class="msg-hint">제작자에게만 전달되고, 다른 사람에게는 보이지 않아요.<br/>닉네임은 공란으로 비워둘 수 있습니다.</div>
+          <div class="msg-hint">제작자에게만 전달되는 메시지예요.<br/>닉네임은 공란으로 비워둘 수 있습니다.</div>
+          <div class="mcat"><p>어떤 메시지인가요?<small>안 골라도 보낼 수 있어요</small></p><div id="msgCats">${[["port", "↪ 이식 요청"], ["ask", "❓ 문의"], ["cheer", "💜 응원"], ["etc", "💬 기타"]].map(([k, t]) => `<button type="button" data-cat="${k}" class="${msgDraft.cat === k ? "on" : ""}">${t}</button>`).join("")}</div></div>
           <input id="msgNick" maxlength="30" placeholder="닉네임" />
           <textarea id="msgBody" maxlength="${MSG_MAX}" placeholder="하고 싶은 말을 자유롭게 남겨주세요"></textarea>
           <input class="msg-hp" id="msgHp" tabindex="-1" aria-hidden="true" />
           <div class="msg-foot"><span class="msg-count" id="msgCount">0 / ${MSG_MAX}</span><button class="msg-send" id="msgSend" type="submit">보내기</button></div>
-        </form>`;
+          <div class="msg-pubnote">♥ 남겨주신 이식 요청 · 문의사항은 공개 답변으로 올라옵니다.</div>
+        </form>
+        <div id="qaBox"></div>`;
+      $("msgCats").onclick = e => { const b = e.target.closest("[data-cat]"); if (!b) return; msgDraft.cat = msgDraft.cat === b.dataset.cat ? "" : b.dataset.cat; document.querySelectorAll("#msgCats button").forEach(x => x.classList.toggle("on", x.dataset.cat === msgDraft.cat)); };
+      loadQa();
       $("msgNick").value = msgDraft.nick; $("msgBody").value = msgDraft.body;
       const count = () => { $("msgCount").textContent = `${$("msgBody").value.length} / ${MSG_MAX}`; };
       count();
@@ -1509,17 +1534,35 @@
           const res = await fetch(MSG_API, {
             method: "POST",
             headers: { "content-type": "application/json" },
-            body: JSON.stringify({ action: "send", nick, body, hp: $("msgHp").value })
+            body: JSON.stringify({ action: "send", nick, body, cat: msgDraft.cat, hp: $("msgHp").value })
           });
           if (res.status === 429) { toast("잠깐만요! 조금 뒤에 다시 보내주세요"); btn.disabled = false; btn.textContent = "보내기"; return; }
           if (!res.ok) throw new Error(res.status);
           store.set("msg_last", Date.now());
-          msgDraft = { nick: "", body: "" }; msgSent = true; renderMessage(el);
+          msgDraft = { nick: "", body: "", cat: "" }; msgSent = true; renderMessage(el);
         } catch {
           toast("전송에 실패했어요. 인터넷 연결을 확인해주세요.");
           btn.disabled = false; btn.textContent = "보내기";
         }
       };
+    }
+
+    /* ---- 💬 공개 답장 모아보기 ---- */
+    const QA_CAT = { port: "↪ 이식 요청", ask: "❓ 문의", cheer: "💜 응원", etc: "💬 기타" };
+    async function loadQa() {
+      if (qaCache) return drawQa();
+      try { const r = await fetch(MSG_API, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "qa" }) }); if (!r.ok) return; qaCache = (await r.json()).qa || []; drawQa(); } catch {}
+    }
+    function drawQa() {
+      const box = $("qaBox"); if (!box || !qaCache || !qaCache.length) return;
+      const md = iso => { const d = new Date(iso); return isNaN(d) ? "" : `${d.getMonth() + 1}/${d.getDate()}`; };
+      const avSrc = profile.avatarSmall || profile.avatar, ava = avSrc ? `<img src="${esc(avSrc)}" alt="" />` : `<i>♥</i>`;
+      const list = qaOpen ? qaCache : qaCache.slice(0, 3);
+      box.innerHTML = `<div class="qa-sec"><div class="qa-hd"><b>💬 답장 모아보기</b><small>제작자가 공개한 답장이에요</small></div>${list.map(q => `
+        <div class="qa">${q.cat && QA_CAT[q.cat] ? `<span class="qa-tg">${QA_CAT[q.cat]}</span>` : ""}<div class="q"><i>Q.</i><span>${escH(q.q)}</span></div><div class="qm">${escH(q.nick || "익명")} · ${md(q.at)}</div>
+          <div class="a">${ava}<div><b>${escH(profile.name || "하트")}<em>${md(q.aAt)}</em></b><p>${escH(q.a)}</p></div></div></div>`).join("")}
+        ${qaCache.length > 3 ? `<button class="qa-more" id="qaMore">${qaOpen ? "접기" : `답장 더 보기 (${qaCache.length - 3})`}</button>` : ""}</div>`;
+      if ($("qaMore")) $("qaMore").onclick = () => { qaOpen = !qaOpen; drawQa(); };
     }
 
     /* ---- 본문 ---- */

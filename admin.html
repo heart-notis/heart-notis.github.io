@@ -228,6 +228,24 @@
     input.sw:checked::after { left: 22px; }
     .tg-sub:empty, .tg-sub:not(:has(> :not(.hidden))) { display: none; }
     .tg-sub { margin: -6px 0 0 10px; padding: 4px 0 4px 12px; border-left: 2px solid #ddd3fb; display: flex; flex-direction: column; gap: 10px; }
+    .lb-bar { display: flex; gap: 6px; overflow-x: auto; margin: 0 0 12px; padding-bottom: 2px; scrollbar-width: none; }
+    .lb-bar::-webkit-scrollbar { display: none; }
+    .lb-bar button { flex-shrink: 0; height: 36px; padding: 0 13px; border-radius: 999px; font-size: .8rem; font-weight: 800; background: #fff; border: 1px solid var(--line); color: #5b6070; cursor: pointer; }
+    .lb-bar button.on { background: linear-gradient(120deg, #a993f4, #74c6f0); color: #fff; border-color: transparent; }
+    .msg-item { flex-direction: column; align-items: stretch !important; gap: 0; }
+    .msg-top { display: flex; align-items: center; gap: 6px; min-width: 0; }
+    .msg-nick { font-size: .95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .msg-when { margin-left: auto; font-size: .72rem; color: var(--sub); white-space: nowrap; }
+    .msg-body { white-space: pre-wrap; word-break: break-word; font-size: .9rem; margin-top: 8px; line-height: 1.6; }
+    .mlb { flex-shrink: 0; display: inline-flex; align-items: center; gap: 3px; font-size: .72rem; font-weight: 800; padding: 4px 9px; border-radius: 999px; border: 0; cursor: pointer; }
+    .mlb.port { background: #e8f1ff; color: #3f7fd6; } .mlb.ask { background: #fff3e2; color: #c27a14; } .mlb.cheer { background: #ffeaf2; color: #d24f86; } .mlb.etc { background: #eef0f4; color: #5b6070; }
+    .mlb.none { background: none; border: 1px dashed #cfc7ea; color: #9a93b8; }
+    .mact { display: flex; gap: 6px; margin-top: 10px; }
+    .mact button { height: 38px; padding: 0 13px; border-radius: 11px; border: 1px solid var(--line); background: #fff; font-weight: 800; font-size: .8rem; color: #5b6070; cursor: pointer; }
+    .mact .rp { background: #f3efff; border-color: #e2d9fb; color: #7353d6; }
+    .mact .mdel { margin-left: auto; color: #e0527a; }
+    .pubd { margin-top: 10px; padding: 10px 12px; border-radius: 12px; background: linear-gradient(120deg, #f3efff, #eaf5fd); font-size: .86rem; line-height: 1.55; white-space: pre-wrap; word-break: break-word; }
+    .pubd b { font-size: .74rem; color: #7353d6; display: block; margin-bottom: 2px; }
     .more-btn { width: 42px; height: 42px; border-radius: 50%; border: 0; background: #f6f5fb; color: #6b6f80; font-size: 1.25rem; font-weight: 900; line-height: 1; cursor: pointer; }
     #postList .item[data-id] { cursor: pointer; }
     .sheet-wrap { position: fixed; inset: 0; z-index: 60; }
@@ -302,10 +320,25 @@
     .log-it b { color: var(--accent); flex-shrink: 0; }
     .log-it span { flex: 1; min-width: 0; }
     .log-it button { width: 22px; height: 22px; border-radius: 50%; color: var(--sub); font-size: .9rem; }
-    .w-it { display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; }
-    .w-it b { font-size: .86rem; }
-    .w-it small { font-size: .72rem; color: var(--sub); font-weight: 500; }
-    .w-it textarea { min-height: 54px; }
+    .w-ic { width: 38px; height: 38px; flex-shrink: 0; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; background: linear-gradient(135deg, #efe9ff, #e3f2fd); }
+    .w-cnt { font-size: .72rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: var(--soft); color: var(--accent); vertical-align: 3px; margin-left: 4px; }
+    .w-cnt:empty { display: none; }
+    .w-list { display: flex; flex-direction: column; gap: 10px; }
+    .w-it { display: flex; flex-direction: column; gap: 10px; padding: 14px; background: #fff; border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 1px 3px rgba(80,60,160,.04); }
+    .w-hd { display: flex; align-items: center; gap: 8px; }
+    .w-hd b { font-size: .95rem; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .w-heart { font-size: 1.05rem; line-height: 1; background: linear-gradient(135deg, #b9a2f6, #7fcdf2); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .w-n { font-size: .7rem; font-weight: 800; padding: 3px 9px; border-radius: 999px; background: linear-gradient(120deg, #efe9ff, #e3f2fd); color: #7353d6; flex-shrink: 0; }
+    .w-ppl { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+    .w-ppl::-webkit-scrollbar { display: none; }
+    .w-ppl span { flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px 3px 3px; border-radius: 999px; background: #f6f5fb; font-size: .74rem; font-weight: 700; color: #4b5563; }
+    .w-ppl img, .w-ppl i { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; object-position: top; }
+    .w-ppl i { display: flex; align-items: center; justify-content: center; font-style: normal; font-size: .66rem; background: #e7e1fb; color: #7353d6; }
+    .w-it textarea { width: 100%; min-height: 58px; padding: 10px 12px; border: 1px solid transparent; border-radius: 12px; background: #f7f6fc; font: inherit; font-size: .86rem; font-weight: 400; line-height: 1.55; resize: vertical; outline: none; transition: border-color .15s, background .15s; }
+    .w-it textarea:focus { border-color: #c9bbf6; background: #fff; }
+    .w-it textarea::placeholder { color: #a9a6b8; }
+    .w-save { width: 100%; height: 48px; margin-top: 12px; border-radius: 14px; }
+    .fold-sec > summary { align-items: center !important; }
     .ex-row { display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 6px; }
     .ex-it { position: relative; flex: 0 0 64px; height: 79px; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); background: var(--soft); cursor: grab; user-select: none; -webkit-touch-callout: none; transition: transform .15s, box-shadow .15s; }
     .ex-it.lift { transform: scale(1.08); box-shadow: 0 6px 16px rgba(110,90,220,.3); z-index: 2; }
@@ -526,11 +559,9 @@
           <button class="btn btn-line" id="saveTags" style="align-self:flex-end">해시태그 저장</button>
         </div>
         <details class="fold-sec">
-          <summary><div><h2>세계관</h2><div class="hint">게시물 상세에서 세계관 뱃지를 누르면 그 세계관 캐릭터만 모아서 보여줘요 · 여기 적은 소개가 맨 위에 떠요</div></div><span class="fold-ic">펼치기 ▾</span></summary>
-          <div class="item" style="flex-direction:column;align-items:stretch;gap:10px">
-            <div id="worldList" style="display:flex;flex-direction:column;gap:8px"></div>
-            <button class="btn btn-line" id="saveWorlds" style="align-self:flex-end">세계관 소개 저장</button>
-          </div>
+          <summary><span class="w-ic">🌍</span><div><h2>세계관 <span class="w-cnt" id="worldCnt"></span></h2><div class="hint">세계관 뱃지를 누르면 그 세계관 캐릭터만 모아 보여줘요 · 여기 적은 소개가 맨 위에 떠요</div></div><span class="fold-ic">펼치기 ▾</span></summary>
+          <div id="worldList" class="w-list"></div>
+          <button class="btn btn-main w-save" id="saveWorlds">세계관 소개 저장</button>
         </details>
       </section>
     </div>
@@ -1657,20 +1688,62 @@
         else $("msgArea").innerHTML = `<div class="empty">메시지를 못 불러왔어요. 인터넷 연결을 확인하고 새로고침해주세요.</div>`;
       }
     }
+    const MCAT = { port: ["↪", "이식 요청"], ask: ["❓", "문의"], cheer: ["💜", "응원"], etc: ["💬", "기타"] };
+    let msgFilter = "all";
     function renderMessages() {
       if (!msgCache.length) { $("msgArea").innerHTML = `<div class="empty">아직 받은 메시지가 없어요 💌</div>`; return; }
       const unread = msgCache.filter(m => !m.read).map(m => m.id);
-      $("msgArea").innerHTML = msgCache.map(m => `
-        <div class="item" style="align-items:flex-start">
-          <div class="item-main">
-            <div class="item-title">${esc(m.nick || "익명")}${m.read ? "" : `<span class="badge new">NEW</span>`}</div>
-            <div class="item-sub">${fmtWhen(m.createdAt)}</div>
-            <div style="white-space:pre-wrap;word-break:break-word;font-size:.9rem;margin-top:6px;line-height:1.6">${esc(m.body)}</div>
-          </div>
-          <div class="item-actions"><button class="icon del" data-msgdel="${esc(m.id)}" aria-label="삭제">${I.del}</button></div>
-        </div>`).join("");
+      const cnt = k => msgCache.filter(m => (m.cat || "none") === k).length;
+      const chips = [["all", `전체 ${msgCache.length}`], ["unread", `안 읽음 ${unread.length}`], ["answered", `💬 답장함 ${msgCache.filter(m => m.answer).length}`],
+        ...Object.entries(MCAT).map(([k, [ic, t]]) => [k, `${ic} ${t} ${cnt(k)}`]), ["none", `라벨 없음 ${cnt("none")}`]];
+      const shown = msgCache.filter(m => msgFilter === "all" ? true : msgFilter === "unread" ? !m.read || unread.includes(m.id) : msgFilter === "answered" ? !!m.answer : (m.cat || "none") === msgFilter);
+      $("msgArea").innerHTML = `<div class="lb-bar">${chips.map(([k, t]) => `<button class="${msgFilter === k ? "on" : ""}" data-mfilter="${k}">${t}</button>`).join("")}</div>` + (shown.length ? shown.map(m => `
+        <div class="item msg-item">
+          <div class="msg-top"><button class="mlb ${m.cat || "none"}" data-mlabel="${esc(m.id)}">${m.cat && MCAT[m.cat] ? MCAT[m.cat].join(" ") : "＋ 라벨"}</button><b class="msg-nick">${esc(m.nick || "익명")}</b>${m.read ? "" : `<span class="badge new">NEW</span>`}<span class="msg-when">${fmtWhen(m.createdAt)}</span></div>
+          <div class="msg-body">${esc(m.body)}</div>
+          ${m.answer ? `<div class="pubd"><b>💬 공개 답장 · 사이트에 보여요${m.showNick && m.nick ? " · 닉네임 공개" : " · 익명"}</b>${esc(m.answer)}</div>` : ""}
+          <div class="mact"><button class="rp" data-mans="${esc(m.id)}">${m.answer ? "✏️ 답장 고치기" : "💬 공개 답장"}</button><button data-mlabel="${esc(m.id)}">🏷 라벨</button><button class="mdel" data-msgdel="${esc(m.id)}" aria-label="삭제">🗑</button></div>
+        </div>`).join("") : `<div class="empty">여기엔 아직 메시지가 없어요</div>`);
       // 본 메시지는 읽음으로 표시 (NEW 표시는 이번 화면에서는 그대로 보여줘요)
       if (unread.length) msgApi("read", { ids: unread }).then(() => { msgCache.forEach(m => { if (unread.includes(m.id)) m.read = true; }); setBadge(0); }).catch(() => {});
+    }
+    $("msgArea").addEventListener("click", e => {
+      const f = e.target.closest("[data-mfilter]"); if (f) { msgFilter = f.dataset.mfilter; renderMessages(); return; }
+      const l = e.target.closest("[data-mlabel]");
+      if (l) {
+        const m = msgCache.find(x => x.id === l.dataset.mlabel); if (!m) return;
+        openSheet(`<div class="sheet-t"><b>🏷 라벨 고르기</b></div><div class="sheet-li">${Object.entries(MCAT).map(([k, [ic, t]]) => `<button data-pick="${k}">${ic} ${t}${m.cat === k ? " ✓" : ""}</button>`).join("")}<button data-pick="">라벨 빼기</button></div>`, async cat => {
+          try { await msgApi("label", { ids: [m.id], cat }); if (cat) m.cat = cat; else delete m.cat; renderMessages(); toast(cat ? `${MCAT[cat][1]} 라벨을 달았어요` : "라벨을 뺐어요"); }
+          catch { toast("저장하지 못했어요. 다시 시도해주세요."); }
+        });
+        return;
+      }
+      const a = e.target.closest("[data-mans]"); if (a) openAnswer(a.dataset.mans);
+    });
+    function openAnswer(id) {
+      const m = msgCache.find(x => x.id === id); if (!m) return;
+      edit = { kind: "answer", index: -1, item: m };
+      $("editor").innerHTML = `
+        <div class="ed-top"><h3>💬 공개 답장</h3><button class="icon" data-close aria-label="닫기">${I.x}</button></div>
+        <div class="ed-body">
+          <div class="f">받은 메시지 <small>사이트에는 질문(Q.)으로 보여요 · 개인 정보가 있으면 여기서 지우고 올려주세요</small><textarea id="a_q" style="min-height:80px">${esc(m.body)}</textarea></div>
+          <label class="f">답장 <small>사이트 메시지 탭 "답장 모아보기"에 하트 이름으로 올라가요</small><textarea id="a_body" style="min-height:120px" placeholder="답장을 적어주세요">${esc(m.answer || "")}</textarea></label>
+          <label class="tg"><span class="t"><b>닉네임 같이 보여주기</b><small>끄면 "익명"으로 보여요 · 보낸 닉네임: ${esc(m.nick || "없음")}</small></span><input type="checkbox" class="sw" id="a_nick" ${m.showNick ? "checked" : ""} /></label>
+          ${m.answer ? `<button type="button" class="btn btn-ghost" id="a_remove" style="align-self:flex-start;color:#e0527a">답장 내리기 (사이트에서 빼기)</button>` : ""}
+        </div>
+        <div class="ed-foot"><button class="btn btn-ghost" data-close>취소</button><button class="btn btn-main" id="a_save">${m.answer ? "답장 고치기" : "공개 답장 올리기"}</button></div>`;
+      $("overlay").classList.add("open"); document.body.style.overflow = "hidden";
+      const send = async (answer) => {
+        const btn = $("a_save"); btn.disabled = true;
+        try {
+          const r = await msgApi("answer", { ids: [m.id], answer, showNick: $("a_nick").checked, body: $("a_q").value });
+          Object.assign(m, r.message || {}); if (!answer) { delete m.answer; delete m.answeredAt; delete m.showNick; }
+          closeEditor(); renderMessages(); toast(answer ? "답장을 올렸어요 · 사이트에 바로 보여요" : "답장을 내렸어요");
+        } catch { btn.disabled = false; toast("저장하지 못했어요. 다시 시도해주세요."); }
+      };
+      $("a_save").onclick = () => { const v = $("a_body").value.trim(); if (!v) { toast("답장을 적어주세요"); return; } send(v); };
+      if ($("a_remove")) $("a_remove").onclick = async () => { if (await confirmBox("이 답장을 사이트에서 내릴까요?\n메시지는 그대로 남아요.", { ok: "내리기", danger: true })) send(""); };
+      markClean();
     }
     $("msgRefresh").onclick = () => loadMessages();
     $("hdrBadge").onclick = () => document.querySelector('.tab[data-tab="messages"]').click();
@@ -1820,8 +1893,9 @@
     function renderWorlds() {
       const ws = {}; data.posts.forEach(p => { const w = (p.world || "").trim(); if (w) (ws[w] = ws[w] || []).push(p.name); });
       const desc = (data.profile || {}).worlds || {};
+      if ($("worldCnt")) $("worldCnt").textContent = Object.keys(ws).length ? Object.keys(ws).length + "개" : "";
       $("worldList").innerHTML = Object.keys(ws).length ? Object.entries(ws).sort((a, b) => b[1].length - a[1].length).map(([w, names]) => `
-        <label class="w-it"><b>${esc(w)}</b><small>${names.length}명 · ${esc(names.join(", "))}</small><textarea data-world="${esc(w)}" placeholder="세계관 한두 줄 소개 (비워두면 이름만 보여요)">${esc(desc[w] || "")}</textarea></label>`).join("")
+        <label class="w-it"><div class="w-hd"><span class="w-heart">♥</span><b>${esc(w)}</b><span class="w-n">${names.length}명</span></div><div class="w-ppl">${names.map(n => { const p = data.posts.find(x => x.name === n && (x.world || "").trim() === w); return `<span>${p && p.image ? `<img src="${esc(p.image)}" alt="" onerror="${rawFallback}" />` : `<i>${esc((n || "?").charAt(0))}</i>`}${esc(n)}</span>`; }).join("")}</div><textarea data-world="${esc(w)}" rows="2" placeholder="세계관 한두 줄 소개 · 비워두면 이름만 보여요">${esc(desc[w] || "")}</textarea></label>`).join("")
         : `<div class="hint">게시물에 세계관을 적으면 여기 나타나요</div>`;
     }
     $("saveWorlds").onclick = () => {
