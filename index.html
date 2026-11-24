@@ -472,7 +472,6 @@
     .t-media.ld, .m-tile.ld { animation: none; background-image: none; }
     @keyframes shimmer { from { background-position: 130% 0, 0 0; } to { background-position: -30% 0, 0 0; } }
     @media (prefers-reduced-motion: reduce) { .t-media, .m-tile { animation: none; } }
-    html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *::after { transition: background-color .3s ease, color .3s ease, border-color .3s ease, box-shadow .3s ease !important; }
     .p-name .verified { animation: badgeGlow 4.5s ease-in-out infinite; }
     @keyframes badgeGlow { 0%, 78%, 100% { filter: none; } 86% { filter: drop-shadow(0 0 5px rgba(185,162,246,.95)) brightness(1.12); } }
     .p-name { position: relative; }
@@ -1842,7 +1841,8 @@
       // 손잡이를 아래로 끌어내리면 닫혀요
       const grab = sheet.querySelector(".cs-grab");
       let y0 = null, dy = 0;
-      grab.onpointerdown = e => { y0 = e.clientY; dy = 0; sheet.classList.add("dragging"); grab.setPointerCapture(e.pointerId); };
+      grab.onpointerdown = e => { if (e.target.closest("button")) return;   // ‹ › 버튼은 그냥 눌리게
+        y0 = e.clientY; dy = 0; sheet.classList.add("dragging"); grab.setPointerCapture(e.pointerId); };
       grab.onpointermove = e => { if (y0 === null) return; dy = Math.max(0, e.clientY - y0); sheet.style.transform = `translate(-50%, ${dy}px)`; };
       grab.onpointerup = grab.onpointercancel = () => {
         if (y0 === null) return; y0 = null; sheet.classList.remove("dragging"); sheet.style.transform = "";
@@ -2055,8 +2055,7 @@
     // 사진이 뜨면 반짝임 멈추기
     document.addEventListener("load", e => { const t = e.target; if (t.tagName === "IMG") { const w = t.closest(".t-media, .m-tile"); if (w) w.classList.add("ld"); } }, true);
     function toggleMode() {
-      const h = document.documentElement; h.classList.add("theme-anim"); clearTimeout(toggleMode.t); toggleMode.t = setTimeout(() => h.classList.remove("theme-anim"), 400);
-      const dark = h.classList.toggle("dark");
+      const dark = document.documentElement.classList.toggle("dark");
       try { localStorage.setItem("heart_theme", dark ? "dark" : "light"); } catch {}
       document.querySelector('meta[name="theme-color"]').content = dark ? "#15151e" : "#b9a2f6";
     }
