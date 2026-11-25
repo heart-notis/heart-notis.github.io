@@ -185,6 +185,12 @@
     html.dark .to-top { background: #1d1b2b; }
     /* 🎂 생일 */
     .bday-tag { display: inline-flex; align-items: center; gap: 3px; margin-left: 7px; padding: 1px 8px; border-radius: 999px; font-size: .68rem; font-weight: 800; color: #c0498a; background: #ffeef6; border: 1px solid #ffc6e1; vertical-align: 2px; }
+    .ct-tag { display: inline-flex; align-items: center; gap: 3px; margin-left: 6px; padding: 2px 8px; border-radius: 999px; font-size: .7rem; font-weight: 800; vertical-align: 2px; background: linear-gradient(120deg, #fff4d6, #ffe7f0); color: #b86b00; border: 1px solid #f5d48a; white-space: nowrap; }
+    .ct-line { display: flex; align-items: center; gap: 8px; margin: 10px 0 2px; padding: 8px 12px; border-radius: 12px; background: linear-gradient(120deg, #fff7e3, #fdeef6); border: 1px solid #f6dca6; font-size: .82rem; color: #8a5a00; font-weight: 700; line-height: 1.4; }
+    .ct-line b { color: #b86b00; } .ct-line span { flex: 1; min-width: 0; }
+    .ct-line em { font-style: normal; flex-shrink: 0; padding: 2px 9px; border-radius: 999px; background: linear-gradient(120deg, #f2b84b, #f08bb4); color: #fff; font-size: .7rem; font-weight: 900; }
+    html.dark .ct-tag { background: linear-gradient(120deg, #3a2e12, #3a1e2c); border-color: #6a5220; color: #f3cf7e; }
+    html.dark .ct-line { background: linear-gradient(120deg, #2e2614, #2c1a26); border-color: #5a4520; color: #f0cf8a; } html.dark .ct-line b { color: #f6d58f; }
     .bday-tag.soon { background: #fff7fb; border-style: dashed; opacity: .9; }
     html.dark .bday-tag.soon { background: #2a1a24; }
     html.dark .bday-tag { background: #3a1f30; border-color: #6b2f52; color: #ffb3d6; }
@@ -1508,7 +1514,7 @@
           <div class="t-main">
             ${isPort(c) ? `<div class="port-tag"><span>↪ 이식 예정</span>${portInfo(c) ? `<em>${escH(portInfo(c))}</em>` : ""}</div>` : ""}
             ${headHTML(isReleased(c) ? c.releaseDate : c.date)}${updBadge(c) || logMini(c)}
-            <p class="t-title">${escH(c.name)}${isBday(c) ? `<span class="bday-tag">🎂 생일</span>` : isBdayTmr(c) ? `<span class="bday-tag soon">🎂 내일 생일</span>` : ""}</p>
+            <p class="t-title">${escH(c.name)}${isBday(c) ? `<span class="bday-tag">🎂 생일</span>` : isBdayTmr(c) ? `<span class="bday-tag soon">🎂 내일 생일</span>` : ""}${c.contest ? `<span class="ct-tag">🏆 공모전</span>` : ""}</p>
             ${c.tagline ? `<p class="t-tagline">${fmtText(c.tagline)}</p>` : ""}
             <p class="t-tags">${hashtags(c)}</p>
             <div class="t-media preview" style="--pv:${typeof c.previewPos === "number" ? c.previewPos : 25}%;--px:${typeof c.previewX === "number" ? c.previewX : 50}%;--pz:${typeof c.previewZoom === "number" ? c.previewZoom : 1}">${mediaHTML(c)}${c.adult ? `<span class="badge">19+</span>` : ""}${allImgs(c).length > 1 ? `<span class="many">${I.photos}${allImgs(c).length}</span>` : ""}<span class="expand">♡ 전체 보기</span></div>
@@ -1773,6 +1779,7 @@
           </div>
           ${isPort(c) ? `<div class="port-tag" style="margin-bottom:8px"><span>↪ 이식 예정</span>${portInfo(c) ? `<em>${escH(portInfo(c))}</em>` : ""}</div>` : ""}
           <div class="d-title">${escH(c.name)}${isBday(c) ? `<span class="bday-tag">🎂 생일</span>` : isBdayTmr(c) ? `<span class="bday-tag soon">🎂 내일 생일</span>` : ""}${c.world ? `<span class="d-world" data-world-go="${esc(c.world)}" role="button" title="이 세계관 캐릭터 모아보기">${escH(c.world)}<em class="dw-go">›</em></span>` : ""}</div>
+          ${c.contest ? `<div class="ct-line">🏆 <span>${c.contestName ? `<b>${escH(c.contestName)}</b> ` : "<b>공모전</b> "}출품작</span>${c.contestResult ? `<em>${escH(c.contestResult)}</em>` : ""}</div>` : ""}
           ${c.tagline ? `<div class="d-tagline">${fmtText(c.tagline)}</div>` : ""}
           ${Array.isArray(c.lines) && c.lines.length ? `<div class="lines" data-lines="${i}"><button class="line-btn" data-line-next>💬 한마디 더 듣기 <span class="line-cnt"></span></button><div class="line-bub" aria-live="polite"></div></div>` : ""}
           ${c.description ? `<p class="d-text">${fmtText(c.description)}</p>` : ""}
