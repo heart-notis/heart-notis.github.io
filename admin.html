@@ -6,7 +6,11 @@
   <meta name="robots" content="noindex, nofollow" />
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="icon" href="favicon-64.png" type="image/png" sizes="64x64" />
-  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link rel="apple-touch-icon" href="admin-touch-icon.png" />
+  <link rel="manifest" href="admin.webmanifest" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="하트 관리" />
   <meta name="theme-color" content="#b9a2f6" />
   <title>제작자 페이지 · 하트</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
@@ -170,6 +174,14 @@
     .sel-chip.on { background: var(--grad); color: #fff; border-color: transparent; }
     .sel-chip.del { color: #e0527a; border-color: #f6cbd8; }
     .sel-chip:disabled { opacity: .4; }
+    .sched-box { margin-top: 14px; }
+    .two-in { display: flex; gap: 8px; margin-top: 8px; } .two-in input { flex: 1; min-width: 0; height: 44px; border: 1px solid var(--line); border-radius: 12px; padding: 0 12px; font: inherit; background: #fff; }
+    .sch-bdg { display: inline-block; font-size: .66rem; font-weight: 800; padding: 2px 7px; border-radius: 999px; background: #fff4e0; color: #c27a00; margin-left: 4px; vertical-align: 1px; white-space: nowrap; }
+    .sdiff { padding: 10px 8px; border-bottom: 1px solid #f1eef9; font-size: .82rem; line-height: 1.5; } .sdiff b { display: block; font-size: .78rem; color: #5b5770; }
+    .sdiff .o { color: #b4b0c4; text-decoration: line-through; word-break: break-all; } .sdiff .n { color: #2f8a57; font-weight: 700; word-break: break-all; }
+    .sl-sub { float: right; font-size: .74rem; font-weight: 600; color: #9aa0a8; margin-top: 2px; }
+    .sdiff i { color: #b4b0c4; font-style: normal; }
+    .sdiff img { width: 44px; height: 52px; object-fit: cover; border-radius: 8px; vertical-align: middle; margin: 0 4px; }
     .side-pick { display: flex; gap: 6px; margin-top: 6px; }
     .side-pick button { flex: 1; height: 40px; border-radius: 12px; border: 1px solid var(--line); background: #fff; font-weight: 800; font-size: .84rem; color: #5b5770; cursor: pointer; }
     .side-pick button.on { background: var(--grad); color: #fff; border-color: transparent; }
@@ -192,7 +204,8 @@
     .item-main { flex: 1; min-width: 0; }
     .item-title { font-weight: 800; font-size: .95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .item-title:has(.nm) { display: flex; align-items: center; gap: 4px; }
-    .item-title .nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+    .item-title .nm { min-width: 3.2em; flex-shrink: 0; max-width: 60%; overflow: hidden; text-overflow: ellipsis; }
+    .item-title:has(.nm) { overflow: hidden; }
     .item-title .badge { flex-shrink: 0; margin-left: 0; }
     .item-sub { font-size: .78rem; color: var(--sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .badge { display: inline-block; font-size: .66rem; font-weight: 800; padding: 1px 6px; border-radius: 5px; background: var(--soft); color: var(--accent); margin-left: 4px; vertical-align: 1px; }
@@ -512,6 +525,7 @@
         <h1><span class="h1-text">제작자 페이지</span><span id="hdrBadge" class="badge new hidden" style="margin-left:6px;cursor:pointer" title="안 읽은 메시지">💌 0</span></h1>
         <a class="link-btn" href="index.html" target="_blank" rel="noopener">사이트 보기 ↗</a>
         <button class="link-btn" id="historyBtn">🕘 기록</button>
+        <button class="link-btn hidden" id="appBtn">📱 앱으로</button>
         <button class="link-btn" id="settingsBtn">⚙️ 연결</button>
         <button class="link-btn" id="logoutBtn">잠그기</button>
       </div>
@@ -673,7 +687,7 @@
 
     /* 사이트에 항상 들어가는 파일들 */
     const FIXED_FILES = [
-      "index.html", "admin.html", "favicon.svg", "favicon-64.png", "apple-touch-icon.png", "og.jpg", "og-2.jpg", "sw.js",
+      "index.html", "admin.html", "favicon.svg", "favicon-64.png", "apple-touch-icon.png", "manifest.webmanifest", "admin.webmanifest", "icon-192.png", "icon-512.png", "admin-icon-192.png", "admin-icon-512.png", "admin-touch-icon.png", "og.jpg", "og-2.jpg", "sw.js",
       "images/header.jpg", "images/profile.jpg", "images/profile-sm.jpg",
       "images/sticker-smile.png", "images/sticker-open.png", "images/sticker-top.png", "images/sticker-top2.png"
     ];
@@ -819,6 +833,21 @@
       });
     }
 
+    /* 📱 제작자 페이지를 폰 홈 화면에 (버튼 누를 때만) */
+    (function adminApp() {
+      const b = $("appBtn"); if (!b) return;
+      if (matchMedia("(display-mode: standalone)").matches || navigator.standalone) return;
+      const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+      let ask = null;
+      if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+      addEventListener("beforeinstallprompt", e => { e.preventDefault(); ask = e; b.classList.remove("hidden"); });
+      addEventListener("appinstalled", () => { b.classList.add("hidden"); toast("💜 제작자 페이지를 홈 화면에 추가했어요"); });
+      if (ios) b.classList.remove("hidden");
+      b.onclick = async () => {
+        if (ask) { ask.prompt(); try { await ask.userChoice; } catch {} ask = null; return; }
+        confirmBox("📱 홈 화면에 추가하기\n① 아래쪽 공유 ⬆︎ 버튼\n② 홈 화면에 추가 ⊞\n③ 오른쪽 위 추가\n연필 달린 하트 아이콘이 생겨요", { ok: "알겠어요", cancel: "닫기" });
+      };
+    })();
     function renderAll() { renderPosts(); renderNotices(); renderProfile(); $("tagInput").value = data.tags.join(", "); renderWorlds(); renderStatus(); renderToday(); }
     /* ---------- 📋 오늘 챙길 것 (탭 위 한 줄) ---------- */
     const missLink = p => !(p.link || Object.values(p.links || {}).some(v => String(v || "").trim()));
@@ -835,6 +864,7 @@
         else if (p.port && p.portDate) { const end = p.portTime ? new Date(p.portDate + "T" + p.portTime).getTime() : new Date(p.portDate + "T00:00").getTime() + 864e5; const v = dday(p.portDate); if (Date.now() < end && (v === "오늘" || v === "내일" || +v.slice(2) <= 7)) chips.push(["↪", `${p.name} 이식`, v, "p" + i]); }
         if (p.birthday && !p.spoiler && (p.birthday === md(now) || p.birthday === md(tm))) chips.push(["🎂", `${p.name} 생일`, p.birthday === md(now) ? "오늘" : "내일", "p" + i]);
       });
+      data.posts.forEach((p, i) => { if (!p.sched || schedDue(p)) return; const dt = new Date(p.sched.at), v = dday(ymdL(dt)); if (v === "오늘" || v === "내일" || +v.slice(2) <= 7) chips.push(["⏰", `${p.name} 예약 수정`, v + " " + schedLabel(p).split(" ")[1], "s" + i]); });
       data.notices.forEach((n, i) => { const w = noticeWait(n); if (w) chips.push(["⏰", "예약 공지", w, "n" + i]); });
       const noLink = [], noLine = [];
       data.posts.forEach((p, i) => { if (p.hidden || (p.spoiler && !spoilerOpened(p))) return; if (missLink(p)) noLink.push(i); if (!(p.tagline || "").trim()) noLine.push(i); });
@@ -848,6 +878,7 @@
       const g = b.dataset.today;
       if (g === "msg") return document.querySelector('.tab[data-tab="messages"]').click();
       if (g[0] === "p") { document.querySelector('.tab[data-tab="posts"]').click(); return openPost(+g.slice(1)); }
+      if (g[0] === "s") { document.querySelector('.tab[data-tab="posts"]').click(); return schedSheet(+g.slice(1)); }
       if (g[0] === "n") { document.querySelector('.tab[data-tab="notices"]').click(); return openNotice(+g.slice(1)); }
     });
 
@@ -903,6 +934,12 @@
       tags: { label: "# 해시태그" },
       theme: { label: "🎨 꾸미기" }
     };
+    const applyPatch = (p, patch) => { Object.entries(patch || {}).forEach(([k, v]) => { if (v === null) delete p[k]; else p[k] = clone(v); }); return p; };
+    const ymdL = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    const schedDue = p => !!(p.sched && Date.parse(p.sched.at) <= Date.now());
+    // 시간이 지난 예약은 올릴 때 본문에 합쳐서 정리해요 (사이트는 그 전에도 이미 바뀐 모습)
+    const bakeSched = posts => posts.forEach(p => { if (schedDue(p)) { applyPatch(p, p.sched.patch); delete p.sched; } });
+    const schedLabel = p => { const d = new Date(p.sched.at); return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`; };
     function setOrDel(p, k, v) { if (v) p[k] = v; else delete p[k]; }
     function bulkDone(ps, msg) { saveDraft(); renderPosts(); renderSelBar(); toast(`${ps.length}개 ${msg}`); }
     function openBulkForm(k) {
@@ -1041,7 +1078,7 @@
           ${selMode ? `<span class="pick" aria-hidden="true">✓</span>` : ""}
           ${p.image ? `<img class="thumb" src="${esc(p.image)}" alt="" draggable="false" onerror="${rawFallback}" />` : `<div class="thumb">${esc((p.name || "?").charAt(0))}</div>`}
           <div class="item-main">
-            <div class="item-title"><span class="nm">${esc(p.name || "(이름 없음)")}</span>${p.hidden ? `<span class="badge hid">🙈 비공개</span>` : ""}${p.spoiler ? (spoilerOpened(p) ? `<span class="badge spo">✦ 공개됨</span>` : `<span class="badge spo">✦ 스포</span>`) : ""}${p.noPort ? (p.noPortUntil && Date.now() >= new Date(p.noPortUntil + "T00:00").getTime() + 864e5 ? `<span class="badge">🚫 이식불가 끝</span>` : `<span class="badge" style="background:#ffe9ee;color:#c0485a">🚫${p.noPortUntil ? " ~" + (+p.noPortUntil.split("-")[1]) + "/" + (+p.noPortUntil.split("-")[2]) : ""}</span>`) : ""}${p.contest ? `<span class="badge" style="background:#fff4d6;color:#b86b00">🏆${p.contestResult ? " " + esc(p.contestResult) : ""}</span>` : ""}${p.port ? (p.portDate && Date.now() >= (p.portTime ? new Date(p.portDate + "T" + p.portTime).getTime() : new Date(p.portDate + "T00:00").getTime() + 864e5) ? `<span class="badge">↪ 이식 끝</span>` : `<span class="badge spo">↪ 이식${p.portDate ? " " + (+p.portDate.split("-")[1]) + "/" + (+p.portDate.split("-")[2]) + (p.portTime ? " " + p.portTime : "") : ""}</span>`) : ""}${p.birthday ? `<span class="badge bd">🎂 ${+p.birthday.split("-")[0]}/${+p.birthday.split("-")[1]}</span>` : ""}${p.adult ? `<span class="badge">19+</span>` : ""}${p.status === "asset" ? `<span class="badge st">🔧 교체중</span>` : p.status === "renewal" ? `<span class="badge st re">✨ 리뉴얼</span>` : ""}${!p.hidden && !(p.spoiler && !spoilerOpened(p)) && missLink(p) ? `<span class="badge miss">🔗 링크 없음</span>` : ""}${isNew(p, "posts") ? `<span class="badge new">NEW</span>` : ""}</div>
+            <div class="item-title"><span class="nm">${esc(p.name || "(이름 없음)")}</span>${p.sched ? `<span class="badge sch-bdg" title="예약 수정 ${schedLabel(p)}">⏰ ${schedDue(p) ? "적용됨" : schedLabel(p).split(" ")[0]}</span>` : ""}${p.hidden ? `<span class="badge hid">🙈 비공개</span>` : ""}${p.spoiler ? (spoilerOpened(p) ? `<span class="badge spo">✦ 공개됨</span>` : `<span class="badge spo">✦ 스포</span>`) : ""}${p.noPort ? (p.noPortUntil && Date.now() >= new Date(p.noPortUntil + "T00:00").getTime() + 864e5 ? `<span class="badge">🚫 이식불가 끝</span>` : `<span class="badge" style="background:#ffe9ee;color:#c0485a">🚫${p.noPortUntil ? " ~" + (+p.noPortUntil.split("-")[1]) + "/" + (+p.noPortUntil.split("-")[2]) : ""}</span>`) : ""}${p.contest ? `<span class="badge" style="background:#fff4d6;color:#b86b00">🏆${p.contestResult ? " " + esc(p.contestResult) : ""}</span>` : ""}${p.port ? (p.portDate && Date.now() >= (p.portTime ? new Date(p.portDate + "T" + p.portTime).getTime() : new Date(p.portDate + "T00:00").getTime() + 864e5) ? `<span class="badge">↪ 이식 끝</span>` : `<span class="badge spo">↪ 이식${p.portDate ? " " + (+p.portDate.split("-")[1]) + "/" + (+p.portDate.split("-")[2]) + (p.portTime ? " " + p.portTime : "") : ""}</span>`) : ""}${p.birthday ? `<span class="badge bd">🎂 ${+p.birthday.split("-")[0]}/${+p.birthday.split("-")[1]}</span>` : ""}${p.adult ? `<span class="badge">19+</span>` : ""}${p.status === "asset" ? `<span class="badge st">🔧 교체중</span>` : p.status === "renewal" ? `<span class="badge st re">✨ 리뉴얼</span>` : ""}${!p.hidden && !(p.spoiler && !spoilerOpened(p)) && missLink(p) ? `<span class="badge miss">🔗 링크 없음</span>` : ""}${isNew(p, "posts") ? `<span class="badge new">NEW</span>` : ""}</div>
             <div class="item-sub">${esc(p.date || "")} · ${(p.tags || []).map(t => "#" + esc(t)).join(" ") || "태그 없음"}</div>
             <div class="item-sub">${esc(p.tagline || "")}</div>
           </div>
@@ -1126,6 +1163,43 @@
       document.body.appendChild(sh); requestAnimationFrame(() => sh.classList.add("show"));
       sh.onclick = e => { if (e.target.closest("[data-sheet-close]")) return closeSheet(); const b = e.target.closest("[data-pick]"); if (b) { closeSheet(); onPick(b.dataset.pick); } };
     }
+    /* ⏰ 예약 수정: 뭐가 어떻게 바뀌는지 · 지금 적용 · 취소 */
+    const SCH_NAME = { name: "이름", world: "세계관", tagline: "한 줄 소개", description: "자세한 소개", greeting: "첫 인사말", lines: "명대사", image: "사진", images: "추가 사진", tags: "해시태그", links: "대화 링크", link: "대화 링크", theme: "꾸미기", songUrl: "테마곡 링크", songTitle: "테마곡 제목", adult: "19+", hidden: "비공개", spoiler: "스포일러", releaseDate: "공개 날짜", releaseTime: "공개 시간", port: "이식 예정", portDate: "이식 날짜", portTime: "이식 시간", portNote: "이식 메모", contest: "공모전", contestName: "공모전 이름", contestResult: "공모전 결과", noPort: "이식 불가", noPortUntil: "이식 불가 기간", noPortReason: "이식 불가 이유", status: "상태", birthday: "생일", date: "올린 날짜", previewPos: "사진 위치", previewX: "사진 위치", previewZoom: "사진 확대", wm: "워터마크" };
+    function schVal(k, v) {
+      if (v === null || v === undefined || v === "" || v === false) return "<i>(없음)</i>";
+      if (v === true) return "켬";
+      if (k === "image") return `<img src="${esc(v)}" alt="" onerror="${rawFallback}" />`;
+      if (k === "theme") return esc(themeName(v));
+      if (Array.isArray(v)) return k === "images" ? `${v.length}장` : esc(v.map(x => (k === "tags" ? "#" : "") + x).join(k === "lines" ? " / " : " "));
+      if (typeof v === "object") return esc(Object.entries(v).filter(([, x]) => x).map(([t]) => t || "기본").join(" · ") || "(없음)");
+      const t = String(v); return esc(t.length > 60 ? t.slice(0, 60) + "…" : t);
+    }
+    function schedSheet(i) {
+      const p = data.posts[i]; if (!p || !p.sched) return;
+      const rows = Object.entries(p.sched.patch || {}).filter(([k]) => k !== "updatedAt" && !(k in { previewX: 1, previewZoom: 1 } && "previewPos" in p.sched.patch));
+      openSheet(`<div class="sheet-t"><b>⏰ ${schedLabel(p)}에 이렇게 바뀌어요${schedDue(p) ? " (시간 지남)" : ""}</b></div>
+        <div class="bf-scroll">${rows.map(([k, v]) => `<div class="sdiff"><b>${esc(SCH_NAME[k] || k)}</b><span class="o">${schVal(k, p[k])}</span> → <span class="n">${schVal(k, v)}</span></div>`).join("")}</div>
+        <div class="sheet-li"><button data-pick="edit">✏️ 예약 내용 고치기</button><button data-pick="now">⚡ 지금 바로 적용하기</button><button data-pick="cancel" class="del">🗑 예약 취소</button></div>`, async act => {
+        const p = data.posts[i]; if (!p || !p.sched) return;
+        if (act === "edit") return openPost(i);
+        if (act === "now") { applyPatch(p, p.sched.patch); if (p.sched.patch.updatedAt) p.updatedAt = new Date().toISOString(); delete p.sched; toast("지금 바로 바꿨어요 · 사이트에 올리면 반영돼요"); }
+        if (act === "cancel") { if (!(await confirmDel(`${p.name} 예약 수정을 취소할까요?\n예약해둔 내용은 사라져요`, "예약 취소"))) return; delete p.sched; toast("예약을 취소했어요"); }
+        saveDraft(); renderAll();
+      });
+    }
+    /* 🌍 같은 세계관 친구들을 한 덩어리로 (멀리 떨어져 있어도) */
+    function worldSheet(i) {
+      const p = data.posts[i]; if (!p || !p.world) return;
+      const w = p.world, grp = data.posts.filter(x => x.world === w);
+      openSheet(`<div class="sheet-t"><b>🌍 「${esc(w)}」 ${grp.length}명 같이 옮기기</b></div>
+        <p class="bf-hint">세계관 안에서 순서는 지금 그대로예요 · ${grp.map(x => esc(x.name)).join(", ")}</p>
+        <div class="sheet-li"><button data-pick="top">⬆️ 맨 위로</button><button data-pick="here">📍 ${esc(p.name)} 자리로 모으기</button><button data-pick="bottom">⬇️ 맨 아래로</button></div>`, act => {
+        const rest = data.posts.filter(x => x.world !== w), g = data.posts.filter(x => x.world === w);
+        let at = act === "top" ? 0 : act === "bottom" ? rest.length : data.posts.slice(0, data.posts.indexOf(p)).filter(x => x.world !== w).length;
+        rest.splice(at, 0, ...g); data.posts = rest;
+        saveDraft(); renderAll(); toast(`「${w}」 ${g.length}명을 ${act === "top" ? "맨 위로" : act === "bottom" ? "맨 아래로" : "한 자리로"} 옮겼어요`);
+      });
+    }
     function postMenu(i) {
       const p = data.posts[i]; if (!p) return;
       openSheet(`
@@ -1135,6 +1209,8 @@
           <button data-pick="top" ${i === 0 ? "disabled" : ""}><em>⬆️</em>맨 위로</button><button data-pick="link"><em>🔗</em>링크 복사</button>
         </div>
         <div class="sheet-li">
+          ${p.sched ? `<button data-pick="sched">⏰ 예약 수정 보기 <small class="sl-sub">${schedDue(p) ? "시간 지남 · 사이트엔 이미 바뀜" : schedLabel(p)}</small></button>` : ""}
+          ${p.world && data.posts.filter(x => x.world === p.world).length > 1 ? `<button data-pick="world">🌍 「${esc(p.world)}」 같이 옮기기 <small class="sl-sub">${data.posts.filter(x => x.world === p.world).length}명</small></button>` : ""}
           <button data-pick="spoiler">✦ ${p.spoiler ? "스포일러 끄기" : "스포일러로 바꾸기"}</button>
           <button data-pick="hidden">🙈 ${p.hidden ? "비공개 풀기" : "비공개로 바꾸기"}</button>
           <button data-pick="dup">📄 복제해서 새로 만들기</button>
@@ -1142,13 +1218,15 @@
         </div>`, async act => {
         const p = data.posts[i];
         if (act === "edit") return openPost(i);
+        if (act === "sched") return setTimeout(() => schedSheet(i), 230);
+        if (act === "world") return setTimeout(() => worldSheet(i), 230);
         if (act === "preview") { if (!store.set(DRAFT_KEY, data)) { toast("미리보기 공간이 부족해요"); return; } window.open(`index.html?preview=1#post-${encodeURIComponent(p.id)}`, "_blank"); return; }
         if (act === "link") { const u = p.slug ? charUrl(p) : `https://heart-notis.github.io/#post-${encodeURIComponent(p.id)}`; try { await navigator.clipboard.writeText(u); toast("링크를 복사했어요"); } catch { prompt("링크를 복사해주세요", u); } return; }
         if (act === "top") { data.posts.splice(i, 1); data.posts.unshift(p); toast("맨 위로 올렸어요"); }
         if (act === "spoiler") { if (p.spoiler) delete p.spoiler; else p.spoiler = true; toast(p.spoiler ? "스포일러로 바꿨어요 · 공개 날짜는 수정에서 정해요" : "스포일러를 껐어요"); }
         if (act === "hidden") { if (p.hidden) delete p.hidden; else p.hidden = true; toast(p.hidden ? "비공개로 바꿨어요" : "비공개를 풀었어요"); }
         if (act === "dup") {
-          const c = clone(p); c.id = uid(); c.name = (p.name || "") + " (복사)"; c.createdAt = new Date().toISOString(); c.date = today(); delete c.updatedAt; delete c.log;
+          const c = clone(p); c.id = uid(); c.name = (p.name || "") + " (복사)"; c.createdAt = new Date().toISOString(); c.date = today(); delete c.updatedAt; delete c.log; delete c.sched; delete c.slug; delete c.cardKey;
           data.posts.splice(i + 1, 0, c); saveDraft(); renderAll(); toast("복제했어요"); return openPost(i + 1);
         }
         if (act === "del") {
@@ -1203,7 +1281,10 @@
         ...randomCounts(), date: today(), description: "", greeting: "", link: ""
       };
       if (!item.id) item.id = uid();
-      edit = { kind: "post", index, item, queue, at, orig: index >= 0 ? JSON.stringify(data.posts[index]) : "" };   // at: 여러 장일 때 고른 순서대로 위에서부터 놓이게
+      // ⏰ 예약 수정이 걸린 게시물은 "바뀔 모습"으로 열어요 (원래 모습은 schedBase 에)
+      let schedBase = null, schedAt = "";
+      if (item.sched) { schedBase = clone(item); delete schedBase.sched; schedAt = item.sched.at; applyPatch(item, item.sched.patch); delete item.sched; }
+      edit = { kind: "post", index, item, queue, at, schedBase, schedAt, orig: schedBase ? JSON.stringify(schedBase) : index >= 0 ? JSON.stringify(data.posts[index]) : "" };   // at: 여러 장일 때 고른 순서대로 위에서부터 놓이게
       $("editor").innerHTML = `
         <div class="ed-top"><h3>${index >= 0 ? "게시물 수정" : "새 게시물"}</h3><button class="icon" data-close aria-label="닫기">${I.x}</button></div>
         <div class="ed-body">
@@ -1301,6 +1382,11 @@
             <button type="button" class="btn btn-line" id="dice" style="flex:0 0 auto" title="숫자 랜덤으로 다시 뽑기">🎲 랜덤</button>
           </div>
           </div></details>
+          ${index >= 0 ? (() => { const sd = schedAt ? new Date(schedAt) : null, due = sd && sd <= new Date(), on = sd && !due;
+            const dv = on ? ymdL(sd) : "", tv = on ? `${String(sd.getHours()).padStart(2, "0")}:${String(sd.getMinutes()).padStart(2, "0")}` : "21:00";
+            return `<div class="sched-box">
+            <label class="tg"><span class="t"><b>⏰ 지금 말고 나중에 바꾸기</b><small>${due ? "예약 시간이 지나서 사이트엔 이미 바뀐 모습이 보이고 있어요 · 수정 완료하면 깔끔하게 정리돼요" : "고친 내용이 정한 시간에 홈페이지에 알아서 바뀌어요 · 그 전엔 지금 모습 그대로"}</small></span><input type="checkbox" class="sw" id="f_schedOn" ${on ? "checked" : ""} /></label>
+            <div class="two-in ${on ? "" : "hidden"}" id="f_schedRow"><input type="date" id="f_schedDate" value="${dv}" /><input type="time" id="f_schedTime" value="${tv}" /></div></div>`; })() : ""}
           </div>
         <div class="ed-foot">
           <button class="btn btn-ghost" data-close>취소</button>
@@ -1474,6 +1560,15 @@
       drawEx();
       $("f_bclr").onclick = () => { $("f_bm").value = ""; $("f_bd").value = ""; };
       $("savePost").onclick = savePost;
+      if ($("f_schedOn")) {
+        const syncSched = () => {
+          const on = $("f_schedOn").checked; $("f_schedRow").classList.toggle("hidden", !on);
+          if (on && !$("f_schedDate").value) { const d = new Date(Date.now() + 86400000); $("f_schedDate").value = ymdL(d); }
+          const d = $("f_schedDate").value, t = $("f_schedTime").value;
+          $("savePost").textContent = on && d ? `${+d.slice(5, 7)}/${+d.slice(8, 10)} ${t || "00:00"}에 바꾸기 예약` : "수정 완료";
+        };
+        $("f_schedOn").onchange = syncSched; $("f_schedDate").oninput = $("f_schedTime").oninput = syncSched; syncSched();
+      }
       // 폰에선 키보드가 갑자기 올라오지 않게, 컴퓨터에서 새로 쓸 때만 이름 칸에 커서를 둬요
       if (index < 0 && isDesktop()) $("f_name").focus();
       markClean();
@@ -1669,7 +1764,7 @@
       });
     }
     function savePost() {
-      const it = edit.item;
+      let it = edit.item;
       it.name = $("f_name").value.trim();
       if (!it.name) { toast("캐릭터 이름을 적어주세요"); $("f_name").focus(); return; }
       it.world = $("f_world").value.trim();
@@ -1720,11 +1815,28 @@
         let before = null; try { before = JSON.parse(edit.orig); } catch {}
         if (before && strip(before) !== strip(it) && !$("f_quiet")?.checked) it.updatedAt = new Date().toISOString();
       }
+      // ⏰ 예약 수정: 원래 모습은 그대로 두고, 바뀐 칸만 sched.patch 에 담아요
+      let schedMsg = "";
+      if (wasEdit && $("f_schedOn")?.checked) {
+        const d = $("f_schedDate").value, t = $("f_schedTime").value || "00:00";
+        if (!d) { toast("언제 바꿀지 날짜를 골라주세요"); $("f_schedDate").focus(); return; }
+        const atMs = new Date(`${d}T${t}`).getTime();
+        if (!(atMs > Date.now())) { toast("예약 시간은 지금보다 뒤로 정해주세요"); $("f_schedDate").focus(); return; }
+        const base = edit.schedBase ? clone(edit.schedBase) : JSON.parse(edit.orig);
+        delete base.sched;
+        const skip = ["sched", "cardKey", "slug", "likes", "rts", "updatedAt"], patch = {};
+        new Set([...Object.keys(base), ...Object.keys(it)]).forEach(k => { if (!skip.includes(k) && JSON.stringify(base[k]) !== JSON.stringify(it[k])) patch[k] = it[k] === undefined ? null : it[k]; });
+        if (!Object.keys(patch).length) { toast("바뀐 게 없어서 예약할 게 없어요"); return; }
+        if (it.updatedAt && it.updatedAt !== base.updatedAt) patch.updatedAt = new Date(atMs).toISOString();   // 바뀌는 순간부터 하루 "UPDATE"
+        base.likes = it.likes; base.rts = it.rts;
+        base.sched = { at: new Date(atMs).toISOString(), patch };
+        it = base; schedMsg = `⏰ ${+d.slice(5, 7)}/${+d.slice(8, 10)} ${t}에 바뀌게 예약했어요`;
+      }
       const at = edit.at || 0;
       if (wasEdit) data.posts[edit.index] = it; else data.posts.splice(at, 0, it);
       closeEditor(); saveDraft(); renderAll();
       if (!wasEdit && queue.length) { toast(`추가했어요 💜 다음 사진으로 넘어가요 (남은 ${queue.length}장)`); setTimeout(() => openPost(-1, queue, at + 1), 300); return; }
-      toast(wasEdit ? "수정했어요" : "게시물을 추가했어요 💜");
+      toast(schedMsg || (wasEdit ? (edit && edit.schedBase ? "수정했어요 · 예약은 풀고 바로 바꿨어요" : "수정했어요") : "게시물을 추가했어요 💜"));
     }
 
     /* ---------- 공지 편집 ---------- */
@@ -1854,7 +1966,7 @@
       const m = [
         [/^(x|t\.co|x\.com|twitter\.com)$/, "X (트위터)"], [/heart-notis\.netlify\.app/, "예전 주소 (이사 전 링크)"], [/postype|posty\.pe/, "포스타입"], [/kakao/, "카카오톡"],
         [/naver/, "네이버"], [/google/, "구글"], [/daum/, "다음"], [/instagram/, "인스타그램"], [/discord/, "디스코드"],
-        [/youtube|youtu\.be/, "유튜브"], [/spin-spin/, "스핀스핀"], [/^direct$/, "직접 · 알 수 없음"], [/^share$/, "캐릭터 공유 링크"]
+        [/youtube|youtu\.be/, "유튜브"], [/spin-spin/, "스핀스핀"], [/^direct$/, "직접 · 알 수 없음"], [/^share$/, "캐릭터 공유 링크"], [/^app$/, "📱 홈 화면 앱"]
       ].find(([re]) => re.test(h));
       return m ? m[1] : h;
     }
@@ -2160,7 +2272,13 @@
     function materialize(out) {
       const files = [];
       const stamp = Date.now().toString(36);
+      bakeSched(out.posts);
       for (const p of out.posts) {
+        const pt = p.sched && p.sched.patch;   // ⏰ 예약 수정에 들어있는 새 사진도 파일로
+        if (pt) {
+          if (typeof pt.image === "string" && pt.image.startsWith("data:")) { const path = `images/post-${p.id}-${stamp}s.${imgExt(pt.image)}`; files.push({ path, bytes: dataUrlBytes(pt.image), label: `예약 사진: ${p.name}` }); pt.image = path; }
+          (Array.isArray(pt.images) ? pt.images : []).forEach((src, k) => { if (src && src.startsWith("data:")) { const path = `images/post-${p.id}-${stamp}s-${k + 2}.${imgExt(src)}`; files.push({ path, bytes: dataUrlBytes(src), label: `예약 추가 사진: ${p.name}` }); pt.images[k] = path; } });
+        }
         (p.images || []).forEach((src, k) => {
           if (src && src.startsWith("data:")) { const path = `images/post-${p.id}-${stamp}-${k + 2}.${imgExt(src)}`; files.push({ path, bytes: dataUrlBytes(src), label: `추가 사진: ${p.name}` }); p.images[k] = path; }
         });
@@ -2178,7 +2296,7 @@
       }
       return files;
     }
-    const referenced = out => new Set([...out.posts.map(p => p.image), ...out.posts.flatMap(p => p.images || []), ...["avatar", "avatarSmall", "banner"].map(k => (out.profile || {})[k]), ((out.profile || {}).share || {}).image].filter(src => src && !src.startsWith("http") && !src.startsWith("data:")));
+    const referenced = out => new Set([...out.posts.map(p => p.image), ...out.posts.flatMap(p => p.images || []), ...out.posts.map(p => p.sched?.patch?.image), ...out.posts.flatMap(p => Array.isArray(p.sched?.patch?.images) ? p.sched.patch.images : []), ...["avatar", "avatarSmall", "banner"].map(k => (out.profile || {})[k]), ((out.profile || {}).share || {}).image].filter(src => src && !src.startsWith("http") && !src.startsWith("data:")));
     const siteJs = out => "/* 이 파일은 제작자 페이지(admin.html)가 자동으로 만들어요. 직접 고치지 않아도 돼요. */\nwindow.SITE_DATA = " + JSON.stringify({ tags: out.tags, profile: out.profile || {}, notices: out.notices, posts: out.posts }, null, 2) + ";\n";
 
     async function exportZip(btn) {

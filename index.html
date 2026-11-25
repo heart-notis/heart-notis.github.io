@@ -6,6 +6,10 @@
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="icon" href="favicon-64.png" type="image/png" sizes="64x64" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="하트" />
   <meta name="theme-color" content="#b9a2f6" />
   <script>
     // 🌙 다크 모드: 저장한 설정이 있으면 그걸, 없으면 폰/컴 설정을 따라가요 (깜빡임 없게 제일 먼저)
@@ -591,6 +595,16 @@
     .act.like.pop svg { animation: pop .35s ease; }
     @keyframes pop { 50% { transform: scale(1.3); } }
     /* 재게시 · 공유는 보여주기만 (눌러도 아무 일 없음) */
+    .p-counts:has(.inst-btn:not(.hidden)) { display: flex; align-items: center; }
+    .inst-btn { margin-left: auto; width: 30px; height: 30px; padding: 0; border: 0; background: none; color: #b3abd0; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: color .2s, transform .15s; }
+    .inst-btn svg { width: 18px; height: 18px; } .inst-btn:hover { color: #8b6ff0; transform: scale(1.08); } .inst-btn.hidden { display: none; }
+    html.dark .inst-btn { color: #5d577a; } html.dark .inst-btn:hover { color: #b9a2f6; }
+    .ins .shr-t { display: block; margin-bottom: 8px; }
+    .ins-st { display: flex; align-items: center; gap: 10px; padding: 11px 0; font-size: .88rem; border-bottom: 1px solid var(--line); }
+    .ins-st:last-of-type { border: 0; margin-bottom: 10px; }
+    .ins-st span { width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(120deg, #a993f4, #74c6f0); color: #fff; font-size: .72rem; font-weight: 900; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .ins-st em { font-style: normal; font-weight: 800; padding: 2px 8px; border-radius: 8px; background: #f3f1fb; font-size: .8rem; }
+    html.dark .ins-st em { background: #24223a; }
     .more-wrap { padding: 18px 16px 26px; text-align: center; border-bottom: 1px solid var(--line); }
     .more-btn { display: inline-flex; align-items: center; gap: 8px; height: 46px; padding: 0 22px; border: 0; border-radius: 999px; background: linear-gradient(120deg, #a993f4, #74c6f0); color: #fff; font-weight: 800; font-size: .9rem; box-shadow: 0 6px 18px rgba(110,90,220,.3); cursor: pointer; transition: transform .15s; }
     .more-btn:hover { transform: scale(1.03); } .more-btn:active { transform: scale(.97); }
@@ -1164,6 +1178,7 @@
       <div class="p-counts">
         <span><b id="cFollowing">0</b>팔로잉</span>
         <span><b id="cFollowers">0</b>팔로워</span>
+        <button type="button" class="inst-btn hidden" id="instBtn" aria-label="홈 화면에 추가" title="홈 화면에 추가"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M12 8v6M9.5 11.5 12 14l2.5-2.5"/></svg></button>
       </div>
     </section>
 
@@ -1216,6 +1231,13 @@
     // ⏰ 예약 공지: 정한 시간이 되기 전에는 안 보여요
     const pubAt = n => { if (!n || !n.publishDate) return 0; const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(n.publishDate); if (!m) return 0; const [h, mi] = (n.publishTime || "0:0").split(":"); return new Date(+m[1], m[2] - 1, +m[3], +h || 0, +mi || 0).getTime(); };
     const notices = (SITE.notices || []).filter(n => Date.now() >= pubAt(n));
+    // ⏰ 예약 수정: 정한 시간이 지난 것만 바뀐 모습으로 (그 전엔 지금 모습 그대로 · 화면엔 아무 표시 없음)
+    function applySched(list) {
+      let n = 0;
+      (list || []).forEach(p => { if (!p.sched || !(Date.parse(p.sched.at) <= Date.now())) return; Object.entries(p.sched.patch || {}).forEach(([k, v]) => { if (v === null) delete p[k]; else p[k] = v; }); delete p.sched; n++; });
+      return n;
+    }
+    applySched(SITE.posts);
     const characters = (SITE.posts || []).filter(c => !c.hidden);   // 🙈 비공개 게시물은 숨겨요
     const tagList = SITE.tags || [];
     // 제작자 페이지에서 바꾼 프로필(프사 · 헤더 · 소개글 · 링크)이 있으면 그걸로 덮어쓰기
@@ -1607,6 +1629,7 @@
         if (qs.has("preview")) return;
         // 어디서 왔는지: 링크 끝의 ?from=티팟 같은 표시가 먼저, 없으면 이전 페이지 주소(도메인만)
         let src = qs.get("from") || qs.get("utm_source") || "";
+        if (!src && (matchMedia("(display-mode: standalone)").matches || navigator.standalone)) src = "app";   // 📱 홈 화면 앱으로 열었을 때
         if (!src) { try { const h = new URL(document.referrer).hostname.replace(/^(www|m|mobile)\./, ""); if (h && h !== location.hostname) src = h; } catch {} }
         if (qs.has("from") || qs.has("utm_source")) { qs.delete("from"); qs.delete("utm_source"); history.replaceState(history.state, "", location.pathname + (qs.toString() ? "?" + qs : "") + location.hash); }
         if (localStorage.getItem("heart_me") || localStorage.getItem("heart_gh_token")) return;
@@ -2244,6 +2267,30 @@
     }
     // ⚡ 다시 올 때 빨리 열리게 (사진·글꼴을 폰에 저장해둬요) · 미리보기 화면은 빼요
     if ("serviceWorker" in navigator && !/[?&]preview/.test(location.search)) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+    /* ---- 📱 홈 화면에 추가: 자동 알림은 막고, 팔로워 줄 끝 작은 폰 아이콘을 누른 사람한테만 ---- */
+    (function installBtn() {
+      const b = $("instBtn"); if (!b) return;
+      const standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+      const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+      if (standalone || /[?&]preview/.test(location.search)) return;
+      let ask = null;
+      addEventListener("beforeinstallprompt", e => { e.preventDefault(); ask = e; b.classList.remove("hidden"); });   // 브라우저가 알아서 띄우는 설치 알림은 안 보이게
+      addEventListener("appinstalled", () => { ask = null; b.classList.add("hidden"); toast("💜 홈 화면에 추가했어요"); });
+      if (ios) b.classList.remove("hidden");
+      b.onclick = async () => {
+        if (ask) { ask.prompt(); try { await ask.userChoice; } catch {} ask = null; return; }
+        if (ios) {
+          const el = document.createElement("div"); el.className = "shr-wrap";
+          el.innerHTML = `<div class="shr-dim" data-x></div><div class="shr ins"><div class="shr-hdl"></div><b class="shr-t">📱 하트를 홈 화면에 추가하기</b>
+            <div class="ins-st"><span>1</span>아래쪽 <em>공유 ⬆︎</em> 버튼을 눌러요</div>
+            <div class="ins-st"><span>2</span><em>홈 화면에 추가 ⊞</em> 를 골라요</div>
+            <div class="ins-st"><span>3</span>오른쪽 위 <em>추가</em> 를 누르면 끝!</div>
+            <div class="shr-btns"><button class="go" data-x style="flex:1">알겠어요</button></div></div>`;
+          document.body.appendChild(el); requestAnimationFrame(() => el.classList.add("show"));
+          el.onclick = e => { if (e.target.closest("[data-x]")) { el.classList.remove("show"); setTimeout(() => el.remove(), 250); } };
+        }
+      };
+    })();
     async function toggleNotify(id) {
       if (pushSubs[id]) {   // 취소
         fetch(MSG_API, { method: "POST", headers: { "content-type": "text/plain" }, body: JSON.stringify({ action: "push-unsub", post: id, endpoint: pushSubs[id] }) }).catch(() => {});
@@ -2270,6 +2317,7 @@
       const opened = () => characters.filter(isReleased).map(c => c.id).join();
       let last = opened();
       setInterval(() => {
+        if (applySched(characters)) { const typing = document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName); if (!typing && (view === "tweets" || view === "media")) renderView(); }
         const now = opened();
         if (now !== last) {
           last = now;
@@ -2290,6 +2338,7 @@
         try {
           const txt = await (await fetch("data.js?v=" + Date.now(), { cache: "no-store" })).text();
           const box = {}; new Function("window", txt)(box);
+          if (box.SITE_DATA) applySched(box.SITE_DATA.posts);   // 예약 수정은 이 화면과 똑같이 맞춰서 비교 (괜히 새로고침 안 되게)
           if (box.SITE_DATA && JSON.stringify(box.SITE_DATA) !== snap) location.reload();
         } catch {}
         busy = false;
