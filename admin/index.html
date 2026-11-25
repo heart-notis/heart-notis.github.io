@@ -448,6 +448,7 @@
     .theme-pick button { border: 2px solid var(--line); border-radius: 12px; padding: 6px; display: flex; flex-direction: column; gap: 5px; align-items: stretch; background: #fff; font-size: .76rem; font-weight: 700; color: #4a4f57; }
     .theme-pick button.on { border-color: var(--accent); box-shadow: 0 0 0 3px var(--soft); }
     .theme-pick .sw { height: 30px; border-radius: 8px; position: relative; overflow: hidden; }
+    .theme-pick .sw-em { position: absolute; left: 7px; top: 50%; transform: translateY(-50%); font-style: normal; font-size: 16px; line-height: 1; filter: drop-shadow(0 1px 2px rgba(0,0,0,.15)); }
     .theme-pick .sw::after { content: ""; position: absolute; right: 6px; top: 6px; width: 34px; height: 8px; border-radius: 999px; background: var(--btn); }
     /* ---------- 목록 미리보기 위치 ---------- */
     .pv-wrap { display: flex; flex-direction: column; gap: 6px; }
@@ -968,7 +969,7 @@
         return;
       }
       if (k === "theme") {
-        openSheet(`${head}<div class="sheet-li bf-scroll"><button data-pick="">기본 (꾸미기 없음)</button>${THEMES.filter(t => t.key).map(t => `<button data-pick="${esc(t.key)}">${esc(themeName(t.key))}</button>`).join("")}</div>`, key => {
+        openSheet(`${head}<div class="sheet-li bf-scroll"><button data-pick="">기본 (꾸미기 없음)</button>${THEMES.filter(t => t.key).map(t => `<button data-pick="${esc(t.key)}">${THEME_EMOJI[t.key] || "🤍"} ${esc(themeName(t.key))}</button>`).join("")}</div>`, key => {
           ps.forEach(p => setOrDel(p, "theme", key)); bulkDone(ps, `꾸미기: ${key ? themeName(key) : "기본"}`);
         });
         return;
@@ -1587,7 +1588,7 @@
     }
     // 🎨 게시물 페이지 꾸미기 (사이트 index.html 의 THEMES 와 이름이 같아야 해요)
     const THEMES = [
-      { key: "",       name: "기본 하트", bg: "#fff",    btn: "linear-gradient(120deg,#a993f4,#74c6f0)" },
+      { key: "",       name: "기본 하트", group: "basic", bg: "#fff",    btn: "linear-gradient(120deg,#a993f4,#74c6f0)" },
       { key: "sakura", name: "벚꽃",     bg: "#fffafc", btn: "linear-gradient(120deg,#f59ab8,#ffcbb8)" },
       { key: "night",  name: "밤하늘",   bg: "#12142e", btn: "linear-gradient(120deg,#6b7bff,#d49cff)" },
       { key: "forest", name: "숲",       bg: "#fbfefc", btn: "linear-gradient(120deg,#5fb985,#c2e3a5)" },
@@ -1617,10 +1618,34 @@
       { key: "cyber", name: "사이버펑크", group: "concept", bg: "#0b0d1a", btn: "linear-gradient(120deg,#ff2fd0,#2fe6ff)" },
       { key: "horror", name: "호러·오컬트", group: "concept", bg: "#0d0a0a", btn: "linear-gradient(120deg,#3a0a0f,#c0262f)" },
       { key: "game", name: "게임", group: "concept", bg: "#fdfcf6", btn: "linear-gradient(120deg,#ff6b9d,#4fd1a5)" },
-      { key: "gamedark", name: "게임 (다크)", group: "concept", bg: "#14122b", btn: "linear-gradient(120deg,#ff6b9d,#7dff9b)" }
+      { key: "gamedark", name: "게임 (다크)", group: "concept", bg: "#14122b", btn: "linear-gradient(120deg,#ff6b9d,#7dff9b)" },
+      { key: "coral", name: "코랄", group: "color", bg: "#fffaf8", btn: "linear-gradient(120deg,#ff7f6e,#ffc9b0)" },
+      { key: "sage", name: "세이지", group: "color", bg: "#fbfcf9", btn: "linear-gradient(120deg,#7fa68d,#d6e5c8)" },
+      { key: "blush", name: "블러쉬", group: "color", bg: "#fffbfc", btn: "linear-gradient(120deg,#eea0b8,#fde1e8)" },
+      { key: "choco", name: "초코", group: "color", bg: "#fffaf5", btn: "linear-gradient(120deg,#7a4a33,#e0b48a)" },
+      { key: "navy", name: "네이비", group: "color", bg: "#0f1a2e", btn: "linear-gradient(120deg,#2f5fb5,#8fb7ff)" },
+      { key: "winter", name: "겨울", group: "concept", bg: "#fbfdff", btn: "linear-gradient(120deg,#7fb8f5,#dcefff)" },
+      { key: "xmas", name: "크리스마스", group: "concept", bg: "#fffcfa", btn: "linear-gradient(120deg,#b8323f,#2f7a52)" },
+      { key: "gothic", name: "고딕·뱀파이어", group: "concept", bg: "#120c12", btn: "linear-gradient(120deg,#4a1d3f,#b0607f)" },
+      { key: "magic", name: "마법·판타지", group: "concept", bg: "#fcfbff", btn: "linear-gradient(120deg,#7357d6,#f0c96b)" },
+      { key: "space", name: "우주·SF", group: "concept", bg: "#070b1c", btn: "linear-gradient(120deg,#3b4cff,#7fd7ff)" },
+      { key: "retro", name: "레트로·Y2K", group: "concept", bg: "#fdfbff", btn: "linear-gradient(120deg,#6fe3f5,#ff6fc4)" },
+      { key: "band", name: "밴드·음악", group: "concept", bg: "#121212", btn: "linear-gradient(120deg,#ff4f4f,#ffcf40)" },
+      { key: "sports", name: "스포츠", group: "concept", bg: "#fbfdfb", btn: "linear-gradient(120deg,#1e9e5a,#ffd23f)" },
+      { key: "fairy", name: "동화", group: "concept", bg: "#fffdfb", btn: "linear-gradient(120deg,#f7b6d2,#bfe0ff)" },
+      { key: "b-ivory", name: "아이보리", group: "basic", bg: "#fffdf7", btn: "linear-gradient(120deg,#c9b48a,#efe4cc)" },
+      { key: "b-gray", name: "그레이", group: "basic", bg: "#fbfbfc", btn: "linear-gradient(120deg,#8a929c,#d5d9de)" },
+      { key: "b-pink", name: "핑크", group: "basic", bg: "#fffafb", btn: "linear-gradient(120deg,#f08aa6,#ffd0dc)" },
+      { key: "b-blue", name: "블루", group: "basic", bg: "#fafcff", btn: "linear-gradient(120deg,#5b95ee,#c5dcff)" },
+      { key: "b-green", name: "그린", group: "basic", bg: "#fbfdfb", btn: "linear-gradient(120deg,#5fb987,#cdeccf)" },
+      { key: "b-black", name: "블랙", group: "basic", bg: "#111214", btn: "linear-gradient(120deg,#3a3d42,#9a9ea6)" }
     ];
-    const THEME_GROUPS = [["color", "🎨 색감"], ["concept", "🏷️ 컨셉"]];
-    const themeBtn = (t, cur) => `<button type="button" data-theme-key="${t.key}" class="${cur === t.key ? "on" : ""}"><span class="sw" style="background:${t.bg};--btn:${t.btn}"></span>${t.name}</button>`;
+    const THEME_GROUPS = [["basic", "🤍 베이직 · 이모지 없이 색만"], ["color", "🎨 색감"], ["concept", "🏷️ 컨셉"]];
+    // 고르는 창에 찍히는 대표 이모지 (홈페이지 게시물 위쪽 바에 나오는 것과 같아요 · 베이직은 없음)
+    const THEME_EMOJI = { sakura: "🌸", night: "🌙", forest: "🌲", sunset: "🌅", ocean: "🌊", cream: "🍮", noir: "🥃", rose: "🌹", lavender: "🪻", mint: "🌱", lemon: "🍋", peach: "🍑", sky: "☁️", mono: "🖤", wine: "🍷",
+      home: "🏠", fire: "🚒", police: "🚓", hospital: "🩺", school: "🏫", office: "💼", cafe: "☕", idol: "🎤", palace: "👑", oriental: "🏮", apocalypse: "☢️", cyber: "🤖", horror: "👻", game: "🎮", gamedark: "👾",
+      coral: "🐚", sage: "🌿", blush: "🎀", choco: "🍫", navy: "⚓", winter: "❄️", xmas: "🎄", gothic: "🦇", magic: "🔮", space: "🪐", retro: "💿", band: "🎸", sports: "⚽", fairy: "🧚" };
+    const themeBtn = (t, cur) => `<button type="button" data-theme-key="${t.key}" class="${cur === t.key ? "on" : ""}"><span class="sw" style="background:${t.bg};--btn:${t.btn}">${THEME_EMOJI[t.key] ? `<i class="sw-em">${THEME_EMOJI[t.key]}</i>` : ""}</span>${t.name}</button>`;
     const themeName = key => (THEMES.find(t => t.key === (key || "")) || THEMES[0]).name;
     const pickedTags = () => [...document.querySelectorAll("#f_tags .on")].map(b => b.dataset.tag);
     function readLinkInputs() {
