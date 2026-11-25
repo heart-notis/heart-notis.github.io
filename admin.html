@@ -744,11 +744,16 @@
           <button class="btn btn-main" id="useDraft">이어서 하기</button>
           <button class="btn btn-ghost" id="dropDraft">버리기</button>`;
         $("useDraft").onclick = () => { data = draft; if (!data._base) data._base = BASE_AT_LOAD; if (!data.profile) data.profile = clone(SERVER.profile); b.classList.add("hidden"); renderAll(); };
-        $("dropDraft").onclick = async () => { if (await confirmBox("저장 안 한 작업을 버릴까요?\n되돌릴 수 없어요.", { ok: "버리기", danger: true })) { store.del(DRAFT_KEY); b.classList.add("hidden"); renderAll(); } };
+        $("dropDraft").onclick = async () => { if (await confirmDel("저장 안 한 작업을 버릴까요?\n되돌릴 수 없어요.", "버리기")) { store.del(DRAFT_KEY); b.classList.add("hidden"); renderAll(); } };
       } else if (draft) { store.del(DRAFT_KEY); }
       renderAll();
     }
     /* 💜 예쁜 확인창: await confirmBox("메시지", { title, ok, danger }) → true / false */
+    // 🗑 지우기는 두 번 확인해요 (실수 방지)
+    async function confirmDel(msg, ok = "지우기") {
+      if (!(await confirmBox(msg, { ok, danger: true }))) return false;
+      return await confirmBox("정말 지울까요? 🗑\n한 번 더 확인할게요.", { ok: "네, 지울게요", cancel: "아니요", danger: true });
+    }
     function confirmBox(msg, opt = {}) {
       return new Promise(res => {
         const lines = String(msg).split("\n");
@@ -843,7 +848,7 @@
       const k = b.dataset.bulk, ps = data.posts.filter(p => sel.has(p.id));
       if (k === "all") { if (ps.length === data.posts.length) sel.clear(); else data.posts.forEach(p => sel.add(p.id)); }
       else if (k === "del") {
-        if (!(await confirmBox(`고른 게시물 ${ps.length}개를 지울까요?\n사이트에 올리기 전까지는 사이트에서 안 지워져요`, { ok: "지우기", danger: true }))) return;
+        if (!(await confirmDel(`고른 게시물 ${ps.length}개를 지울까요?\n사이트에 올리기 전까지는 사이트에서 안 지워져요`))) return;
         data.posts = data.posts.filter(p => !sel.has(p.id)); sel.clear(); toast(`${ps.length}개를 지웠어요`);
       } else {
         const has = BULK.find(x => x[0] === k)[2], allOn = ps.every(has);
@@ -979,7 +984,7 @@
       else if (b.dataset.act === "down" && i < arr.length - 1) { [arr[i + 1], arr[i]] = [arr[i], arr[i + 1]]; }
       else if (b.dataset.act === "del") {
         const name = list === "posts" ? arr[i].name : arr[i].title;
-        if (!(await confirmBox(`"${name || "이 항목"}"을(를) 지울까요?\n사이트에 올리기 전까지는 사이트에서 안 지워져요`, { ok: "지우기", danger: true }))) return;
+        if (!(await confirmDel(`"${name || "이 항목"}"을(를) 지울까요?\n사이트에 올리기 전까지는 사이트에서 안 지워져요`))) return;
         arr.splice(i, 1);
       }
       else if (b.dataset.act === "edit") { return list === "posts" ? openPost(i) : openNotice(i); }
@@ -1053,7 +1058,7 @@
           data.posts.splice(i + 1, 0, c); saveDraft(); renderAll(); toast("복제했어요"); return openPost(i + 1);
         }
         if (act === "del") {
-          if (!(await confirmBox(`"${p.name || "이 항목"}"을(를) 지울까요?\n사이트에 올리기 전까지는 사이트에서 안 지워져요`, { ok: "지우기", danger: true }))) return;
+          if (!(await confirmDel(`"${p.name || "이 항목"}"을(를) 지울까요?\n사이트에 올리기 전까지는 사이트에서 안 지워져요`))) return;
           data.posts.splice(i, 1);
         }
         saveDraft(); renderAll();
@@ -1312,7 +1317,7 @@
         $("logText").value = ""; drawLog();
       };
       $("logText").onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); $("logAdd").click(); } };
-      $("logList").onclick = e => { const b = e.target.closest("[data-log-del]"); if (b) { edit.item.log.splice(+b.dataset.logDel, 1); drawLog(); } };
+      $("logList").onclick = async e => { const b = e.target.closest("[data-log-del]"); if (b && await confirmDel("이 업데이트 기록을 지울까요?")) { edit.item.log.splice(+b.dataset.logDel, 1); drawLog(); } };
       drawLog();
       // 🖼️ 추가 사진
       if (!Array.isArray(edit.item.images)) edit.item.images = [];
@@ -1329,7 +1334,7 @@
           }
         };
       };
-      $("exRow").addEventListener("click", e => { const d = e.target.closest("[data-ex-del]"); if (d) { e.preventDefault(); edit.item.images.splice(+d.dataset.exDel, 1); drawEx(); } });
+      $("exRow").addEventListener("click", async e => { const d = e.target.closest("[data-ex-del]"); if (d) { e.preventDefault(); if (await confirmDel("이 추가 사진을 뺄까요?", "빼기")) { edit.item.images.splice(+d.dataset.exDel, 1); drawEx(); } } });
       // 끌어서 순서 바꾸기 (컴퓨터: 드래그 · 폰: 꾹 눌러 끌기)
       (() => {
         const row = $("exRow"); let from = null, timer = null, startX = 0, moved = false;
@@ -1793,7 +1798,7 @@
         } catch { btn.disabled = false; toast("저장하지 못했어요. 다시 시도해주세요."); }
       };
       $("a_save").onclick = () => { const v = $("a_body").value.trim(); if (!v) { toast("답장을 적어주세요"); return; } send(v); };
-      if ($("a_remove")) $("a_remove").onclick = async () => { if (await confirmBox("이 답장을 사이트에서 내릴까요?\n메시지는 그대로 남아요.", { ok: "내리기", danger: true })) send(""); };
+      if ($("a_remove")) $("a_remove").onclick = async () => { if (await confirmDel("이 답장을 사이트에서 내릴까요?\n메시지는 그대로 남아요.", "내리기")) send(""); };
       markClean();
     }
     $("msgRefresh").onclick = () => loadMessages();
@@ -1803,7 +1808,7 @@
     document.addEventListener("visibilitychange", () => { if (!document.hidden && adminPw && !$("appView").classList.contains("hidden")) { loadMessages(true); loadVisits(); } });
     document.addEventListener("click", async e => {
       const b = e.target.closest("[data-msgdel]"); if (!b) return;
-      if (!(await confirmBox("이 메시지를 지울까요?\n되돌릴 수 없어요.", { ok: "지우기", danger: true }))) return;
+      if (!(await confirmDel("이 메시지를 지울까요?\n되돌릴 수 없어요."))) return;
       try { await msgApi("delete", { ids: [b.dataset.msgdel] }); msgCache = msgCache.filter(m => m.id !== b.dataset.msgdel); renderMessages(); toast("메시지를 지웠어요"); }
       catch { toast("지우지 못했어요. 다시 시도해주세요."); }
     });
