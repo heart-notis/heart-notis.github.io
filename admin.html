@@ -238,6 +238,18 @@
     .live-box .lb-bar i { display: block; height: 100%; border-radius: 9px; background: linear-gradient(90deg, #b9a2f6, #7fcdf2); transition: width .8s ease; }
     .live-box.done .lb-bar i { background: linear-gradient(90deg, #7fe0b0, #7fcdf2); }
     .live-box .lb-s { font-size: .72rem; opacity: .75; margin-top: 7px; }
+    .cs-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .cs-url { flex: 1; min-width: 0; font-size: .76rem; color: #8b7cf0; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .cs-dots { display: flex; gap: 6px; }
+    .cs-dots button { width: 32px; height: 32px; border-radius: 50%; border: 0; background: #f3f1fb; color: #9a93b8; font-weight: 900; font-size: .82rem; cursor: pointer; transition: all .2s; }
+    .cs-dots button.on { background: linear-gradient(135deg, #a993f4, #74c6f0); color: #fff; box-shadow: 0 3px 10px rgba(120,100,230,.35); }
+    .cs-prev { position: relative; border-radius: 14px; overflow: hidden; border: 1px solid #ebe7f6; aspect-ratio: 1200 / 630; background: #f3efff; touch-action: pan-y; user-select: none; }
+    .cs-prev img { width: 100%; height: 100%; display: block; object-fit: cover; pointer-events: none; }
+    .cs-load { position: absolute; right: 8px; bottom: 8px; font-size: .7rem; font-weight: 800; color: #7353d6; background: rgba(255,255,255,.85); border-radius: 999px; padding: 3px 9px; opacity: 0; transition: opacity .2s; }
+    .cs-load.show { opacity: 1; }
+    .cs-pg { display: flex; justify-content: center; gap: 5px; margin-top: 8px; }
+    .cs-pg i { width: 6px; height: 6px; border-radius: 9px; background: #ddd6f5; transition: all .2s; }
+    .cs-pg i.on { width: 18px; background: linear-gradient(90deg, #b9a2f6, #7fcdf2); }
     .slug-in { display: flex; align-items: center; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: #fff; }
     .slug-in span { padding: 0 2px 0 12px; font-size: .78rem; color: #9aa0a8; white-space: nowrap; }
     .slug-in input { border: 0 !important; box-shadow: none !important; padding-left: 0 !important; min-width: 0; flex: 1; }
@@ -1026,6 +1038,32 @@
       };
     }
 
+    /* ---------- 🎴 편집 화면: 공유 카드 고르기 + 미리보기 ---------- */
+    function setupCardPick() {
+      if (!$("csPrev")) return;
+      const it = edit.item; edit.cardStyle = cardStyleOf(it);
+      $("csUrl").textContent = it.slug ? `heart-notis.github.io/c/${it.slug}` : `heart-notis.github.io/c/${slugBase(it.name || "")} (올리면 생겨요)`;
+      let seq = 0, timer = null;
+      const draw = async () => {
+        const my = ++seq; $("csLoad").classList.add("show");
+        const pv = { ...it, name: $("f_name").value.trim() || it.name || "", tagline: $("f_tagline").value.trim(), world: $("f_world").value.trim(), cardStyle: edit.cardStyle,
+          spoiler: $("f_spoiler") ? $("f_spoiler").checked : it.spoiler, releaseDate: $("f_release") ? $("f_release").value : it.releaseDate, releaseTime: $("f_releaseTime") ? $("f_releaseTime").value : it.releaseTime };
+        try { const url = await makeCard(pv, it.image); if (my === seq && $("csImg")) $("csImg").src = url; } catch {}
+        if (my === seq && $("csLoad")) $("csLoad").classList.remove("show");
+      };
+      const mark = () => { document.querySelectorAll("#csDots [data-cs]").forEach(b => b.classList.toggle("on", +b.dataset.cs === edit.cardStyle)); document.querySelectorAll("#csPg i").forEach((d, k) => d.classList.toggle("on", k + 1 === edit.cardStyle)); };
+      const pick = n => { edit.cardStyle = Math.min(3, Math.max(1, n)); mark(); draw(); };
+      $("csDots").onclick = e => { const b = e.target.closest("[data-cs]"); if (b) pick(+b.dataset.cs); };
+      let x0 = null; const pr = $("csPrev");
+      pr.addEventListener("pointerdown", e => { x0 = e.clientX; });
+      pr.addEventListener("pointerup", e => { if (x0 === null) return; const dx = e.clientX - x0; x0 = null; if (Math.abs(dx) > 40) pick(edit.cardStyle + (dx < 0 ? 1 : -1)); });
+      ["f_name", "f_tagline", "f_world"].forEach(id => $(id) && $(id).addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(draw, 500); }));
+      ["pvPos"].forEach(id => $(id) && $(id).addEventListener("change", draw));
+      $("sec_link").addEventListener("toggle", () => { if ($("sec_link").open) draw(); });
+      mark(); if ($("sec_link").open) draw();
+      edit.redrawCard = draw;
+    }
+
     /* ---------- ⋯ 엄지 메뉴 (아래에서 올라오는 시트) ---------- */
     function closeSheet() { const sh = $("sheet"); if (!sh) return; sh.classList.remove("show"); setTimeout(() => sh.remove(), 220); }
     function openSheet(html, onPick) {
@@ -1159,7 +1197,10 @@
           <details class="sec" id="sec_link" ${index < 0 ? "open" : ""}><summary><span class="sec-t">🔗 대화 링크 · 태그</span><span class="sec-sum" data-sum="sec_link"></span><i class="sec-ar"></i></summary><div class="sec-in">
           <label class="f">해시태그<div class="tag-pick" id="f_tags">${data.tags.map(t => `<button type="button" class="${(item.tags || []).includes(t) ? "on" : ""}" data-tag="${esc(t)}">#${esc(t)}</button>`).join("") || `<small>해시태그 탭에서 먼저 태그를 만들어주세요</small>`}</div></label>
           <label class="f">대화하러 가기 링크 <small>위에서 체크한 해시태그(플랫폼)마다 주소 칸이 생겨요 · #합작은 세계관 보기 버튼이 돼요</small><div class="links-box" id="f_links"></div></label>
-          <label class="f">🔗 공유 주소 <small>X · 카톡에 올리면 이 캐릭터 카드로 떠요 · 비우면 이름으로 자동으로 만들어요</small><div class="slug-in"><span>heart-notis.github.io/c/</span><input type="text" id="f_slug" maxlength="40" value="${esc(item.slug || "")}" placeholder="${esc(slugBase(item.name || ""))}" /></div></label>
+<div class="f">🎴 공유 카드 <small>X · 카톡에 올리면 이 카드로 떠요 · 숫자를 누르거나 카드를 옆으로 밀어서 골라요</small>
+            <div class="cs-head"><span class="cs-url" id="csUrl"></span><span class="cs-dots" id="csDots">${[1, 2, 3].map(n => `<button type="button" data-cs="${n}">${n}</button>`).join("")}</span></div>
+            <div class="cs-prev" id="csPrev"><img id="csImg" alt="" /><span class="cs-load" id="csLoad">만드는 중…</span></div>
+            <div class="cs-pg" id="csPg"><i></i><i></i><i></i></div></div>
           </div></details>
           <details class="sec" id="sec_theme" ${false ? "open" : ""}><summary><span class="sec-t">🎨 꾸미기</span><span class="sec-sum" data-sum="sec_theme"></span><i class="sec-ar"></i></summary><div class="sec-in">
           <div class="f">🎨 페이지 꾸미기 <small>게시물을 눌렀을 때 열리는 페이지의 색감이에요. "미리보기"로 확인할 수 있어요.</small>
@@ -1201,7 +1242,7 @@
           <button class="btn btn-main" id="savePost">${index >= 0 ? "수정 완료" : "게시물 추가"}</button>
         </div>`;
       $("overlay").classList.add("open", "full"); $("editor").classList.add("full"); document.body.style.overflow = "hidden";
-      setupSections();
+      setupSections(); setupCardPick();
 
       $("dice").onclick = () => { const r = randomCounts(); $("f_likes").value = r.likes; $("f_rts").value = r.rts; };
       // 대화 링크 칸: 체크한 태그마다 하나씩, 아무것도 안 체크하면 기본 칸 하나
@@ -1272,6 +1313,7 @@
         edit.item.image = url;
         $("imgPrev").innerHTML = `<img src="${url}" alt="" />`;
         drawPv();
+        if (edit.redrawCard && $("sec_link") && $("sec_link").open) edit.redrawCard();
         if (!$("imgRecrop")) $("imgBtns").insertAdjacentHTML("beforeend", `<button class="btn btn-ghost btn-sm" id="imgRecrop">✂️ 다시 자르기</button>`);
         $("imgRecrop").onclick = recrop;
       };
@@ -1556,8 +1598,7 @@
       if ($("f_hidden").checked) it.hidden = true; else delete it.hidden;
       if (Array.isArray(it.images) && !it.images.length) delete it.images;
       if ($("f_spoiler").checked) it.spoiler = true; else delete it.spoiler;
-      { const sv = slugBase($("f_slug").value); const raw = $("f_slug").value.trim();
-        if (raw) { if (data.posts.some(x => x !== edit.item && x.id !== it.id && x.slug === sv)) { toast("이미 다른 캐릭터가 쓰는 공유 주소예요"); return; } it.slug = sv; } else delete it.slug; }
+      if (edit.cardStyle && edit.cardStyle !== 2) it.cardStyle = edit.cardStyle; else delete it.cardStyle;
       if ($("f_port").checked) { it.port = true; const pn = $("f_portNote").value.trim(); if (pn) it.portNote = pn; else delete it.portNote; const pd = $("f_portDate").value, ptm = $("f_portTime").value; if (pd) it.portDate = pd; else delete it.portDate; if (pd && ptm) it.portTime = ptm; else delete it.portTime; } else { delete it.portTime; delete it.port; delete it.portNote; delete it.portDate; }
       const rel = $("f_release").value;
       if (it.spoiler && rel) it.releaseDate = rel; else delete it.releaseDate;
@@ -2312,7 +2353,7 @@
     }
     const charUrl = p => p && p.slug ? `${SITE_URL}c/${p.slug}` : SITE_URL;
     const plainTxt = t => String(t || "").replace(/\*\*|__|~~|`/g, "").replace(/\{\{\s*user\s*\}\}/gi, "당신").replace(/\s+/g, " ").trim();
-    const cardKey = p => { const k = JSON.stringify(["v2", p.name, p.tagline || "", p.image || "", p.previewPos ?? 25, p.world || "", !!(p.spoiler && !spoilerOpened(p)), p.releaseDate || "", p.releaseTime || "", p.slug]); let h = 5381; for (let i = 0; i < k.length; i++) h = (h * 33 + k.charCodeAt(i)) | 0; return (h >>> 0).toString(36); };
+    const cardKey = p => { const k = JSON.stringify(["v3", cardStyleOf(p), p.name, p.tagline || "", p.image || "", p.previewPos ?? 25, p.world || "", !!(p.spoiler && !spoilerOpened(p)), p.releaseDate || "", p.releaseTime || "", p.slug]); let h = 5381; for (let i = 0; i < k.length; i++) h = (h * 33 + k.charCodeAt(i)) | 0; return (h >>> 0).toString(36); };
     function wrapLines(g, text, maxW, maxLines) {
       const words = String(text).split(/(\s+)/), lines = []; let cur = "";
       const push = w => { if (g.measureText(cur + w).width <= maxW) { cur += w; return; } if (cur.trim()) lines.push(cur.trim()); cur = ""; if (g.measureText(w).width > maxW) { for (const ch of w) { if (g.measureText(cur + ch).width > maxW) { lines.push(cur); cur = ""; } cur += ch; } } else cur = w.trimStart(); };
@@ -2320,66 +2361,62 @@
       if (lines.length > maxLines) { lines.length = maxLines; let l = lines[maxLines - 1]; while (l && g.measureText(l + "…").width > maxW) l = l.slice(0, -1); lines[maxLines - 1] = l + "…"; }
       return lines;
     }
-    async function makeCard(p, imgSrc) {
+    const cardStyleOf = p => [1, 2, 3].includes(+p.cardStyle) ? +p.cardStyle : 2;
+    // 공유 카드 그리기 · 스타일 1: 사진 꽉 / 2: 둥근 사진 카드 / 3: 흐린 배경 + 유리 패널
+    async function makeCard(p, imgSrc, opt = {}) {
       const W = 1200, H = 630, cv = document.createElement("canvas"); cv.width = W; cv.height = H;
       const g = cv.getContext("2d"); g.imageSmoothingQuality = "high";
       try { await document.fonts.load('800 60px "Pretendard Variable"'); await document.fonts.load('500 30px "Pretendard Variable"'); } catch {}
       const font = '"Pretendard Variable", Pretendard, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
-      const spo = !!(p.spoiler && !spoilerOpened(p));
-      // 오른쪽 바탕
-      const bg = g.createLinearGradient(0, 0, W, H); bg.addColorStop(0, "#f4efff"); bg.addColorStop(1, "#e6f3fd"); g.fillStyle = bg; g.fillRect(0, 0, W, H);
-      // 왼쪽: 캐릭터 사진 → 오른쪽 바탕으로 부드럽게 스며들게
-      const S = 760, F0 = 380;
-      g.fillStyle = "#d9cffb"; g.fillRect(0, 0, S, H);
-      try {
-        const im = await loadImage(imgSrc || p.image);
-        const sc = Math.max(S / im.width, H / im.height), iw = im.width * sc, ih = im.height * sc;
-        const pv = (typeof p.previewPos === "number" ? p.previewPos : 25) / 100;
-        g.save(); if (spo) g.filter = "blur(26px) saturate(1.1)";
-        g.drawImage(im, (S - iw) / 2 - 40, (H - ih) * pv, iw, ih); g.filter = "none"; g.restore();
-        if (spo) { g.fillStyle = "rgba(60,40,120,.28)"; g.fillRect(0, 0, S, H); }
-      } catch {}
-      // 바탕을 가로 그라데이션 마스크로 덮어서 사진이 자연스럽게 사라지게
-      const ov = document.createElement("canvas"); ov.width = W; ov.height = H; const o = ov.getContext("2d");
-      const bg2 = o.createLinearGradient(0, 0, W, H); bg2.addColorStop(0, "#f4efff"); bg2.addColorStop(1, "#e6f3fd"); o.fillStyle = bg2; o.fillRect(0, 0, W, H);
-      o.globalCompositeOperation = "destination-in";
-      const mk = o.createLinearGradient(F0, 0, S, 0);
-      [[0, 0], [.25, .12], [.5, .42], [.75, .8], [1, 1]].forEach(([t, a]) => mk.addColorStop(t, `rgba(0,0,0,${a})`));
-      o.fillStyle = mk; o.fillRect(0, 0, W, H);
-      g.drawImage(ov, 0, 0);
-      // 아래쪽도 살짝 라벤더 빛
-      const lo = g.createLinearGradient(0, H - 160, 0, H); lo.addColorStop(0, "rgba(185,162,246,0)"); lo.addColorStop(1, "rgba(185,162,246,.18)"); g.fillStyle = lo; g.fillRect(0, H - 160, S, 160);
-      if (spo) { g.fillStyle = "rgba(255,255,255,.92)"; g.font = `800 46px ${font}`; g.textAlign = "center"; g.fillText("✦ SPOILER", 330, H / 2 + 16); g.textAlign = "left"; }
+      const spo = opt.open ? false : !!(p.spoiler && !spoilerOpened(p));
+      const style = cardStyleOf(p);
+      let im = null; try { im = await loadImage(imgSrc || p.image); } catch {}
+      const pv = (typeof p.previewPos === "number" ? p.previewPos : 25) / 100;
       const heart = (x, y, sz) => { g.save(); g.translate(x, y); g.scale(sz / 24, sz / 24); const hg = g.createLinearGradient(0, 0, 24, 24); hg.addColorStop(0, "#b9a2f6"); hg.addColorStop(1, "#7fcdf2"); g.fillStyle = hg; g.fill(new Path2D("M12 21.2s-8.6-5.2-10.4-10.6C.3 6.6 2.8 2.8 6.7 2.8c2.3 0 4.1 1.2 5.3 3.1 1.2-1.9 3-3.1 5.3-3.1 3.9 0 6.4 3.8 5.1 7.8C20.6 16 12 21.2 12 21.2z")); g.restore(); };
-      const x = 690, maxW = W - x - 50; let y = 92;
+      const cover = (x, y, w, h, blur) => { if (!im) { g.fillStyle = "#d9cffb"; g.fillRect(x, y, w, h); return; } const sc = Math.max(w / im.width, h / im.height), iw = im.width * sc, ih = im.height * sc; g.save(); g.beginPath(); g.rect(x, y, w, h); g.clip(); if (blur) g.filter = `blur(${blur}px)`; g.drawImage(im, x + (w - iw) / 2, y + (h - ih) * pv, iw, ih); g.restore(); };
+      const photoBox = (x, y, w, h, r) => {
+        g.save(); g.shadowColor = "rgba(110,90,220,.28)"; g.shadowBlur = 40; g.shadowOffsetY = 14; g.beginPath(); g.roundRect(x, y, w, h, r); g.fillStyle = "#fff"; g.fill(); g.restore();
+        g.save(); g.beginPath(); g.roundRect(x, y, w, h, r); g.clip(); cover(x, y, w, h, spo ? 26 : 0); if (spo) { g.fillStyle = "rgba(60,40,120,.28)"; g.fillRect(x, y, w, h); } g.restore();
+        if (spo) { g.fillStyle = "rgba(255,255,255,.94)"; g.font = `800 40px ${font}`; g.textAlign = "center"; g.fillText("✦ SPOILER", x + w / 2, y + h / 2 + 14); g.textAlign = "left"; }
+      };
+      let tx, tw, dark = false, rx, by;
+      if (style === 1) {
+        cover(0, 0, W, H, spo ? 30 : 0);
+        const gr = g.createLinearGradient(380, 0, W, 0); gr.addColorStop(0, "rgba(38,28,72,0)"); gr.addColorStop(.45, "rgba(38,28,72,.72)"); gr.addColorStop(1, "rgba(30,24,60,.92)"); g.fillStyle = gr; g.fillRect(0, 0, W, H);
+        const gb = g.createLinearGradient(0, H * .55, 0, H); gb.addColorStop(0, "rgba(30,24,60,0)"); gb.addColorStop(1, "rgba(30,24,60,.45)"); g.fillStyle = gb; g.fillRect(0, 0, W, H);
+        if (spo) { g.fillStyle = "rgba(255,255,255,.94)"; g.font = `800 44px ${font}`; g.textAlign = "center"; g.fillText("✦ SPOILER", 330, H / 2 + 16); g.textAlign = "left"; }
+        tx = 700; tw = W - tx - 56; dark = true; rx = W - 56; by = H - 62;
+      } else if (style === 3) {
+        cover(0, 0, W, H, 34); g.fillStyle = "rgba(244,239,255,.55)"; g.fillRect(0, 0, W, H);
+        photoBox(56, 56, 460, 518, 30);
+        g.beginPath(); g.roundRect(552, 56, W - 552 - 56, 518, 30); g.fillStyle = "rgba(255,255,255,.62)"; g.fill();
+        tx = 596; tw = W - tx - 96; rx = W - 96; by = H - 92;
+      } else {
+        const bg = g.createLinearGradient(0, 0, W, H); bg.addColorStop(0, "#efe8ff"); bg.addColorStop(1, "#e2f1fd"); g.fillStyle = bg; g.fillRect(0, 0, W, H);
+        photoBox(56, 56, 460, 518, 32);
+        tx = 580; tw = W - tx - 56; rx = W - 56; by = H - 80;
+      }
+      const ink = dark ? "#ffffff" : "#1f1d2b", sink = dark ? "rgba(255,255,255,.86)" : "#4b5160", acc = dark ? "#d9ccff" : "#7353d6";
       g.textBaseline = "alphabetic";
-      // 세계관 칩
-      if (p.world) {
-        g.font = `700 24px ${font}`; const t = p.world, tw = Math.min(g.measureText(t).width, maxW - 60);
-        g.beginPath(); g.roundRect(x, y - 34, tw + 64, 46, 23); g.fillStyle = "rgba(255,255,255,.85)"; g.fill();
-        heart(x + 16, y - 24, 24); g.fillStyle = "#7353d6"; g.fillText(t, x + 48, y - 3, maxW - 64); y += 58;
-      } else y += 10;
-      // 이름 (등록된 이름 그대로, 이모티콘 포함)
-      let fs = 72; g.font = `800 ${fs}px ${font}`;
-      let nl = wrapLines(g, p.name || "", maxW, 2); if (nl.length > 1) { fs = 56; g.font = `800 ${fs}px ${font}`; nl = wrapLines(g, p.name || "", maxW, 2); }
-      g.fillStyle = "#1f1d2b"; nl.forEach(l => { y += fs + 4; g.fillText(l, x, y); }); y += 30;
-      // 한 줄 소개 / 스포일러 공개일
-      g.font = `500 34px ${font}`; g.fillStyle = "#4b5160";
-      let sub = plainTxt(p.tagline);
-      if (spo) { const [yy, mm, dd] = (p.releaseDate || "").split("-").map(Number); sub = p.releaseDate ? `✦ ${mm}월 ${dd}일${p.releaseTime ? " " + p.releaseTime : ""} 공개 예정` : "✦ 곧 공개 예정"; g.fillStyle = "#7353d6"; g.font = `700 34px ${font}`; }
-      wrapLines(g, sub, maxW, 3).forEach(l => { y += 50; g.fillText(l, x, y); });
-      // 아래: 하트 @HEART + 주소
-      const by = H - 84; heart(x, by - 30, 36);
-      g.fillStyle = "#1f1d2b"; g.font = `800 30px ${font}`; g.fillText("하트", x + 46, by - 4);
-      const hw = g.measureText("하트").width; g.fillStyle = "#8a8f99"; g.font = `500 26px ${font}`; g.fillText("@HEART", x + 56 + hw, by - 4);
-      g.font = `600 22px ${font}`; g.fillStyle = "#8b7cf0"; g.fillText("heart-notis.github.io", x + 46, by + 30);
+      let y = 120;
+      if (p.world) { g.font = `700 24px ${font}`; const w0 = Math.min(g.measureText(p.world).width, tw - 64); g.beginPath(); g.roundRect(tx, y - 34, w0 + 64, 46, 23); g.fillStyle = dark ? "rgba(255,255,255,.16)" : "rgba(255,255,255,.9)"; g.fill(); heart(tx + 16, y - 24, 24); g.fillStyle = acc; g.fillText(p.world, tx + 48, y - 3, tw - 64); y += 58; }
+      let fs = 70; g.font = `800 ${fs}px ${font}`; let nl = wrapLines(g, p.name || "", tw, 2); if (nl.length > 1) { fs = 54; g.font = `800 ${fs}px ${font}`; nl = wrapLines(g, p.name || "", tw, 2); }
+      g.fillStyle = ink; nl.forEach(l => { y += fs + 4; g.fillText(l, tx, y); }); y += 28;
+      let sub = plainTxt(p.tagline); g.font = `500 33px ${font}`; g.fillStyle = sink;
+      if (spo) { const [, mm, dd] = (p.releaseDate || "").split("-").map(Number); sub = p.releaseDate ? `✦ ${mm}월 ${dd}일${p.releaseTime ? " " + p.releaseTime : ""} 공개 예정` : "✦ 곧 공개 예정"; g.fillStyle = acc; g.font = `700 33px ${font}`; }
+      wrapLines(g, sub, tw, 3).forEach(l => { y += 48; g.fillText(l, tx, y); });
+      // ♥ 하트 @HEART · 오른쪽 아래
+      g.font = `500 25px ${font}`; const hw = g.measureText("@HEART").width; g.font = `800 29px ${font}`; const nw = g.measureText("하트").width;
+      const x0 = rx - (34 + 10 + nw + 10 + hw);
+      heart(x0, by - 29, 34); g.fillStyle = ink; g.fillText("하트", x0 + 44, by - 4);
+      g.fillStyle = dark ? "rgba(255,255,255,.72)" : "#8a8f99"; g.font = `500 25px ${font}`; g.fillText("@HEART", x0 + 54 + nw, by - 4);
       return cv.toDataURL("image/jpeg", 0.88);
     }
-    function cardPage(p, key) {
-      const spo = !!(p.spoiler && !spoilerOpened(p));
+    function cardPage(p, key, open = false) {
+      const spo = open ? false : !!(p.spoiler && !spoilerOpened(p));
       const title = `${p.name} · 하트 (@HEART)`;
       const desc = spo ? "✦ 곧 공개될 캐릭터예요 · 하트 (@HEART)" : (plainTxt(p.tagline) || "하트 (@HEART)의 캐릭터예요 💙");
-      const dir = `${SITE_URL}c/${encodeURIComponent(p.slug)}/`, img = `${dir}card.jpg?v=${key}`;
+      const dir = `${SITE_URL}c/${encodeURIComponent(p.slug)}/`, img = `${dir}${open ? "card-open.jpg" : "card.jpg"}?v=${key}`;
       const go = `/?from=share#post-${encodeURIComponent(p.id)}`;
       return `<!DOCTYPE html>
 <html lang="ko"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><meta name="robots" content="noindex" />
@@ -2400,7 +2437,8 @@
       const byPath = new Map(uploads.map(u => [u.path, u]));
       for (const p of out.posts) {
         if (p.hidden || !p.image) { delete p.cardKey; continue; }
-        const dir = `c/${p.slug}/`; keep.add(dir + "index.html"); keep.add(dir + "card.jpg");
+        const dir = `c/${p.slug}/`, spoNow = !!(p.spoiler && !spoilerOpened(p)); keep.add(dir + "index.html"); keep.add(dir + "card.jpg");
+        if (spoNow) { keep.add(dir + "open.html"); keep.add(dir + "card-open.jpg"); }
         const k = cardKey(p); if (p.cardKey === k) continue;
         step(`공유 카드 만드는 중… ${p.name}`);
         let src = p.image, tmp = null;
@@ -2408,6 +2446,11 @@
         try {
           const jpg = await makeCard(p, src);
           uploads.unshift({ path: dir + "card.jpg", bytes: b64Bytes(jpg.split(",")[1]), label: "card" }, { path: dir + "index.html", bytes: new TextEncoder().encode(cardPage(p, k)), label: "card" });
+          // 🔓 스포일러: 공개되면 깃허브가 바꿔 끼울 "공개 후 카드"를 미리 만들어둬요
+          if (spoNow) {
+            const jo = await makeCard(p, src, { open: true });
+            uploads.unshift({ path: dir + "card-open.jpg", bytes: b64Bytes(jo.split(",")[1]), label: "card" }, { path: dir + "open.html", bytes: new TextEncoder().encode(cardPage(p, k + "o", true)), label: "card" });
+          }
           p.cardKey = k;
         } catch (e) { console.warn("공유 카드 건너뜀", p.name, e); }
         finally { if (tmp) URL.revokeObjectURL(tmp); }

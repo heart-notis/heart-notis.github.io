@@ -9,6 +9,8 @@ on:
     branches: [main]
     paths: [data.js]
   workflow_dispatch:
+permissions:
+  contents: write
 concurrency:
   group: release-push
   cancel-in-progress: true
