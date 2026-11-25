@@ -1,4 +1,4 @@
-/* 이 파일은 제작자 페이지(admin.html)가 자동으로 만들어요. 직접 고치지 않아도 돼요. */
+/* 이 파일은 제작자 페이지(admin/)가 자동으로 만들어요. 직접 고치지 않아도 돼요. */
 window.SITE_DATA = {
   "tags": [
     "TEAPOT",
@@ -80,10 +80,10 @@ window.SITE_DATA = {
         "정말 많이 좋아해. 이젠 전하지 못하게 되려나……."
       ],
       "releaseDate": "2026-11-25",
-      "releaseTime": "20:00",
+      "releaseTime": "16:30",
       "theme": "sunset",
-      "updatedAt": "2026-11-25T04:28:59.795Z",
-      "cardKey": "1preblf",
+      "updatedAt": "2026-11-25T07:25:44.824Z",
+      "cardKey": "1a17y1m",
       "songUrl": "https://youtu.be/AnoNJjIikX0?si=Oxf7zrEQQO16S9lf",
       "songTitle": "Wish It Was Me"
     },
