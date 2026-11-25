@@ -238,6 +238,9 @@
     .live-box .lb-bar i { display: block; height: 100%; border-radius: 9px; background: linear-gradient(90deg, #b9a2f6, #7fcdf2); transition: width .8s ease; }
     .live-box.done .lb-bar i { background: linear-gradient(90deg, #7fe0b0, #7fcdf2); }
     .live-box .lb-s { font-size: .72rem; opacity: .75; margin-top: 7px; }
+    .short-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin-top: 8px; }
+    .short-links button { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; padding: 8px 10px; border-radius: 12px; border: 1px solid var(--line); background: #faf9ff; font-size: .72rem; color: #6b6f80; cursor: pointer; text-align: left; overflow: hidden; }
+    .short-links b { font-size: .8rem; color: #7353d6; }
     .today-bar { display: flex; gap: 6px; overflow-x: auto; margin: 12px 0 14px; padding-bottom: 2px; scrollbar-width: none; }
     .today-bar::-webkit-scrollbar { display: none; }
     .today-bar button { flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px; height: 36px; padding: 0 12px; border-radius: 13px; background: #fff; border: 1px solid #ebe7f6; font-size: .78rem; font-weight: 700; color: #4b5563; cursor: pointer; }
@@ -1647,7 +1650,8 @@
           <div class="vs-ref">
             <div class="vs-ref-top"><b>🔗 어디서 왔나</b><div class="vs-seg">${["오늘", "7일", "14일", "전체"].map((t, k) => `<button data-ref="${k}" class="${k === 1 ? "on" : ""}">${t}</button>`).join("")}</div></div>
             <div id="refList"></div>
-            <div class="hint" style="margin-top:6px">💡 링크 끝에 <b>?from=이름</b>을 붙여서 올리면 정확히 구분돼요. 예: heart-notis.github.io/?from=티팟</div>
+            <div class="hint" style="margin-top:6px">💡 올리는 곳마다 아래 <b>짧은 주소</b>를 쓰면 어디서 왔는지 정확히 구분돼요 · 누르면 복사돼요</div>
+            <div class="short-links">${[["x", "X"], ["p", "포스타입"], ["t", "티팟"], ["w", "위프"], ["b", "블룸"], ["tg", "팅글"]].map(([k, n]) => `<button type="button" data-copy="https://heart-notis.github.io/${k}"><b>${n}</b>heart-notis.github.io/${k}</button>`).join("")}</div>
           </div>
           <div class="vs-ref">
             <div class="vs-ref-top"><b>💜 캐릭터 반응</b><div class="vs-seg">${[["v", "조회"], ["l", "하트"], ["c", "대화"], ["s", "알림"]].map(([k, t], n) => `<button data-rk="${k}" class="${n === 0 ? "on" : ""}">${t}</button>`).join("")}</div></div>
@@ -2308,6 +2312,7 @@
       };
       tick(); liveTimer = setInterval(check, 4000);
     }
+    document.addEventListener("click", async e => { const c = e.target.closest("[data-copy]"); if (!c) return; try { await navigator.clipboard.writeText(c.dataset.copy); toast("주소를 복사했어요"); } catch { prompt("주소를 복사해주세요", c.dataset.copy); } });
     document.addEventListener("click", e => { if (e.target.closest("[data-live-x]")) { const b = $("liveBox"); if (b) b.classList.remove("show"); } });
     function showPublished() {
       edit = { kind: "done" };
