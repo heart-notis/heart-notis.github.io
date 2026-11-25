@@ -1429,8 +1429,11 @@
     }
 
     /* ---- 💍 24시간 안에 새 게시물이 있으면 프사에 링 + NEW ---- */
-    (function newRing() {
+    let ringOn = false;
+    function newRing() {
+      if (ringOn) return;
       const fresh = characters.some(c => !isSpoiler(c) && !c.hidden && (() => {
+        const ra = releaseAt(c); if (ra !== null && isReleased(c) && Date.now() - ra < 86400000) return true;   // ✦ 스포일러는 공개된 순간부터 24시간
         const t = Date.parse(c.createdAt || ""); if (!isNaN(t)) return Date.now() - t < 86400000;
         const d = new Date(); return c.date === `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
       })());
@@ -1440,6 +1443,7 @@
         document.head.insertAdjacentHTML("beforeend", `<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,${encodeURIComponent(svg)}" />`);
       }
       const r = $("avaRing"), a = $("pAvatar"); if (!r || !a || !fresh) return;
+      ringOn = true;
       const nw = $("avaNew");
       const place = () => {
         r.style.left = a.offsetLeft - 6 + "px"; r.style.top = a.offsetTop - 6 + "px"; r.style.width = r.style.height = a.offsetWidth + 12 + "px";
@@ -1448,7 +1452,8 @@
         nw.style.left = a.offsetLeft + half + k - nw.offsetWidth / 2 + "px"; nw.style.top = a.offsetTop + half + k - nw.offsetHeight / 2 + "px";
       };
       r.classList.remove("hidden"); nw.classList.remove("hidden"); place(); addEventListener("resize", place);
-    })();
+    }
+    newRing();
 
     /* ---- ⬆ 맨 위로 하트 버튼 ---- */
     (function toTop() {
@@ -2259,7 +2264,7 @@
           last = now;
           const typing = document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName);
           if (!typing && (view === "tweets" || view === "media")) renderView();
-          updateCalDot(); drawCal();
+          updateCalDot(); drawCal(); newRing();   // 보고 있는 중에 공개돼도 바로 링 + NEW
         }
       }, 15000);
     })();
