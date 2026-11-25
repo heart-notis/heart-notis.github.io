@@ -852,10 +852,12 @@
       if ("serviceWorker" in navigator) navigator.serviceWorker.register("/admin/sw.js", { scope: "/admin/" }).catch(() => {});
       addEventListener("beforeinstallprompt", e => { e.preventDefault(); ask = e; b.classList.remove("hidden"); });
       addEventListener("appinstalled", () => { b.classList.add("hidden"); toast("💜 제작자 페이지를 홈 화면에 추가했어요"); });
-      if (ios) b.classList.remove("hidden");
+      const android = /android/i.test(navigator.userAgent);
+      if (ios || android) b.classList.remove("hidden");   // 크롬이 설치 창을 안 줄 때도 방법은 알려줘요
       b.onclick = async () => {
         if (ask) { ask.prompt(); try { await ask.userChoice; } catch {} ask = null; return; }
-        confirmBox("📱 홈 화면에 추가하기\n① 아래쪽 공유 ⬆︎ 버튼\n② 홈 화면에 추가 ⊞\n③ 오른쪽 위 추가\n연필 달린 하트 아이콘이 생겨요", { ok: "알겠어요", cancel: "닫기" });
+        if (ios) return confirmBox("📱 홈 화면에 추가하기\n① 아래쪽 공유 ⬆︎ 버튼\n② 홈 화면에 추가 ⊞\n③ 오른쪽 위 추가\n연필 달린 하트 아이콘이 생겨요", { ok: "알겠어요", cancel: "닫기" });
+        confirmBox("📱 홈 화면에 추가하기\n① 크롬 오른쪽 위 ⋮ 메뉴\n② 앱 설치 (또는 홈 화면에 추가)\n③ 설치 누르면 연필 달린 하트 아이콘이 생겨요\n메뉴에 '하트 앱 열기'만 보이면 홈페이지 하트 앱을 먼저 지우고 해주세요", { ok: "알겠어요", cancel: "닫기" });
       };
     })();
     function renderAll() { renderPosts(); renderNotices(); renderProfile(); $("tagInput").value = data.tags.join(", "); renderWorlds(); renderStatus(); renderToday(); }
