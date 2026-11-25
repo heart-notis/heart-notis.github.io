@@ -525,7 +525,11 @@ window.SITE_DATA = {
       "cardKey": "3vqk5m",
       "noPort": true,
       "noPortUntil": "2027-03-15",
-      "noPortReason": "포스타입 공모전 규정"
+      "noPortReason": "포스타입 공모전 규정",
+      "contest": true,
+      "contestName": "POSTYPE 제6회 캐릭터톡 공모전",
+      "contestResult": "우수상 수상",
+      "updatedAt": "2026-11-25T07:53:13.360Z"
     },
     {
       "id": "mwrpqewk3sy6",
