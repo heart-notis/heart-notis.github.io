@@ -21,7 +21,7 @@ const swapCards = t => {
     execSync('git config user.name "heart-notis" && git config user.email "heart-notis@users.noreply.github.com"')
     execSync("git pull -q --rebase origin main")
     let n = 0
-    for (const p of list) for (const d of ["", "2/", "3/"]) { const f = `c/${p.slug}/${d}`; if (!existsSync(f + "open.html")) continue; copyFileSync(f + "open.html", f + "index.html"); n++ }
+    for (const p of list) for (const d of ["", "b", "c"]) { const f = `c/${p.slug}${d}/`; if (!existsSync(f + "open.html")) continue; copyFileSync(f + "open.html", f + "index.html"); n++ }
     if (!n) return
     execSync(`git add c && git commit -q -m "🔓 공개된 캐릭터 공유 카드 바꾸기 · ${list.map(p => p.name).join(" · ")}" && git push -q origin HEAD:main`)
     console.log("공유 카드 바꿈:", list.map(p => p.name).join(", "))

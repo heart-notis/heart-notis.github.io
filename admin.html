@@ -1042,7 +1042,6 @@
     /* ---------- 🎴 편집 화면: 공유 카드 고르기 + 미리보기 ---------- */
     function setupCardPick() {
       if (!$("f_slug")) return;
-      $("f_name").addEventListener("input", () => { $("f_slug").placeholder = slugBase($("f_name").value); });
     }
 
     /* ---------- ⋯ 엄지 메뉴 (아래에서 올라오는 시트) ---------- */
@@ -1178,7 +1177,7 @@
           <details class="sec" id="sec_link" ${index < 0 ? "open" : ""}><summary><span class="sec-t">🔗 대화 링크 · 태그</span><span class="sec-sum" data-sum="sec_link"></span><i class="sec-ar"></i></summary><div class="sec-in">
           <label class="f">해시태그<div class="tag-pick" id="f_tags">${data.tags.map(t => `<button type="button" class="${(item.tags || []).includes(t) ? "on" : ""}" data-tag="${esc(t)}">#${esc(t)}</button>`).join("") || `<small>해시태그 탭에서 먼저 태그를 만들어주세요</small>`}</div></label>
           <label class="f">대화하러 가기 링크 <small>위에서 체크한 해시태그(플랫폼)마다 주소 칸이 생겨요 · #합작은 세계관 보기 버튼이 돼요</small><div class="links-box" id="f_links"></div></label>
-<label class="f">🔗 공유 주소 <small>제작자만 바꿀 수 있어요 · 비우면 이름으로 자동으로 만들어져요 · 공유하는 사람이 카드 모양 ①②③을 골라서 퍼가요</small><div class="slug-in"><span>heart-notis.github.io/c/</span><input type="text" id="f_slug" maxlength="40" value="${esc(item.slug || "")}" placeholder="${esc(slugBase(item.name || ""))}" /></div></label>
+<label class="f">🔗 공유 주소 <small>제작자만 바꿀 수 있어요 · 비우면 번호로 자동 · kailus처럼 영문 별명도 돼요 (한글은 영문으로 바뀌어요) · 카드 모양 ②③은 뒤에 b · c가 붙어요</small><div class="slug-in"><span>heart-notis.github.io/c/</span><input type="text" id="f_slug" maxlength="40" value="${esc(item.slug || "")}" placeholder="자동 번호" /></div></label>
           </div></details>
           <details class="sec" id="sec_theme" ${false ? "open" : ""}><summary><span class="sec-t">🎨 꾸미기</span><span class="sec-sum" data-sum="sec_theme"></span><i class="sec-ar"></i></summary><div class="sec-in">
           <div class="f">🎨 페이지 꾸미기 <small>게시물을 눌렀을 때 열리는 페이지의 색감이에요. "미리보기"로 확인할 수 있어요.</small>
@@ -1576,7 +1575,7 @@
       if (Array.isArray(it.images) && !it.images.length) delete it.images;
       if ($("f_spoiler").checked) it.spoiler = true; else delete it.spoiler;
       { const raw = $("f_slug").value.trim();
-        if (raw) { const sv = slugBase(raw); if (data.posts.some(x => x !== it && x.slug === sv)) { toast("이미 다른 캐릭터가 쓰는 공유 주소예요"); $("f_slug").focus(); return; } if (it.slug !== sv) { it.slug = sv; delete it.cardKey; } }
+        if (raw) { const sv = /^\d+$/.test(raw) ? raw : slugBase(raw); if (data.posts.some(x => x !== it && x.slug && [x.slug, x.slug + "b", x.slug + "c"].some(a => [sv, sv + "b", sv + "c"].includes(a)))) { toast("이미 다른 캐릭터가 쓰는 공유 주소예요"); $("f_slug").focus(); return; } if (it.slug !== sv) { it.slug = sv; delete it.cardKey; } }
         else if (it.slug) { delete it.slug; delete it.cardKey; } }
       if ($("f_port").checked) { it.port = true; const pn = $("f_portNote").value.trim(); if (pn) it.portNote = pn; else delete it.portNote; const pd = $("f_portDate").value, ptm = $("f_portTime").value; if (pd) it.portDate = pd; else delete it.portDate; if (pd && ptm) it.portTime = ptm; else delete it.portTime; } else { delete it.portTime; delete it.port; delete it.portNote; delete it.portDate; }
       const rel = $("f_release").value;
@@ -2344,11 +2343,13 @@
     function assignSlugs(posts) {
       const used = new Set();
       posts.forEach(p => { if (p.slug) { if (used.has(p.slug)) delete p.slug; else used.add(p.slug); } });
-      posts.forEach(p => { if (p.slug) return; const b = slugBase(p.name); let s = b, n = 2; while (used.has(s)) s = `${b}-${n++}`; p.slug = s; used.add(s); });
+      // 새 캐릭터는 번호로 (오래된 것부터 1, 2, 3…) · 한 번 정해지면 안 바뀌어요
+      let next = Math.max(0, ...[...used].filter(x => /^\d+$/.test(x)).map(Number)) + 1;
+      [...posts].reverse().forEach(p => { if (p.slug) return; while (used.has(String(next))) next++; p.slug = String(next++); used.add(p.slug); });
     }
     const charUrl = p => p && p.slug ? `${SITE_URL}c/${p.slug}` : SITE_URL;
     const plainTxt = t => String(t || "").replace(/\*\*|__|~~|`/g, "").replace(/\{\{\s*user\s*\}\}/gi, "당신").replace(/\s+/g, " ").trim();
-    const cardKey = p => { const k = JSON.stringify(["v6", p.name, p.tagline || "", p.image || "", p.previewPos ?? 25, p.world || "", !!(p.spoiler && !spoilerOpened(p)), p.releaseDate || "", p.releaseTime || "", p.slug]); let h = 5381; for (let i = 0; i < k.length; i++) h = (h * 33 + k.charCodeAt(i)) | 0; return (h >>> 0).toString(36); };
+    const cardKey = p => { const k = JSON.stringify(["v7", p.name, p.tagline || "", p.image || "", p.previewPos ?? 25, p.world || "", !!(p.spoiler && !spoilerOpened(p)), p.releaseDate || "", p.releaseTime || "", p.slug]); let h = 5381; for (let i = 0; i < k.length; i++) h = (h * 33 + k.charCodeAt(i)) | 0; return (h >>> 0).toString(36); };
     function wrapLines(g, text, maxW, maxLines) {
       const words = String(text).split(/(\s+)/), lines = []; let cur = "";
       const push = w => { if (g.measureText(cur + w).width <= maxW) { cur += w; return; } if (cur.trim()) lines.push(cur.trim()); cur = ""; if (g.measureText(w).width > maxW) { for (const ch of w) { if (g.measureText(cur + ch).width > maxW) { lines.push(cur); cur = ""; } cur += ch; } } else cur = w.trimStart(); };
@@ -2407,12 +2408,12 @@
       g.fillStyle = dark ? "rgba(255,255,255,.72)" : "#8a8f99"; g.font = `500 25px ${font}`; g.fillText("@HEART", x0 + 54 + nw, by - 4);
       return cv.toDataURL("image/jpeg", 0.88);
     }
-    const styleDir = n => n === 1 ? "" : `${n}/`;   // 1번(기본)은 c/이름, 2·3번은 c/이름/2 · c/이름/3
+    const styleSuf = n => ["", "b", "c"][n - 1] || "";   // 1번(기본) c/7 · 2번 c/7b · 3번 c/7c
     function cardPage(p, key, open = false, n = 1) {
       const spo = open ? false : !!(p.spoiler && !spoilerOpened(p));
       const title = `${p.name} · 하트 (@HEART)`;
       const desc = spo ? "✦ 곧 공개될 캐릭터예요 · 하트 (@HEART)" : (plainTxt(p.tagline) || "하트 (@HEART)의 캐릭터예요 💙");
-      const dir = `${SITE_URL}c/${encodeURIComponent(p.slug)}/${styleDir(n)}`, img = `${dir}${open ? "card-open.jpg" : "card.jpg"}?v=${key}`;
+      const dir = `${SITE_URL}c/${encodeURIComponent(p.slug + styleSuf(n))}/`, img = `${dir}${open ? "card-open.jpg" : "card.jpg"}?v=${key}`;
       const go = `/?from=share#post-${encodeURIComponent(p.id)}`;
       return `<!DOCTYPE html>
 <html lang="ko"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><meta name="robots" content="noindex" />
@@ -2434,14 +2435,14 @@
       for (const p of out.posts) {
         if (p.hidden || !p.image) { delete p.cardKey; continue; }
         const base = `c/${p.slug}/`, spoNow = !!(p.spoiler && !spoilerOpened(p));
-        for (const n of [1, 2, 3]) { const d = base + styleDir(n); keep.add(d + "index.html"); keep.add(d + "card.jpg"); if (spoNow) { keep.add(d + "open.html"); keep.add(d + "card-open.jpg"); } }
+        for (const n of [1, 2, 3]) { const d = `c/${p.slug}${styleSuf(n)}/`; keep.add(d + "index.html"); keep.add(d + "card.jpg"); if (spoNow) { keep.add(d + "open.html"); keep.add(d + "card-open.jpg"); } }
         const k = cardKey(p); if (p.cardKey === k) continue;
         step(`공유 카드 만드는 중… ${p.name}`);
         let src = p.image, tmp = null;
         const up = byPath.get(p.image); if (up) { tmp = URL.createObjectURL(new Blob([up.bytes])); src = tmp; }
         try {
           for (const n of [1, 2, 3]) {
-            const d = base + styleDir(n);
+            const d = `c/${p.slug}${styleSuf(n)}/`;
             const jpg = await makeCard(p, src, { style: n });
             uploads.unshift({ path: d + "card.jpg", bytes: b64Bytes(jpg.split(",")[1]), label: "card" }, { path: d + "index.html", bytes: new TextEncoder().encode(cardPage(p, k, false, n)), label: "card" });
             // 🔓 스포일러: 공개되면 깃허브가 바꿔 끼울 "공개 후 카드"를 미리 만들어둬요

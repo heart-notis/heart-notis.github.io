@@ -1961,9 +1961,9 @@
     function shareChar(i) {
       const c = characters[i]; if (!c) return;
       let st = 2;
-      const sd = n => n === 1 ? "" : `${n}/`;
-      const urlOf = n => c.slug ? `${location.origin}/c/${c.slug}${n === 1 ? "" : "/" + n}` : location.href.split("#")[0];
-      const imgOf = n => c.slug ? `c/${encodeURIComponent(c.slug)}/${sd(n)}card.jpg${c.cardKey ? "?v=" + c.cardKey : ""}` : "";
+      const sd = n => ["", "b", "c"][n - 1] || "";
+      const urlOf = n => c.slug ? `${location.origin}/c/${c.slug}${sd(n)}` : location.href.split("#")[0];
+      const imgOf = n => c.slug ? `c/${encodeURIComponent(c.slug + sd(n))}/card.jpg${c.cardKey ? "?v=" + c.cardKey : ""}` : "";
       const sub = isSpoiler(c) ? "✦ 곧 공개될 캐릭터예요" : String(c.tagline || "").replace(/\*\*|__|~~|`/g, "").replace(/\{\{\s*user\s*\}\}/gi, "당신");
       const el = document.createElement("div"); el.className = "shr-wrap";
       el.innerHTML = `<div class="shr-dim" data-shr-x></div><div class="shr" role="dialog" aria-label="공유하기"><div class="shr-hdl"></div>
