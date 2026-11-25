@@ -80,7 +80,7 @@ window.SITE_DATA = {
         "정말 많이 좋아해. 이젠 전하지 못하게 되려나……."
       ],
       "releaseDate": "2026-11-25",
-      "releaseTime": "21:00",
+      "releaseTime": "20:00",
       "theme": "sunset",
       "updatedAt": "2026-11-25T04:28:59.795Z",
       "cardKey": "1preblf",
