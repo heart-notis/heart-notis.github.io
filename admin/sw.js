@@ -9,7 +9,7 @@ self.addEventListener("push", e => {
   e.waitUntil(self.registration.showNotification(d.title || "하트 관리", {
     body: d.body || "",
     icon: "/admin-touch-icon.png",
-    badge: "/favicon-64.png",
+    badge: "/notify-badge.png",
     tag: d.tag,
     data: { url: "/admin/#messages" },
   }));

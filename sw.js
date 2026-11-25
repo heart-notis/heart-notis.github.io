@@ -32,7 +32,7 @@ self.addEventListener("push", e => {
   e.waitUntil(self.registration.showNotification(d.title || "하트", {
     body: d.body || "",
     icon: d.icon || "apple-touch-icon.png",
-    badge: "favicon-64.png",
+    badge: "notify-badge.png",
     image: d.image,
     tag: d.tag,
     data: { url: d.url || "./" },
