@@ -175,6 +175,7 @@
     .sel-chip.on { background: var(--grad); color: #fff; border-color: transparent; }
     .sel-chip.del { color: #e0527a; border-color: #f6cbd8; }
     .sel-chip:disabled { opacity: .4; }
+    .arw { display: inline-block; width: 1em; height: 1em; vertical-align: -.16em; flex-shrink: 0; }   /* ↪ 대신 쓰는 화살표 (글꼴 상관없이 가운데) */
     #pushMe.on { background: #efe9ff; color: #6a4fd0; }
     #tab-messages .section-head { flex-wrap: wrap; row-gap: 10px; }
     #tab-messages .section-head > div:first-child { flex: 1 1 200px; }
@@ -874,7 +875,7 @@
       if (unread) chips.push(["💌", "안 읽은 메시지", unread, "msg"]);
       data.posts.forEach((p, i) => {
         if (p.spoiler && p.releaseDate && !spoilerOpened(p)) { const v = dday(p.releaseDate); if (v === "오늘" || v === "내일" || +v.slice(2) <= 7) chips.push(["✦", `${p.name} 공개`, v + (p.releaseTime ? " " + p.releaseTime : ""), "p" + i]); }
-        else if (p.port && p.portDate) { const end = p.portTime ? new Date(p.portDate + "T" + p.portTime).getTime() : new Date(p.portDate + "T00:00").getTime() + 864e5; const v = dday(p.portDate); if (Date.now() < end && (v === "오늘" || v === "내일" || +v.slice(2) <= 7)) chips.push(["↪", `${p.name} 이식`, v, "p" + i]); }
+        else if (p.port && p.portDate) { const end = p.portTime ? new Date(p.portDate + "T" + p.portTime).getTime() : new Date(p.portDate + "T00:00").getTime() + 864e5; const v = dday(p.portDate); if (Date.now() < end && (v === "오늘" || v === "내일" || +v.slice(2) <= 7)) chips.push([ARW, `${p.name} 이식`, v, "p" + i]); }
         if (p.birthday && !p.spoiler && (p.birthday === md(now) || p.birthday === md(tm))) chips.push(["🎂", `${p.name} 생일`, p.birthday === md(now) ? "오늘" : "내일", "p" + i]);
       });
       data.posts.forEach((p, i) => { if (!p.sched || schedDue(p)) return; const dt = new Date(p.sched.at), v = dday(ymdL(dt)); if (v === "오늘" || v === "내일" || +v.slice(2) <= 7) chips.push(["⏰", `${p.name} 예약 수정`, v + " " + schedLabel(p).split(" ")[1], "s" + i]); });
@@ -928,12 +929,14 @@
         <div class="sel-hint">윗줄: 누르면 켜기·끄기 · 아랫줄: 눌러서 날짜·내용까지</div>`;
     }
     /* 📝 자세히 바꾸기: 날짜·이름이 필요한 것들 (고른 게시물 전부에 똑같이) */
+    const ARW = '<svg class="arw" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4.5v5.5a4 4 0 0 0 4 4h10"/><path d="M15 10l4 4-4 4"/></svg>';
+    const noTags = t => String(t).replace(/<[^>]+>/g, "").trim();
     const same = (ps, k) => ps.length && ps.every(p => (p[k] || "") === (ps[0][k] || "")) ? (ps[0][k] || "") : "";
     const BULK_FORM = {
       spoiler: { label: "✦ 스포일러", has: p => !!p.spoiler, off: ["spoiler", "releaseDate", "releaseTime"],
         fields: [["releaseDate", "공개 날짜", "date"], ["releaseTime", "공개 시간", "time"]],
         apply: (p, v) => { p.spoiler = true; setOrDel(p, "releaseDate", v.releaseDate); setOrDel(p, "releaseTime", v.releaseDate && v.releaseTime); } },
-      port: { label: "↪ 이식 예정", has: p => !!p.port, off: ["port", "portDate", "portTime", "portNote"],
+      port: { label: ARW + " 이식 예정", has: p => !!p.port, off: ["port", "portDate", "portTime", "portNote"],
         fields: [["portDate", "이식 날짜", "date"], ["portTime", "시간", "time"], ["portNote", "어디로 · 메모 (선택)", "text"]],
         apply: (p, v) => { p.port = true; setOrDel(p, "portDate", v.portDate); setOrDel(p, "portTime", v.portDate && v.portTime); setOrDel(p, "portNote", v.portNote); } },
       contest: { label: "🏆 공모전", has: p => !!p.contest, off: ["contest", "contestName", "contestResult"],
@@ -976,9 +979,9 @@
       }
       const rows = f.fields.map(([id, label, type, ph]) => `<label class="f">${label}<input type="${type}" data-bf="${id}" value="${esc(same(ps, id))}" ${ph ? `placeholder="${esc(ph)}"` : ""}></label>`).join("");
       openSheet(`${head}<div class="bf-form">${rows}</div><div class="bf-btns"><button data-pick="ok" class="bf-ok">${f.off ? "켜고 적용하기" : "적용하기"}</button>${f.off ? `<button data-pick="off" class="bf-off">끄기</button>` : ""}</div>`, act => {
-        if (act === "off") { ps.forEach(p => f.off.forEach(x => delete p[x])); return bulkDone(ps, `끔: ${f.label}`); }
+        if (act === "off") { ps.forEach(p => f.off.forEach(x => delete p[x])); return bulkDone(ps, `끔: ${noTags(f.label)}`); }
         const v = {}; document.querySelectorAll("[data-bf]").forEach(i => v[i.dataset.bf] = i.value.trim());
-        ps.forEach(p => f.apply(p, v)); bulkDone(ps, `적용: ${f.label}`);
+        ps.forEach(p => f.apply(p, v)); bulkDone(ps, `적용: ${noTags(f.label)}`);
       });
     }
     $("selBar").addEventListener("click", async e => {
@@ -1091,7 +1094,7 @@
           ${selMode ? `<span class="pick" aria-hidden="true">✓</span>` : ""}
           ${p.image ? `<img class="thumb" src="${esc(p.image)}" alt="" draggable="false" onerror="${rawFallback}" />` : `<div class="thumb">${esc((p.name || "?").charAt(0))}</div>`}
           <div class="item-main">
-            <div class="item-title"><span class="nm">${esc(p.name || "(이름 없음)")}</span>${p.sched ? `<span class="badge sch-bdg" title="예약 수정 ${schedLabel(p)}">⏰ ${schedDue(p) ? "적용됨" : schedLabel(p).split(" ")[0]}</span>` : ""}${p.hidden ? `<span class="badge hid">🙈 비공개</span>` : ""}${p.spoiler ? (spoilerOpened(p) ? `<span class="badge spo">✦ 공개됨</span>` : `<span class="badge spo">✦ 스포</span>`) : ""}${p.noPort ? (p.noPortUntil && Date.now() >= new Date(p.noPortUntil + "T00:00").getTime() + 864e5 ? `<span class="badge">🚫 이식불가 끝</span>` : `<span class="badge" style="background:#ffe9ee;color:#c0485a">🚫${p.noPortUntil ? " ~" + (+p.noPortUntil.split("-")[1]) + "/" + (+p.noPortUntil.split("-")[2]) : ""}</span>`) : ""}${p.contest ? `<span class="badge" style="background:#fff4d6;color:#b86b00">🏆${p.contestResult ? " " + esc(p.contestResult) : ""}</span>` : ""}${p.port ? (p.portDate && Date.now() >= (p.portTime ? new Date(p.portDate + "T" + p.portTime).getTime() : new Date(p.portDate + "T00:00").getTime() + 864e5) ? `<span class="badge">↪ 이식 끝</span>` : `<span class="badge spo">↪ 이식${p.portDate ? " " + (+p.portDate.split("-")[1]) + "/" + (+p.portDate.split("-")[2]) + (p.portTime ? " " + p.portTime : "") : ""}</span>`) : ""}${p.birthday ? `<span class="badge bd">🎂 ${+p.birthday.split("-")[0]}/${+p.birthday.split("-")[1]}</span>` : ""}${p.adult ? `<span class="badge">19+</span>` : ""}${p.status === "asset" ? `<span class="badge st">🔧 교체중</span>` : p.status === "renewal" ? `<span class="badge st re">✨ 리뉴얼</span>` : ""}${!p.hidden && !(p.spoiler && !spoilerOpened(p)) && missLink(p) ? `<span class="badge miss">🔗 링크 없음</span>` : ""}${isNew(p, "posts") ? `<span class="badge new">NEW</span>` : ""}</div>
+            <div class="item-title"><span class="nm">${esc(p.name || "(이름 없음)")}</span>${p.sched ? `<span class="badge sch-bdg" title="예약 수정 ${schedLabel(p)}">⏰ ${schedDue(p) ? "적용됨" : schedLabel(p).split(" ")[0]}</span>` : ""}${p.hidden ? `<span class="badge hid">🙈 비공개</span>` : ""}${p.spoiler ? (spoilerOpened(p) ? `<span class="badge spo">✦ 공개됨</span>` : `<span class="badge spo">✦ 스포</span>`) : ""}${p.noPort ? (p.noPortUntil && Date.now() >= new Date(p.noPortUntil + "T00:00").getTime() + 864e5 ? `<span class="badge">🚫 이식불가 끝</span>` : `<span class="badge" style="background:#ffe9ee;color:#c0485a">🚫${p.noPortUntil ? " ~" + (+p.noPortUntil.split("-")[1]) + "/" + (+p.noPortUntil.split("-")[2]) : ""}</span>`) : ""}${p.contest ? `<span class="badge" style="background:#fff4d6;color:#b86b00">🏆${p.contestResult ? " " + esc(p.contestResult) : ""}</span>` : ""}${p.port ? (p.portDate && Date.now() >= (p.portTime ? new Date(p.portDate + "T" + p.portTime).getTime() : new Date(p.portDate + "T00:00").getTime() + 864e5) ? `<span class="badge">${ARW} 이식 끝</span>` : `<span class="badge spo">${ARW} 이식${p.portDate ? " " + (+p.portDate.split("-")[1]) + "/" + (+p.portDate.split("-")[2]) + (p.portTime ? " " + p.portTime : "") : ""}</span>`) : ""}${p.birthday ? `<span class="badge bd">🎂 ${+p.birthday.split("-")[0]}/${+p.birthday.split("-")[1]}</span>` : ""}${p.adult ? `<span class="badge">19+</span>` : ""}${p.status === "asset" ? `<span class="badge st">🔧 교체중</span>` : p.status === "renewal" ? `<span class="badge st re">✨ 리뉴얼</span>` : ""}${!p.hidden && !(p.spoiler && !spoilerOpened(p)) && missLink(p) ? `<span class="badge miss">🔗 링크 없음</span>` : ""}${isNew(p, "posts") ? `<span class="badge new">NEW</span>` : ""}</div>
             <div class="item-sub">${esc(p.date || "")} · ${(p.tags || []).map(t => "#" + esc(t)).join(" ") || "태그 없음"}</div>
             <div class="item-sub">${esc(p.tagline || "")}</div>
           </div>
@@ -1142,7 +1145,7 @@
       set("sec_text", [$("f_tagline").value.trim() ? "한 줄 ✓" : "", ln ? `대사 ${ln}` : "", $("f_desc").value.trim() ? "본문 ✓" : "", $("f_songUrl")?.value.trim() ? "♪ 테마곡" : ""].filter(Boolean).join(" · ") || "한 줄 · 대사 · 본문");
       set("sec_link", [...document.querySelectorAll("#f_tags .on")].map(b => b.textContent).join(" ") || "태그 고르기");
       set("sec_theme", $("f_themeNow").textContent);
-      const on = [["f_contest", "🏆"], ["f_noPort", "🚫"], ["f_spoiler", "✦ 스포"], ["f_port", "↪ 이식"], ["f_adult", "19+"], ["f_hidden", "🙈 비공개"], ["f_quiet", "🤫"]].filter(([id]) => $(id) && $(id).checked).map(([, t]) => t);
+      const on = [["f_contest", "🏆"], ["f_noPort", "🚫"], ["f_spoiler", "✦ 스포"], ["f_port", "이식 예정"], ["f_adult", "19+"], ["f_hidden", "🙈 비공개"], ["f_quiet", "🤫"]].filter(([id]) => $(id) && $(id).checked).map(([, t]) => t);
       const st = document.querySelector(".f-status:checked"); if (st) on.push(st.value === "asset" ? "🔧 교체중" : "✨ 리뉴얼");
       set("sec_show", on.join(" · ") || "기본");
       const lg = $("logList") ? $("logList").children.length : 0;
@@ -1342,7 +1345,7 @@
           </div>
           </div></details>
           <details class="sec" id="sec_text" ${index < 0 ? "open" : ""}><summary><span class="sec-t">💬 소개 · 대사</span><span class="sec-sum" data-sum="sec_text"></span><i class="sec-ar"></i></summary><div class="sec-in">
-          <label class="f">한 줄 소개<input type="text" id="f_tagline" value="${esc(item.tagline)}" /></label>
+          <label class="f">한 줄 소개 <small>엔터로 줄바꿈할 수 있어요 · 공유 카드에선 한 줄로 이어져요</small><textarea id="f_tagline" rows="2" style="min-height:0;resize:vertical">${esc(item.tagline)}</textarea></label>
           <label class="f">💬 명대사 더 넣기 <small>한 줄에 하나씩 · 적으면 상세 화면에 "한마디 더 듣기" 버튼이 생겨요 · 비워두면 지금처럼</small><textarea id="f_lines" style="min-height:70px" placeholder="짐의 곁에 남겠다면, 그 정도 각오는 하고 온 거겠지.&#10;…">${esc((item.lines || []).join("\n"))}</textarea></label>
           <div class="hint" style="margin-bottom:-6px">✍️ 글 꾸미기: <i>*기울기*</i> · <b>**두껍게**</b></div>
           <label class="f">자세한 소개<textarea id="f_desc">${esc(item.description)}</textarea></label>
@@ -1375,7 +1378,7 @@
           <label class="tg"><span class="t"><b>🚫 이식 불가</b><small>정한 날짜가 지나면 딱지가 자동으로 떨어져요</small></span><input type="checkbox" class="sw" id="f_noPort" ${item.noPort ? "checked" : ""} /></label>
           <div class="tg-sub"><label class="f rel-row ${item.noPort ? "" : "hidden"}" id="f_npRow">언제까지 <small>이 날이 지나면 자동으로 사라져요 · 비우면 직접 끌 때까지</small><div class="rel-in"><input type="date" id="f_npUntil" value="${esc(item.noPortUntil || "")}" /><button type="button" class="btn btn-ghost btn-sm" id="f_npClr">지우기</button></div></label>
           <label class="f rel-row ${item.noPort ? "" : "hidden"}" id="f_npReasonRow">이유 (선택) <small>예: 공모전 규정 · 상세에만 보여요</small><input type="text" id="f_npReason" maxlength="24" value="${esc(item.noPortReason || "")}" /></label></div>
-          <label class="tg"><span class="t"><b>↪ 이식 예정</b><small>다른 플랫폼에 추가 공개 · 고정 공지 아래 · 눌러서 볼 수 있어요</small></span><input type="checkbox" class="sw" id="f_port" ${item.port ? "checked" : ""} /></label>
+          <label class="tg"><span class="t"><b>${ARW} 이식 예정</b><small>다른 플랫폼에 추가 공개 · 고정 공지 아래 · 눌러서 볼 수 있어요</small></span><input type="checkbox" class="sw" id="f_port" ${item.port ? "checked" : ""} /></label>
           <div class="tg-sub"><label class="f rel-row ${item.port ? "" : "hidden"}" id="f_portRow">이식 안내 <small>예: BLOOM · 12월 3일 (비워두면 "이식 예정"만 보여요)</small><input type="text" id="f_portNote" maxlength="40" value="${esc(item.portNote || "")}" /></label>
           <label class="f rel-row ${item.port ? "" : "hidden"}" id="f_portDateRow">이식 날짜 · 시간 <small>그 시간이 되면 이식 예정 딱지가 자동으로 떨어져요 (시간을 비우면 그날 밤 12시 · 날짜를 비우면 직접 끌 때까지 유지)</small><div class="rel-in"><input type="date" id="f_portDate" value="${esc(item.portDate || "")}" /><input type="time" id="f_portTime" value="${esc(item.portTime || "")}" /><button type="button" class="btn btn-ghost btn-sm" id="f_portDateClr">지우기</button></div></label></div>
           <label class="tg"><span class="t"><b>🔞 19+ 배지</b></span><input type="checkbox" class="sw" id="f_adult" ${item.adult ? "checked" : ""} /></label>
@@ -2045,7 +2048,7 @@
         else $("msgArea").innerHTML = `<div class="empty">메시지를 못 불러왔어요. 인터넷 연결을 확인하고 새로고침해주세요.</div>`;
       }
     }
-    const MCAT = { port: ["↪", "이식 요청"], ask: ["❓", "문의"], cheer: ["💜", "응원"], etc: ["📝", "후기"] };
+    const MCAT = { port: [ARW, "이식 요청"], ask: ["❓", "문의"], cheer: ["💜", "응원"], etc: ["📝", "후기"] };
     let msgFilter = "all";
     function renderMessages() {
       if (!msgCache.length) { $("msgArea").innerHTML = `<div class="empty">아직 받은 메시지가 없어요 💌</div>`; return; }
