@@ -85,8 +85,8 @@ window.SITE_DATA = {
         "방금 제가 넣어드린 가이딩은 그쪽 목숨줄 연장하라고 준 거지, 바닥에 내다 버리라고 준 팁이 아닌데요.",
         "자유 시간을 저한테서 통째로 사시려면, 방금 치르신 가이딩 비용에 최소한 외출 할증에 위험 수당까지 얹어주셔야 할 텐데."
       ],
-      "slug": "러브-LOVE",
-      "cardKey": "1stt7dx"
+      "slug": "reobeu-love",
+      "cardKey": "1u2m0mo"
     },
     {
       "id": "mwso99e36g7y",
@@ -113,8 +113,8 @@ window.SITE_DATA = {
       "theme": "palace",
       "wm": true,
       "birthday": "10-24",
-      "slug": "카일루스",
-      "cardKey": "199qwoy"
+      "slug": "kailluseu",
+      "cardKey": "fbyae"
     },
     {
       "id": "mwso6b62mp9u",
@@ -141,8 +141,8 @@ window.SITE_DATA = {
       "theme": "palace",
       "wm": true,
       "birthday": "01-30",
-      "slug": "킬리언",
-      "cardKey": "gmajkx"
+      "slug": "killieon",
+      "cardKey": "1h9bktl"
     },
     {
       "id": "mwso5ft3do6j",
@@ -169,8 +169,8 @@ window.SITE_DATA = {
       "theme": "palace",
       "wm": true,
       "birthday": "05-03",
-      "slug": "이사엘",
-      "cardKey": "3l81ol"
+      "slug": "isael",
+      "cardKey": "zkt00s"
     },
     {
       "id": "mwso58cyjlaa",
@@ -197,8 +197,8 @@ window.SITE_DATA = {
       "theme": "palace",
       "wm": true,
       "birthday": "05-07",
-      "slug": "줄리안",
-      "cardKey": "1devtjs"
+      "slug": "jullian",
+      "cardKey": "a9xn80"
     },
     {
       "id": "mwsnp9gdcf8e",
@@ -223,8 +223,8 @@ window.SITE_DATA = {
         "WHIF": "https://whif.io/characters/9fc590b5-7519-4bd0-8a63-c8decfd92458"
       },
       "wm": true,
-      "slug": "권태건",
-      "cardKey": "unobk6"
+      "slug": "gwontaegeon",
+      "cardKey": "l978x5"
     },
     {
       "id": "mwso3ed29b5n",
@@ -249,8 +249,8 @@ window.SITE_DATA = {
         "WHIF": "https://whif.io/characters/cfea7f3a-cee4-48d0-8743-d8cd54ccea7f"
       },
       "wm": true,
-      "slug": "차승우",
-      "cardKey": "1nvm3y"
+      "slug": "chaseungu",
+      "cardKey": "9jmwgx"
     },
     {
       "id": "mwso3tm7vxda",
@@ -275,8 +275,8 @@ window.SITE_DATA = {
         "WHIF": "https://whif.io/characters/6b89ff45-e02a-44cd-96e0-de22a8fb1456"
       },
       "wm": true,
-      "slug": "강태욱",
-      "cardKey": "1k1qzy8"
+      "slug": "gangtaeuk",
+      "cardKey": "12kd46u"
     },
     {
       "id": "mwso42vhuaf6",
@@ -303,8 +303,8 @@ window.SITE_DATA = {
         "합작": "https://whif.io/universes/0065d43a-760d-4621-80c8-fcb58b4328fe"
       },
       "wm": true,
-      "slug": "제로",
-      "cardKey": "1isqy8f"
+      "slug": "jero",
+      "cardKey": "y6f0eg"
     },
     {
       "id": "mwso4qng640u",
@@ -326,7 +326,7 @@ window.SITE_DATA = {
       "links": {},
       "hidden": true,
       "wm": true,
-      "slug": "-"
+      "slug": "c"
     },
     {
       "id": "mwso4a155q12",
@@ -352,8 +352,8 @@ window.SITE_DATA = {
       },
       "wm": true,
       "birthday": "10-14",
-      "slug": "차이현",
-      "cardKey": "19r73ga"
+      "slug": "chaihyeon",
+      "cardKey": "daiqs3"
     },
     {
       "id": "mwrzr4dyeaev",
@@ -383,8 +383,8 @@ window.SITE_DATA = {
       "previewX": 50,
       "previewZoom": 1,
       "wm": true,
-      "slug": "바쿠",
-      "cardKey": "1fdsjtn"
+      "slug": "baku",
+      "cardKey": "1qkug3v"
     },
     {
       "id": "mwrtiya3dc2d",
@@ -416,8 +416,8 @@ window.SITE_DATA = {
       "previewX": 50,
       "previewZoom": 1,
       "birthday": "08-15",
-      "slug": "차은호",
-      "cardKey": "3uzosl"
+      "slug": "chaeunho",
+      "cardKey": "sz9701"
     },
     {
       "id": "mwrpnjsa3wrf",
@@ -443,8 +443,8 @@ window.SITE_DATA = {
       "previewZoom": 1,
       "theme": "home",
       "wm": true,
-      "slug": "한세빈",
-      "cardKey": "1sqpzx8"
+      "slug": "hansebin",
+      "cardKey": "hav4p5"
     },
     {
       "id": "mwrpmrvpy9l0",
@@ -470,8 +470,8 @@ window.SITE_DATA = {
       "previewZoom": 1,
       "theme": "home",
       "wm": true,
-      "slug": "강태승",
-      "cardKey": "dj3az2"
+      "slug": "gangtaeseung",
+      "cardKey": "ucjdi6"
     },
     {
       "id": "mwrpqewk3sy6",
@@ -497,8 +497,8 @@ window.SITE_DATA = {
       "previewZoom": 1,
       "theme": "home",
       "wm": true,
-      "slug": "늘봄-셰어하우스",
-      "cardKey": "1x16qus"
+      "slug": "neulbom-syeeohauseu",
+      "cardKey": "aw0vsb"
     },
     {
       "id": "mwrpoipi2f62",
@@ -524,8 +524,8 @@ window.SITE_DATA = {
       "previewZoom": 1,
       "theme": "home",
       "wm": true,
-      "slug": "늘봄-셰어하우스-2",
-      "cardKey": "fejh9"
+      "slug": "neulbom-syeeohauseu-2",
+      "cardKey": "1ysevjo"
     },
     {
       "id": "mwrpfr95ttut",
@@ -551,8 +551,8 @@ window.SITE_DATA = {
       "previewZoom": 1,
       "wm": true,
       "birthday": "12-24",
-      "slug": "니힐",
-      "cardKey": "1w6qlnn"
+      "slug": "nihil",
+      "cardKey": "2wepa8"
     },
     {
       "id": "mwrpenxf93yt",
@@ -580,8 +580,8 @@ window.SITE_DATA = {
       "previewX": 50,
       "previewZoom": 1,
       "birthday": "07-08",
-      "slug": "베일",
-      "cardKey": "1dd39ly"
+      "slug": "beil",
+      "cardKey": "143fb9j"
     },
     {
       "id": "mwsj5mvjzgsf",
@@ -607,8 +607,8 @@ window.SITE_DATA = {
       },
       "theme": "fire",
       "wm": true,
-      "slug": "중앙소방서-구조대-2팀",
-      "cardKey": "1kpmu7c"
+      "slug": "jungangsobangseo-gujodae-2tim",
+      "cardKey": "139ojfq"
     },
     {
       "id": "mwrmeo1x9fr6",
@@ -642,8 +642,8 @@ window.SITE_DATA = {
         "또 사고치고 있어 저것들이…….",
         "뭘 봐."
       ],
-      "slug": "오태식",
-      "cardKey": "1l71mq3"
+      "slug": "otaesik",
+      "cardKey": "rcw62n"
     },
     {
       "id": "mwrmb1hcvuhk",
@@ -677,8 +677,8 @@ window.SITE_DATA = {
         "보고 싶다.",
         "혹시 시간 비어요?"
       ],
-      "slug": "강민우",
-      "cardKey": "1n0jbnz"
+      "slug": "gangminu",
+      "cardKey": "1dglh"
     },
     {
       "id": "mwrlmy5purob",
@@ -714,8 +714,8 @@ window.SITE_DATA = {
         "밥은 먹었어?",
         "괜히 돌아다니지 말고 앉아서 쉬기나 해."
       ],
-      "slug": "송재현",
-      "cardKey": "1ncfjuu"
+      "slug": "songjaehyeon",
+      "cardKey": "15t3bxc"
     }
   ]
 };

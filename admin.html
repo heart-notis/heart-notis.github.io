@@ -2322,9 +2322,25 @@
     /* ---------- 🔗 캐릭터별 공유 주소 + 공유 카드 ---------- */
     const SITE_URL = "https://heart-notis.github.io/";
     // 등록된 이름으로 주소 만들기 (이모티콘·기호는 빼고, 띄어쓰기는 -)
-    const slugBase = name => String(name || "").normalize("NFC")
-      .replace(/[\p{Extended_Pictographic}\u{FE0F}\u{FE0E}\u{200D}\u{20E3}\u{1F1E6}-\u{1F1FF}\u{1F3FB}-\u{1F3FF}]/gu, "")
-      .replace(/[\/\\?#%.,:;"'<>|*~`!@$^&()\[\]{}+=♥♡❤]/g, " ").trim().replace(/\s+/g, "-").slice(0, 40) || "c";
+    // 한글 → 영문 (X·카톡에서 주소 전체가 링크로 잡히게) 예: 카일루스 → kailluseu
+    const romanize = str => {
+      const I = ["g","kk","n","d","tt","r","m","b","pp","s","ss","","j","jj","ch","k","t","p","h"];
+      const V = ["a","ae","ya","yae","eo","e","yeo","ye","o","wa","wae","oe","yo","u","wo","we","wi","yu","eu","ui","i"];
+      const F = ["","k","k","k","n","n","n","t","l","k","m","l","l","l","p","l","m","p","p","t","t","ng","t","t","k","t","p","t"];
+      let out = "", prevF = -1;
+      for (const ch of str) {
+        const c = ch.charCodeAt(0) - 0xAC00;
+        if (c < 0 || c > 11171) { out += ch; prevF = -1; continue; }
+        const ini = Math.floor(c / 588), med = Math.floor((c % 588) / 28), fin = c % 28;
+        let a = I[ini]; if (ini === 5 && prevF === 8) a = "l";   // ㄹ+ㄹ → ll
+        out += a + V[med] + F[fin]; prevF = fin;
+      }
+      return out;
+    };
+    // 등록된 이름으로 주소 만들기 (이모티콘·기호는 빼고, 한글은 영문으로, 띄어쓰기는 -)
+    const slugBase = name => romanize(String(name || "").normalize("NFC")
+      .replace(/[\p{Extended_Pictographic}\u{FE0F}\u{FE0E}\u{200D}\u{20E3}\u{1F1E6}-\u{1F1FF}\u{1F3FB}-\u{1F3FF}]/gu, ""))
+      .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40) || "c";
     function assignSlugs(posts) {
       const used = new Set();
       posts.forEach(p => { if (p.slug) { if (used.has(p.slug)) delete p.slug; else used.add(p.slug); } });
@@ -2332,7 +2348,7 @@
     }
     const charUrl = p => p && p.slug ? `${SITE_URL}c/${p.slug}` : SITE_URL;
     const plainTxt = t => String(t || "").replace(/\*\*|__|~~|`/g, "").replace(/\{\{\s*user\s*\}\}/gi, "당신").replace(/\s+/g, " ").trim();
-    const cardKey = p => { const k = JSON.stringify(["v5", p.name, p.tagline || "", p.image || "", p.previewPos ?? 25, p.world || "", !!(p.spoiler && !spoilerOpened(p)), p.releaseDate || "", p.releaseTime || "", p.slug]); let h = 5381; for (let i = 0; i < k.length; i++) h = (h * 33 + k.charCodeAt(i)) | 0; return (h >>> 0).toString(36); };
+    const cardKey = p => { const k = JSON.stringify(["v6", p.name, p.tagline || "", p.image || "", p.previewPos ?? 25, p.world || "", !!(p.spoiler && !spoilerOpened(p)), p.releaseDate || "", p.releaseTime || "", p.slug]); let h = 5381; for (let i = 0; i < k.length; i++) h = (h * 33 + k.charCodeAt(i)) | 0; return (h >>> 0).toString(36); };
     function wrapLines(g, text, maxW, maxLines) {
       const words = String(text).split(/(\s+)/), lines = []; let cur = "";
       const push = w => { if (g.measureText(cur + w).width <= maxW) { cur += w; return; } if (cur.trim()) lines.push(cur.trim()); cur = ""; if (g.measureText(w).width > maxW) { for (const ch of w) { if (g.measureText(cur + ch).width > maxW) { lines.push(cur); cur = ""; } cur += ch; } } else cur = w.trimStart(); };
