@@ -946,6 +946,13 @@
     .d-text { margin-top: 12px; font-size: .92rem; line-height: 1.7; white-space: pre-line; color: var(--m-text, #2b2f35); }
     .d-tags { margin-top: 8px; font-size: .86rem; }
     .t-title { font-weight: 800; font-size: .98rem; margin-top: 2px; }
+    .t-title:has(.np-tag) { display: flex; align-items: center; flex-wrap: wrap; row-gap: 4px; }
+    .np-tag { margin-left: auto; display: inline-flex; align-items: center; gap: 3px; padding: 2px 9px; border-radius: 999px; font-size: .7rem; font-weight: 800; background: linear-gradient(120deg, #ffe9ee, #f6eefe); color: #c0485a; border: 1px solid #f4c7d1; white-space: nowrap; }
+    .t-title:has(.np-tag) > span:not(.np-tag) { margin-left: 6px; }
+    .np-line { display: flex; align-items: center; gap: 8px; margin: 8px 0 2px; padding: 8px 12px; border-radius: 12px; background: linear-gradient(120deg, #fff0f3, #f7f1fe); border: 1px solid #f4cfd8; font-size: .82rem; color: #b04255; font-weight: 700; line-height: 1.4; }
+    .np-line span { flex: 1; min-width: 0; } .np-line em { font-style: normal; flex-shrink: 0; font-size: .72rem; color: #a48a95; font-weight: 600; }
+    html.dark .np-tag { background: linear-gradient(120deg, #3a1d26, #2b2140); border-color: #5c2c3a; color: #f39aab; }
+    html.dark .np-line { background: linear-gradient(120deg, #2e1a21, #241f36); border-color: #4e2a36; color: #f2a0b0; } html.dark .np-line em { color: #b8a0aa; }
     .t-tagline { font-size: .88rem; color: #4a4f57; margin-top: 1px; white-space: pre-line; }
     .t-tags { font-size: .85rem; margin-top: 3px; }
     .d-text .who { font-weight: 800; }
@@ -1316,6 +1323,10 @@
     const isBdayTmr = c => { const t = new Date(); t.setDate(t.getDate() + 1); return !!(c && c.birthday && c.birthday === mmdd(t) && !isSpoiler(c)); };
     const isBday = c => !!(c && c.birthday && c.birthday === mmdd(new Date()) && !isSpoiler(c));   // 스포일러는 생일 숨김
     const portEnd = c => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec((c && c.portDate) || ""); if (!m) return 0; if (c.portTime) { const [h, mi] = c.portTime.split(":"); return new Date(+m[1], m[2] - 1, +m[3], +h || 0, +mi || 0).getTime(); } return new Date(+m[1], m[2] - 1, +m[3] + 1).getTime(); };
+    // 🚫 이식 불가: 정한 날짜가 지나면 자동으로 떨어져요
+    const npEnd = c => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec((c && c.noPortUntil) || ""); return m ? new Date(+m[1], m[2] - 1, +m[3] + 1).getTime() : 0; };
+    const isNoPort = c => !!(c && c.noPort && (!npEnd(c) || Date.now() < npEnd(c)));
+    const npLabel = c => { if (!c.noPortUntil) return ""; const [, m, d] = c.noPortUntil.split("-"); return `~${+m}/${+d}`; };
     const isPort = c => !!(c && c.port && !isSpoiler(c) && (!portEnd(c) || Date.now() < portEnd(c)));
     const portInfo = c => c.portNote || (c.portDate ? (() => { const [, m, d] = c.portDate.split("-"); return `${+m}월 ${+d}일${c.portTime ? " " + c.portTime : ""} 이식`; })() : "");
     const isUpdated = c => { const t = Date.parse(c.updatedAt || ""); return !isNaN(t) && Date.now() - t < 86400000; };
@@ -1514,7 +1525,7 @@
           <div class="t-main">
             ${isPort(c) ? `<div class="port-tag"><span>↪ 이식 예정</span>${portInfo(c) ? `<em>${escH(portInfo(c))}</em>` : ""}</div>` : ""}
             ${headHTML(isReleased(c) ? c.releaseDate : c.date)}${updBadge(c) || logMini(c)}
-            <p class="t-title">${escH(c.name)}${isBday(c) ? `<span class="bday-tag">🎂 생일</span>` : isBdayTmr(c) ? `<span class="bday-tag soon">🎂 내일 생일</span>` : ""}${c.contest ? `<span class="ct-tag">🏆 공모전</span>` : ""}</p>
+            <p class="t-title">${escH(c.name)}${isBday(c) ? `<span class="bday-tag">🎂 생일</span>` : isBdayTmr(c) ? `<span class="bday-tag soon">🎂 내일 생일</span>` : ""}${c.contest ? `<span class="ct-tag">🏆 공모전</span>` : ""}${isNoPort(c) ? `<span class="np-tag">🚫 이식 불가${npLabel(c) ? " " + npLabel(c) : ""}</span>` : ""}</p>
             ${c.tagline ? `<p class="t-tagline">${fmtText(c.tagline)}</p>` : ""}
             <p class="t-tags">${hashtags(c)}</p>
             <div class="t-media preview" style="--pv:${typeof c.previewPos === "number" ? c.previewPos : 25}%;--px:${typeof c.previewX === "number" ? c.previewX : 50}%;--pz:${typeof c.previewZoom === "number" ? c.previewZoom : 1}">${mediaHTML(c)}${c.adult ? `<span class="badge">19+</span>` : ""}${allImgs(c).length > 1 ? `<span class="many">${I.photos}${allImgs(c).length}</span>` : ""}<span class="expand">♡ 전체 보기</span></div>
@@ -1705,8 +1716,10 @@
       // 맨 위: 방금 공개된 스포일러(최근 공개 순) → 아직 스포일러 → 나머지 (원래 순서 유지)
       // 맨 위: 🎂 오늘 생일 → 방금 공개된 스포일러 → 아직 스포일러 → 나머지 (원래 순서 유지)
       // 맨 위(고정 공지 바로 아래): ✦ 스포일러 · ↪ 이식 예정 → 🎂 생일 → 방금 공개된 스포일러 → 나머지
-      const rank = c => isSpoiler(c) || isPort(c) ? -2 : isBday(c) ? -1 : isReleased(c) ? 0 : 2;
-      list.sort((a, b) => rank(a.c) - rank(b.c) || (rank(a.c) === 0 ? releaseAt(b.c) - releaseAt(a.c) : 0));
+      // 고정 공지 아래: 스포일러(공개 빠른 순) → 이식 예정(이식 빠른 순) → 생일 → 나머지
+      const rank = c => isSpoiler(c) ? -3 : isPort(c) ? -2 : isBday(c) ? -1 : isReleased(c) ? 0 : 2;
+      const soon = (c, t) => { const v = t(c); return v == null || isNaN(v) ? Infinity : v; };
+      list.sort((a, b) => rank(a.c) - rank(b.c) || (rank(a.c) === -3 ? soon(a.c, releaseAt) - soon(b.c, releaseAt) : rank(a.c) === -2 ? soon(a.c, portAt) - soon(b.c, portAt) : rank(a.c) === 0 ? releaseAt(b.c) - releaseAt(a.c) : 0));
       // 공지 중 "게시물 상단에 띄우기"를 체크한 것은 게시물 탭 맨 위에 (검색 중엔 숨김)
       const topNotices = !searchOpen && activeTag === "전체" ? notices.filter(n => n.onPosts).map(n => noticeTweet(n, true)).join("") : "";
       const head = searchOpen && q ? `<p class="srch-count">검색 결과 <b>${list.length}</b>개</p>` : "";
@@ -1780,6 +1793,7 @@
           ${isPort(c) ? `<div class="port-tag" style="margin-bottom:8px"><span>↪ 이식 예정</span>${portInfo(c) ? `<em>${escH(portInfo(c))}</em>` : ""}</div>` : ""}
           <div class="d-title">${escH(c.name)}${isBday(c) ? `<span class="bday-tag">🎂 생일</span>` : isBdayTmr(c) ? `<span class="bday-tag soon">🎂 내일 생일</span>` : ""}${c.world ? `<span class="d-world" data-world-go="${esc(c.world)}" role="button" title="이 세계관 캐릭터 모아보기">${escH(c.world)}<em class="dw-go">›</em></span>` : ""}</div>
           ${c.contest ? `<div class="ct-line">🏆 <span>${c.contestName ? `<b>${escH(c.contestName)}</b> ` : "<b>공모전</b> "}출품작</span>${c.contestResult ? `<em>${escH(c.contestResult)}</em>` : ""}</div>` : ""}
+          ${isNoPort(c) ? `<div class="np-line">🚫 <span>${c.noPortUntil ? (() => { const [, m, d] = c.noPortUntil.split("-"); return `${+m}월 ${+d}일까지 이식 불가`; })() : "이식 불가"}</span>${c.noPortReason ? `<em>${escH(c.noPortReason)}</em>` : ""}</div>` : ""}
           ${c.tagline ? `<div class="d-tagline">${fmtText(c.tagline)}</div>` : ""}
           ${Array.isArray(c.lines) && c.lines.length ? `<div class="lines" data-lines="${i}"><button class="line-btn" data-line-next>💬 한마디 더 듣기 <span class="line-cnt"></span></button><div class="line-bub" aria-live="polite"></div></div>` : ""}
           ${c.description ? `<p class="d-text">${fmtText(c.description)}</p>` : ""}
