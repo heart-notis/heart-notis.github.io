@@ -1852,7 +1852,7 @@
             ${meAva()}
             <div><div class="name">${esc(profile.name)}${I.verified}</div><div class="handle">@${esc(profile.handle)}</div></div>
           </div>
-          ${isPort(c) ? `<div class="port-tag" style="margin-bottom:8px"><span>↪ 이식 예정</span>${portInfo(c) ? `<em>${escH(portInfo(c))}</em>` : ""}</div>` : ""}
+          ${isPort(c) ? `<div class="port-tag" style="margin:14px 0 10px"><span>↪ 이식 예정</span>${portInfo(c) ? `<em>${escH(portInfo(c))}</em>` : ""}</div>` : ""}
           <div class="d-title">${escH(c.name)}${isBday(c) ? `<span class="bday-tag">🎂 생일</span>` : isBdayTmr(c) ? `<span class="bday-tag soon">🎂 내일 생일</span>` : ""}${c.world ? `<span class="d-world" data-world-go="${esc(c.world)}" role="button" title="이 세계관 캐릭터 모아보기">${escH(c.world)}<em class="dw-go">›</em></span>` : ""}</div>
           ${c.contest ? `<div class="ct-line">🏆 <span>${c.contestName ? `<b>${escH(c.contestName)}</b> ` : "<b>공모전</b> "}출품작</span>${c.contestResult ? `<em>${escH(c.contestResult)}</em>` : ""}</div>` : ""}
           ${isNoPort(c) ? `<div class="np-line">🚫 <span>${c.noPortUntil ? (() => { const [, m, d] = c.noPortUntil.split("-"); return `${+m}월 ${+d}일까지 이식 불가`; })() : "이식 불가"}</span>${c.noPortReason ? `<em>${escH(c.noPortReason)}</em>` : ""}</div>` : ""}
