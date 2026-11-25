@@ -434,7 +434,8 @@ window.SITE_DATA = {
       "previewZoom": 1,
       "wm": true,
       "slug": "12",
-      "cardKey": "1vy5l3r"
+      "cardKey": "1vy5l3r",
+      "birthday": "12-31"
     },
     {
       "id": "mwrtiya3dc2d",
