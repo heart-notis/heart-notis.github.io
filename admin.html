@@ -175,6 +175,10 @@
     .sel-chip.del { color: #e0527a; border-color: #f6cbd8; }
     .sel-chip:disabled { opacity: .4; }
     #pushMe.on { background: #efe9ff; color: #6a4fd0; }
+    #tab-messages .section-head { flex-wrap: wrap; row-gap: 10px; }
+    #tab-messages .section-head > div:first-child { flex: 1 1 200px; }
+    #tab-messages .head-btns { flex-wrap: wrap; justify-content: flex-end; margin-left: auto; }
+    #tab-messages .head-btns .btn { padding-left: 14px; padding-right: 14px; }
     .sched-box { margin-top: 14px; }
     .two-in { display: flex; gap: 8px; margin-top: 8px; } .two-in input { flex: 1; min-width: 0; height: 44px; border: 1px solid var(--line); border-radius: 12px; padding: 0 12px; font: inherit; background: #fff; }
     .sch-bdg { display: inline-block; font-size: .66rem; font-weight: 800; padding: 2px 7px; border-radius: 999px; background: #fff4e0; color: #c27a00; margin-left: 4px; vertical-align: 1px; white-space: nowrap; }
@@ -566,7 +570,7 @@
       <section id="tab-messages" class="hidden">
         <div class="section-head">
           <div><h2>받은 메시지</h2><div class="hint">홈페이지 메시지 탭에서 온 비공개 메시지예요</div></div>
-          <div class="head-btns"><button class="btn btn-ghost hidden" id="pushMe">🔔 이 폰으로 알림</button><button class="btn btn-line" id="msgRefresh">새로고침</button></div>
+          <div class="head-btns"><button class="btn btn-ghost hidden" id="pushTest">📨 알림 테스트</button><button class="btn btn-ghost hidden" id="pushMe">🔔 이 폰으로 알림</button><button class="btn btn-line" id="msgRefresh">새로고침</button></div>
         </div>
         <div id="msgArea" class="list"></div>
       </section>
@@ -2084,7 +2088,14 @@
       if (!pushReady) return;
       const on = await pushState();
       b.textContent = on ? "🔔 알림 켜짐" : "🔔 이 폰으로 알림"; b.classList.toggle("on", on); b.classList.remove("hidden");
+      $("pushTest").classList.toggle("hidden", !on);
     }
+    $("pushTest").onclick = async () => {
+      const t = $("pushTest"); t.disabled = true;
+      try { const r = await msgApi("admin-push-test"); toast(r.sent ? "📨 테스트 알림을 보냈어요 · 몇 초 안에 와요" : "보낼 기기가 없어요 · 🔔 버튼으로 다시 켜주세요"); }
+      catch { toast("못 보냈어요 · 잠시 뒤 다시 해주세요"); }
+      setTimeout(() => t.disabled = false, 3000);
+    };
     $("pushMe").onclick = async () => {
       if (await pushState()) {
         return openSheet(`<div class="sheet-t"><b>🔔 새 메시지 알림 받는 중</b></div><div class="sheet-li"><button data-pick="test">📨 테스트 알림 보내기</button><button data-pick="off" class="del">🔕 이 폰 알림 끄기</button></div>`, async act => {
