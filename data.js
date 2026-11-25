@@ -82,8 +82,10 @@ window.SITE_DATA = {
       "releaseDate": "2026-11-25",
       "releaseTime": "21:00",
       "theme": "sunset",
-      "updatedAt": "2026-11-25T03:36:49.444Z",
-      "cardKey": "1tmtqq0"
+      "updatedAt": "2026-11-25T04:28:59.795Z",
+      "cardKey": "1tmtqq0",
+      "songUrl": "https://youtu.be/AnoNJjIikX0?si=Oxf7zrEQQO16S9lf",
+      "songTitle": "Wish It Was Me"
     },
     {
       "id": "mwspzf0v78ao",
@@ -127,7 +129,10 @@ window.SITE_DATA = {
         "자유 시간을 저한테서 통째로 사시려면, 방금 치르신 가이딩 비용에 최소한 외출 할증에 위험 수당까지 얹어주셔야 할 텐데."
       ],
       "slug": "23",
-      "cardKey": "fo5adt"
+      "cardKey": "fo5adt",
+      "songUrl": "https://youtu.be/lGvJ0PIobrw?si=94IliHW8cGkN1sfk",
+      "songTitle": "No Strings Attached",
+      "updatedAt": "2026-11-25T04:29:58.010Z"
     },
     {
       "id": "mwso99e36g7y",
