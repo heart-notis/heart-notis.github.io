@@ -2092,14 +2092,19 @@
     }
     $("pushTest").onclick = async () => {
       const t = $("pushTest"); t.disabled = true;
-      try { const r = await msgApi("admin-push-test"); toast(r.sent ? "📨 테스트 알림을 보냈어요 · 몇 초 안에 와요" : "보낼 기기가 없어요 · 🔔 버튼으로 다시 켜주세요"); }
+      try {
+        const r = await msgApi("admin-push-test");
+        if (r.sent) toast(`📨 테스트 알림을 보냈어요 · 몇 초 안에 와요${r.total > 1 ? ` (${r.sent}/${r.total}대)` : ""}`);
+        else if (r.fails && r.fails.length) { confirmBox(`알림을 못 보냈어요\n${r.fails[0]}\n🔔 버튼을 눌러 알림을 껐다가 다시 켜주세요`, { ok: "알겠어요", cancel: "닫기" }); store.del("admin_push"); drawPushBtn(); }
+        else { toast("등록된 기기가 없어요 · 🔔 버튼으로 다시 켜주세요"); store.del("admin_push"); drawPushBtn(); }
+      }
       catch { toast("못 보냈어요 · 잠시 뒤 다시 해주세요"); }
       setTimeout(() => t.disabled = false, 3000);
     };
     $("pushMe").onclick = async () => {
       if (await pushState()) {
         return openSheet(`<div class="sheet-t"><b>🔔 새 메시지 알림 받는 중</b></div><div class="sheet-li"><button data-pick="test">📨 테스트 알림 보내기</button><button data-pick="off" class="del">🔕 이 폰 알림 끄기</button></div>`, async act => {
-          if (act === "test") { try { const r = await msgApi("admin-push-test"); toast(r.sent ? "테스트 알림을 보냈어요 · 잠깐 기다려보세요" : "보낼 기기가 없어요 · 다시 켜주세요"); } catch { toast("못 보냈어요 · 잠시 뒤 다시"); } }
+          if (act === "test") return $("pushTest").click();
           if (act === "off") { try { const reg = await navigator.serviceWorker.getRegistration(); const sub = reg && await reg.pushManager.getSubscription(); if (sub) await msgApi("admin-push-unsub", { endpoint: sub.endpoint }); store.del("admin_push"); toast("이 폰 알림을 껐어요"); } catch { toast("못 껐어요 · 잠시 뒤 다시"); } drawPushBtn(); }
         });
       }
@@ -2108,10 +2113,14 @@
       try {
         if ((await Notification.requestPermission()) !== "granted") return toast("알림이 막혀 있어요 · 폰 설정에서 알림을 허용해주세요");
         const reg = await navigator.serviceWorker.register("sw.js"); await navigator.serviceWorker.ready;
-        const sub = (await reg.pushManager.getSubscription()) || (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64uA(ADMIN_VAPID) }));
+        // 폰에 남아 있던 예전 등록은 이미 끊겼을 수 있어서, 켤 때마다 깨끗하게 새로 등록해요
+        const old = await reg.pushManager.getSubscription(); if (old) { try { await old.unsubscribe(); } catch {} }
+        const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64uA(ADMIN_VAPID) });
         await msgApi("admin-push-sub", { sub: sub.toJSON() }); store.set("admin_push", sub.endpoint);
-        toast("💜 이제 새 메시지가 오면 이 폰으로 알림이 와요"); drawPushBtn();
-        msgApi("admin-push-test").catch(() => {});
+        drawPushBtn();
+        const r = await msgApi("admin-push-test").catch(() => null);
+        if (r && r.sent) toast("💜 켜졌어요 · 테스트 알림을 보냈어요");
+        else confirmBox(`켜기는 했는데 테스트 알림이 안 나갔어요\n${(r && r.fails && r.fails[0]) || "등록이 안 됐어요"}\n크롬 설정 → 사이트 설정 → 알림에서 이 사이트가 허용인지 봐주세요`, { ok: "알겠어요", cancel: "닫기" });
       } catch (e) { console.warn(e); toast("알림을 못 켰어요 · 잠시 뒤 다시 해주세요"); }
     };
     $("hdrBadge").onclick = () => document.querySelector('.tab[data-tab="messages"]').click();

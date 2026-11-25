@@ -2305,7 +2305,10 @@
         if (perm !== "granted") return toast("알림이 꺼져 있어요 · 브라우저 설정에서 허용해주세요");
         const reg = await navigator.serviceWorker.register("sw.js");
         await navigator.serviceWorker.ready;
-        const sub = (await reg.pushManager.getSubscription()) || (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64u(VAPID_KEY) }));
+        let sub = await reg.pushManager.getSubscription();   // 다른 열쇠로 만든 예전 구독이면 새로
+        const want = b64u(VAPID_KEY), have = sub && sub.options && sub.options.applicationServerKey ? new Uint8Array(sub.options.applicationServerKey) : null;
+        if (sub && (!have || have.length !== want.length || have.some((v, i) => v !== want[i]))) { try { await sub.unsubscribe(); } catch {} sub = null; }
+        if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: want });
         const r = await fetch(MSG_API, { method: "POST", headers: { "content-type": "text/plain" }, body: JSON.stringify({ action: "push-sub", post: id, sub: sub.toJSON() }) });
         if (!r.ok) throw new Error("server");
         pushSubs[id] = sub.endpoint; store.set("push_subs", pushSubs); refreshNotify();
