@@ -591,6 +591,10 @@
     .act.like.pop svg { animation: pop .35s ease; }
     @keyframes pop { 50% { transform: scale(1.3); } }
     /* 재게시 · 공유는 보여주기만 (눌러도 아무 일 없음) */
+    .more-wrap { padding: 18px 16px 26px; text-align: center; border-bottom: 1px solid var(--line); }
+    .more-btn { display: inline-flex; align-items: center; gap: 8px; height: 46px; padding: 0 22px; border: 0; border-radius: 999px; background: linear-gradient(120deg, #a993f4, #74c6f0); color: #fff; font-weight: 800; font-size: .9rem; box-shadow: 0 6px 18px rgba(110,90,220,.3); cursor: pointer; transition: transform .15s; }
+    .more-btn:hover { transform: scale(1.03); } .more-btn:active { transform: scale(.97); }
+    .more-btn small { font-weight: 700; opacity: .85; font-size: .75rem; }
     .shr-wrap { position: fixed; inset: 0; z-index: 300; }
     .shr-dim { position: absolute; inset: 0; background: rgba(40,32,80,.4); opacity: 0; transition: opacity .25s; }
     .shr { position: absolute; left: 0; right: 0; bottom: 0; max-width: 560px; margin: 0 auto; background: var(--bg, #fff); border-radius: 24px 24px 0 0; padding: 10px 16px calc(18px + env(safe-area-inset-bottom)); box-shadow: 0 -10px 30px rgba(80,60,160,.2); transform: translateY(100%); transition: transform .25s ease; }
@@ -1751,9 +1755,15 @@
       // 공지 중 "게시물 상단에 띄우기"를 체크한 것은 게시물 탭 맨 위에 (검색 중엔 숨김)
       const topNotices = !searchOpen && activeTag === "전체" ? notices.filter(n => n.onPosts).map(n => noticeTweet(n, true)).join("") : "";
       const head = searchOpen && q ? `<p class="srch-count">검색 결과 <b>${list.length}</b>개</p>` : "";
-      return head + topNotices + (list.length ? list.map(({ c, i }) => charTweet(c, i)).join("")
+      // ♡ 더보기: 처음엔 MORE_STEP명까지만 (검색 중엔 전부) · 태그 바꾸면 다시 처음부터
+      if (moreTag !== activeTag) { moreTag = activeTag; moreN = MORE_STEP; }
+      const cut = !searchOpen && list.length > moreN + 2;   // 2명 남짓 남으면 그냥 다 보여줘요
+      const shown = cut ? list.slice(0, moreN) : list;
+      const moreBtn = cut ? `<div class="more-wrap"><button type="button" class="more-btn" data-more>♡ 캐릭터 더보기 <small>${moreN} / ${list.length}</small></button></div>` : "";
+      return head + topNotices + (list.length ? shown.map(({ c, i }) => charTweet(c, i)).join("") + moreBtn
         : `<p class="empty">${searchOpen ? "찾는 게시물이 없어요" : characters.length ? "해당 해시태그의 게시물이 없어요" : "아직 게시물이 없어요"}</p>`);
     }
+    const MORE_STEP = 10; let moreN = MORE_STEP, moreTag = null;
     function closeSearch() { searchOpen = false; searchQ = ""; renderView(); }
 
     /* ---- 태그 줄: 손가락/마우스로 밀기 ---- */
@@ -2066,6 +2076,7 @@
     }
 
     document.addEventListener("click", e => {
+      if (e.target.closest("[data-more]")) { moreN += MORE_STEP; renderView(); return; }
       const like = e.target.closest("[data-like]");
       if (like) { e.stopPropagation(); return toggleLike(+like.dataset.like); }
       const sh = e.target.closest("[data-share]");
