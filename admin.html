@@ -2312,7 +2312,7 @@
     }
     const charUrl = p => p && p.slug ? `${SITE_URL}c/${p.slug}` : SITE_URL;
     const plainTxt = t => String(t || "").replace(/\*\*|__|~~|`/g, "").replace(/\{\{\s*user\s*\}\}/gi, "당신").replace(/\s+/g, " ").trim();
-    const cardKey = p => { const k = JSON.stringify(["v1", p.name, p.tagline || "", p.image || "", p.previewPos ?? 25, p.world || "", !!(p.spoiler && !spoilerOpened(p)), p.releaseDate || "", p.releaseTime || "", p.slug]); let h = 5381; for (let i = 0; i < k.length; i++) h = (h * 33 + k.charCodeAt(i)) | 0; return (h >>> 0).toString(36); };
+    const cardKey = p => { const k = JSON.stringify(["v2", p.name, p.tagline || "", p.image || "", p.previewPos ?? 25, p.world || "", !!(p.spoiler && !spoilerOpened(p)), p.releaseDate || "", p.releaseTime || "", p.slug]); let h = 5381; for (let i = 0; i < k.length; i++) h = (h * 33 + k.charCodeAt(i)) | 0; return (h >>> 0).toString(36); };
     function wrapLines(g, text, maxW, maxLines) {
       const words = String(text).split(/(\s+)/), lines = []; let cur = "";
       const push = w => { if (g.measureText(cur + w).width <= maxW) { cur += w; return; } if (cur.trim()) lines.push(cur.trim()); cur = ""; if (g.measureText(w).width > maxW) { for (const ch of w) { if (g.measureText(cur + ch).width > maxW) { lines.push(cur); cur = ""; } cur += ch; } } else cur = w.trimStart(); };
@@ -2328,22 +2328,30 @@
       const spo = !!(p.spoiler && !spoilerOpened(p));
       // 오른쪽 바탕
       const bg = g.createLinearGradient(0, 0, W, H); bg.addColorStop(0, "#f4efff"); bg.addColorStop(1, "#e6f3fd"); g.fillStyle = bg; g.fillRect(0, 0, W, H);
-      // 왼쪽: 캐릭터 사진 (목록 위치 기준으로 정사각형)
-      const S = 630;
+      // 왼쪽: 캐릭터 사진 → 오른쪽 바탕으로 부드럽게 스며들게
+      const S = 760, F0 = 380;
+      g.fillStyle = "#d9cffb"; g.fillRect(0, 0, S, H);
       try {
         const im = await loadImage(imgSrc || p.image);
-        const sc = Math.max(S / im.width, S / im.height), iw = im.width * sc, ih = im.height * sc;
+        const sc = Math.max(S / im.width, H / im.height), iw = im.width * sc, ih = im.height * sc;
         const pv = (typeof p.previewPos === "number" ? p.previewPos : 25) / 100;
-        g.save(); g.beginPath(); g.rect(0, 0, S, H); g.clip();
-        if (spo) g.filter = "blur(26px) saturate(1.1)";
-        g.drawImage(im, (S - iw) / 2, (H - ih) * pv, iw, ih); g.filter = "none";
+        g.save(); if (spo) g.filter = "blur(26px) saturate(1.1)";
+        g.drawImage(im, (S - iw) / 2 - 40, (H - ih) * pv, iw, ih); g.filter = "none"; g.restore();
         if (spo) { g.fillStyle = "rgba(60,40,120,.28)"; g.fillRect(0, 0, S, H); }
-        g.restore();
-      } catch { g.fillStyle = "#d9cffb"; g.fillRect(0, 0, S, H); }
-      const edge = g.createLinearGradient(S - 60, 0, S, 0); edge.addColorStop(0, "rgba(244,239,255,0)"); edge.addColorStop(1, "rgba(244,239,255,.9)"); g.fillStyle = edge; g.fillRect(S - 60, 0, 60, H);
-      if (spo) { g.fillStyle = "rgba(255,255,255,.92)"; g.font = `800 46px ${font}`; g.textAlign = "center"; g.fillText("✦ SPOILER", S / 2, H / 2 + 16); g.textAlign = "left"; }
+      } catch {}
+      // 바탕을 가로 그라데이션 마스크로 덮어서 사진이 자연스럽게 사라지게
+      const ov = document.createElement("canvas"); ov.width = W; ov.height = H; const o = ov.getContext("2d");
+      const bg2 = o.createLinearGradient(0, 0, W, H); bg2.addColorStop(0, "#f4efff"); bg2.addColorStop(1, "#e6f3fd"); o.fillStyle = bg2; o.fillRect(0, 0, W, H);
+      o.globalCompositeOperation = "destination-in";
+      const mk = o.createLinearGradient(F0, 0, S, 0);
+      [[0, 0], [.25, .12], [.5, .42], [.75, .8], [1, 1]].forEach(([t, a]) => mk.addColorStop(t, `rgba(0,0,0,${a})`));
+      o.fillStyle = mk; o.fillRect(0, 0, W, H);
+      g.drawImage(ov, 0, 0);
+      // 아래쪽도 살짝 라벤더 빛
+      const lo = g.createLinearGradient(0, H - 160, 0, H); lo.addColorStop(0, "rgba(185,162,246,0)"); lo.addColorStop(1, "rgba(185,162,246,.18)"); g.fillStyle = lo; g.fillRect(0, H - 160, S, 160);
+      if (spo) { g.fillStyle = "rgba(255,255,255,.92)"; g.font = `800 46px ${font}`; g.textAlign = "center"; g.fillText("✦ SPOILER", 330, H / 2 + 16); g.textAlign = "left"; }
       const heart = (x, y, sz) => { g.save(); g.translate(x, y); g.scale(sz / 24, sz / 24); const hg = g.createLinearGradient(0, 0, 24, 24); hg.addColorStop(0, "#b9a2f6"); hg.addColorStop(1, "#7fcdf2"); g.fillStyle = hg; g.fill(new Path2D("M12 21.2s-8.6-5.2-10.4-10.6C.3 6.6 2.8 2.8 6.7 2.8c2.3 0 4.1 1.2 5.3 3.1 1.2-1.9 3-3.1 5.3-3.1 3.9 0 6.4 3.8 5.1 7.8C20.6 16 12 21.2 12 21.2z")); g.restore(); };
-      const x = S + 56, maxW = W - x - 56; let y = 92;
+      const x = 690, maxW = W - x - 50; let y = 92;
       g.textBaseline = "alphabetic";
       // 세계관 칩
       if (p.world) {
