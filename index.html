@@ -600,7 +600,7 @@
     .shr-card { touch-action: pan-y; user-select: none; }
     .shr-slide { display: flex; transition: transform .3s ease; }
     .shr-slide img { flex: 0 0 100%; width: 100%; aspect-ratio: 1200 / 630; object-fit: cover; display: block; background: #f3efff; pointer-events: none; }
-    .shr-pg { display: flex; justify-content: center; gap: 5px; margin-top: 8px; }
+    .shr-pg { display: flex; justify-content: center; gap: 5px; margin: 10px 0 14px; }
     .shr-pg i { width: 6px; height: 6px; border-radius: 9px; background: #ddd6f5; transition: all .2s; }
     .shr-pg i.on { width: 18px; background: linear-gradient(90deg, #b9a2f6, #7fcdf2); }
     html.dark .shr-dots button { background: #24223a; color: #8f8aa6; }
@@ -1961,8 +1961,8 @@
     function shareChar(i) {
       const c = characters[i]; if (!c) return;
       let st = 2;
-      const sd = n => n === 2 ? "" : `${n}/`;
-      const urlOf = n => c.slug ? `${location.origin}/c/${c.slug}${n === 2 ? "" : "/" + n}` : location.href.split("#")[0];
+      const sd = n => n === 1 ? "" : `${n}/`;
+      const urlOf = n => c.slug ? `${location.origin}/c/${c.slug}${n === 1 ? "" : "/" + n}` : location.href.split("#")[0];
       const imgOf = n => c.slug ? `c/${encodeURIComponent(c.slug)}/${sd(n)}card.jpg${c.cardKey ? "?v=" + c.cardKey : ""}` : "";
       const sub = isSpoiler(c) ? "✦ 곧 공개될 캐릭터예요" : String(c.tagline || "").replace(/\*\*|__|~~|`/g, "").replace(/\{\{\s*user\s*\}\}/gi, "당신");
       const el = document.createElement("div"); el.className = "shr-wrap";
@@ -1971,7 +1971,6 @@
           ${c.slug ? `<div class="shr-dots">${[1, 2, 3].map(n => `<button data-st="${n}" aria-label="${n}번 카드">${n}</button>`).join("")}</div>` : ""}</div>
         <div class="shr-card">${c.slug ? `<div class="shr-slide" id="shrSlide">${[1, 2, 3].map(n => `<img src="${esc(imgOf(n))}" alt="" draggable="false" />`).join("")}</div>` : ""}<div class="shr-meta"><b>${escH(c.name)} · 하트 (@HEART)</b>${sub ? `<span>${escH(sub)}</span>` : ""}</div></div>
         ${c.slug ? `<div class="shr-pg">${[1, 2, 3].map(n => `<i data-pg="${n}"></i>`).join("")}</div>` : ""}
-        <div class="shr-url"><span id="shrUrl"></span>🔗</div>
         <div class="shr-btns"><button data-shr-x>닫기</button><button class="go" data-shr-copy>링크 복사하기</button></div></div>`;
       document.body.appendChild(el); requestAnimationFrame(() => el.classList.add("show"));
       const set = n => {
@@ -1979,9 +1978,8 @@
         el.querySelectorAll("[data-st]").forEach(b => b.classList.toggle("on", +b.dataset.st === st));
         el.querySelectorAll("[data-pg]").forEach(d => d.classList.toggle("on", +d.dataset.pg === st));
         const sl = el.querySelector("#shrSlide"); if (sl) sl.style.transform = `translateX(${-(st - 1) * 100}%)`;
-        el.querySelector("#shrUrl").textContent = urlOf(st).replace(/^https?:\/\//, "");
       };
-      set(2);
+      set(1);
       const card = el.querySelector(".shr-card"); let x0 = null;
       card.addEventListener("pointerdown", e => { x0 = e.clientX; });
       card.addEventListener("pointerup", e => { if (x0 === null) return; const dx = e.clientX - x0; x0 = null; if (Math.abs(dx) > 40) set(st + (dx < 0 ? 1 : -1)); });

@@ -2332,7 +2332,7 @@
     }
     const charUrl = p => p && p.slug ? `${SITE_URL}c/${p.slug}` : SITE_URL;
     const plainTxt = t => String(t || "").replace(/\*\*|__|~~|`/g, "").replace(/\{\{\s*user\s*\}\}/gi, "당신").replace(/\s+/g, " ").trim();
-    const cardKey = p => { const k = JSON.stringify(["v4", p.name, p.tagline || "", p.image || "", p.previewPos ?? 25, p.world || "", !!(p.spoiler && !spoilerOpened(p)), p.releaseDate || "", p.releaseTime || "", p.slug]); let h = 5381; for (let i = 0; i < k.length; i++) h = (h * 33 + k.charCodeAt(i)) | 0; return (h >>> 0).toString(36); };
+    const cardKey = p => { const k = JSON.stringify(["v5", p.name, p.tagline || "", p.image || "", p.previewPos ?? 25, p.world || "", !!(p.spoiler && !spoilerOpened(p)), p.releaseDate || "", p.releaseTime || "", p.slug]); let h = 5381; for (let i = 0; i < k.length; i++) h = (h * 33 + k.charCodeAt(i)) | 0; return (h >>> 0).toString(36); };
     function wrapLines(g, text, maxW, maxLines) {
       const words = String(text).split(/(\s+)/), lines = []; let cur = "";
       const push = w => { if (g.measureText(cur + w).width <= maxW) { cur += w; return; } if (cur.trim()) lines.push(cur.trim()); cur = ""; if (g.measureText(w).width > maxW) { for (const ch of w) { if (g.measureText(cur + ch).width > maxW) { lines.push(cur); cur = ""; } cur += ch; } } else cur = w.trimStart(); };
@@ -2391,8 +2391,8 @@
       g.fillStyle = dark ? "rgba(255,255,255,.72)" : "#8a8f99"; g.font = `500 25px ${font}`; g.fillText("@HEART", x0 + 54 + nw, by - 4);
       return cv.toDataURL("image/jpeg", 0.88);
     }
-    const styleDir = n => n === 2 ? "" : `${n}/`;   // 2번(기본)은 c/이름, 1·3번은 c/이름/1 · c/이름/3
-    function cardPage(p, key, open = false, n = 2) {
+    const styleDir = n => n === 1 ? "" : `${n}/`;   // 1번(기본)은 c/이름, 2·3번은 c/이름/2 · c/이름/3
+    function cardPage(p, key, open = false, n = 1) {
       const spo = open ? false : !!(p.spoiler && !spoilerOpened(p));
       const title = `${p.name} · 하트 (@HEART)`;
       const desc = spo ? "✦ 곧 공개될 캐릭터예요 · 하트 (@HEART)" : (plainTxt(p.tagline) || "하트 (@HEART)의 캐릭터예요 💙");
