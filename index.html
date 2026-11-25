@@ -707,6 +707,7 @@
 
     .empty { text-align: center; padding: 48px 20px; color: var(--sub); font-size: .92rem; }
     footer { text-align: center; font-size: .78rem; color: var(--faint); padding: 28px 0 40px; }
+    @media (max-width: 600px) { footer { padding: 28px 72px calc(48px + env(safe-area-inset-bottom)); line-height: 1.6; } }   /* 오른쪽 아래 TOP 버튼에 글자가 안 가리게 */
 
     /* ---------- 상세 모달 ---------- */
     .overlay {
@@ -2150,7 +2151,7 @@
       const open = e.target.closest("[data-open]");
       if (open && !e.target.closest(".modal")) return openTweet(+open.dataset.open);
     });
-    document.addEventListener("keydown", e => { if (e.key === "Escape") closeTweet(); });
+    document.addEventListener("keydown", e => { if (e.key !== "Escape") return; if (document.querySelector(".shr-wrap")) return document.querySelectorAll(".shr-wrap [data-shr-x], .shr-wrap [data-x]")[0]?.click(); if (calEls) return closeCal(); closeTweet(); });
 
     /* =====================================================
        💜 마우스 · 터치 하트 효과 (끄려면 false)

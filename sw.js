@@ -31,7 +31,7 @@ self.addEventListener("push", e => {
   try { d = e.data.json(); } catch { d = { title: "하트", body: e.data ? e.data.text() : "" }; }
   e.waitUntil(self.registration.showNotification(d.title || "하트", {
     body: d.body || "",
-    icon: "apple-touch-icon.png",
+    icon: d.icon || "apple-touch-icon.png",
     badge: "favicon-64.png",
     image: d.image,
     tag: d.tag,
@@ -42,7 +42,10 @@ self.addEventListener("notificationclick", e => {
   e.notification.close();
   const url = (e.notification.data && e.notification.data.url) || "./";
   e.waitUntil(self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(ws => {
-    for (const w of ws) if ("focus" in w) { w.navigate(url); return w.focus(); }
+    const want = new URL(url, self.location.origin), adminUrl = /admin\.html/.test(want.pathname);
+    // 제작자 알림은 제작자 페이지 창으로, 홈페이지 알림은 홈페이지 창으로
+    const same = ws.find(w => /admin\.html/.test(new URL(w.url).pathname) === adminUrl);
+    if (same && "focus" in same) { same.navigate(want.href); return same.focus(); }
     return self.clients.openWindow(url);
   }));
 });
