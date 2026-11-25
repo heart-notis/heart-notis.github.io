@@ -1016,7 +1016,7 @@
       const ex = $("exRow") ? $("exRow").querySelectorAll("img").length : 0;
       set("sec_photo", ex ? `추가 ${ex}장 · 목록 위치` : "추가 사진 · 목록 위치");
       const ln = $("f_lines").value.split("\n").filter(x => x.trim()).length;
-      set("sec_text", [$("f_tagline").value.trim() ? "한 줄 ✓" : "", ln ? `대사 ${ln}` : "", $("f_desc").value.trim() ? "본문 ✓" : ""].filter(Boolean).join(" · ") || "한 줄 · 대사 · 본문");
+      set("sec_text", [$("f_tagline").value.trim() ? "한 줄 ✓" : "", ln ? `대사 ${ln}` : "", $("f_desc").value.trim() ? "본문 ✓" : "", $("f_songUrl")?.value.trim() ? "♪ 테마곡" : ""].filter(Boolean).join(" · ") || "한 줄 · 대사 · 본문");
       set("sec_link", [...document.querySelectorAll("#f_tags .on")].map(b => b.textContent).join(" ") || "태그 고르기");
       set("sec_theme", $("f_themeNow").textContent);
       const on = [["f_contest", "🏆"], ["f_noPort", "🚫"], ["f_spoiler", "✦ 스포"], ["f_port", "↪ 이식"], ["f_adult", "19+"], ["f_hidden", "🙈 비공개"], ["f_quiet", "🤫"]].filter(([id]) => $(id) && $(id).checked).map(([, t]) => t);
@@ -1173,6 +1173,8 @@
           <div class="hint" style="margin-bottom:-6px">✍️ 글 꾸미기: <i>*기울기*</i> · <b>**두껍게**</b></div>
           <label class="f">자세한 소개<textarea id="f_desc">${esc(item.description)}</textarea></label>
           <label class="f">첫 인사말 <small>상세 화면에서 캐릭터의 답글처럼 보여요</small><textarea id="f_greet" style="min-height:60px">${esc(item.greeting)}</textarea></label>
+          <label class="f">🎵 테마곡 <small>유튜브 링크를 넣으면 상세 화면에서 바로 재생돼요 · 목록엔 ♪ 테마곡 딱지 · 비워두면 안 보여요</small><input type="url" id="f_songUrl" placeholder="https://youtu.be/…" value="${esc(item.songUrl || "")}" /></label>
+          <label class="f">곡 제목 <small>비우면 "테마곡"으로 보여요</small><input type="text" id="f_songTitle" maxlength="40" placeholder="황제의 왈츠" value="${esc(item.songTitle || "")}" /></label>
           </div></details>
           <details class="sec" id="sec_link" ${index < 0 ? "open" : ""}><summary><span class="sec-t">🔗 대화 링크 · 태그</span><span class="sec-sum" data-sum="sec_link"></span><i class="sec-ar"></i></summary><div class="sec-in">
           <label class="f">해시태그<div class="tag-pick" id="f_tags">${data.tags.map(t => `<button type="button" class="${(item.tags || []).includes(t) ? "on" : ""}" data-tag="${esc(t)}">#${esc(t)}</button>`).join("") || `<small>해시태그 탭에서 먼저 태그를 만들어주세요</small>`}</div></label>
@@ -1566,6 +1568,9 @@
       it.world = $("f_world").value.trim();
       it.date = $("f_date").value || today();
       it.tagline = $("f_tagline").value.trim();
+      { const su = $("f_songUrl").value.trim(), st = $("f_songTitle").value.trim();
+        if (su && !/(?:youtu\.be\/|[?&]v=|\/(?:embed|shorts|live)\/)[\w-]{11}/.test(su)) { toast("테마곡은 유튜브 링크만 넣을 수 있어요"); return; }
+        if (su) { it.songUrl = su; if (st) it.songTitle = st; else delete it.songTitle; } else { delete it.songUrl; delete it.songTitle; } }
       const bm = $("f_bm").value, bd = $("f_bd").value;
       if (bm && bd) it.birthday = `${String(bm).padStart(2, "0")}-${String(bd).padStart(2, "0")}`; else delete it.birthday;
       if (!it.createdAt && edit.index < 0) it.createdAt = new Date().toISOString();

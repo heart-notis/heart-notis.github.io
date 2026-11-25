@@ -947,6 +947,24 @@
     .d-tags { margin-top: 8px; font-size: .86rem; }
     .t-title { font-weight: 800; font-size: .98rem; margin-top: 2px; }
     .t-title:has(.np-tag) { display: flex; align-items: center; flex-wrap: wrap; row-gap: 4px; }
+    .sg-tag { display: inline-flex; align-items: center; gap: 3px; margin-left: 6px; padding: 2px 8px; border-radius: 999px; font-size: .7rem; font-weight: 800; vertical-align: 2px; background: linear-gradient(120deg, #efe9ff, #e3f2fd); color: #7353d6; border: 1px solid #ddd3fa; white-space: nowrap; }
+    html.dark .sg-tag { background: linear-gradient(120deg, #2c2645, #1f3040); border-color: #463d6e; color: #c9b8ff; }
+    .song { display: flex; align-items: center; gap: 8px; margin-top: 10px; padding: 7px 7px 7px 14px; border-radius: 999px; background: linear-gradient(120deg, #efe9ff, #e3f2fd); font-size: .86rem; color: #1f1d2b; cursor: pointer; user-select: none; transition: transform .15s; }
+    .song:hover { transform: scale(1.015); }
+    .song .sg-n { color: #8b6ff0; font-weight: 800; }
+    .song b { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 800; }
+    .song .eq { display: flex; gap: 2px; align-items: flex-end; height: 13px; }
+    .song .eq i { width: 3px; border-radius: 2px; background: linear-gradient(#b9a2f6, #7fcdf2); }
+    .song .eq i:nth-child(1) { height: 5px } .song .eq i:nth-child(2) { height: 11px } .song .eq i:nth-child(3) { height: 8px } .song .eq i:nth-child(4) { height: 13px }
+    .song.on .eq i { animation: sgEq .9s ease-in-out infinite alternate; }
+    .song.on .eq i:nth-child(2) { animation-delay: -.3s } .song.on .eq i:nth-child(3) { animation-delay: -.6s } .song.on .eq i:nth-child(4) { animation-delay: -.15s }
+    @keyframes sgEq { from { height: 3px } to { height: 13px } }
+    .song .sg-p { width: 28px; height: 28px; border: 0; border-radius: 50%; background: #fff; color: #7353d6; display: flex; align-items: center; justify-content: center; font-size: 11px; box-shadow: 0 2px 6px rgba(110,90,220,.2); cursor: pointer; flex-shrink: 0; padding: 0; }
+    .song-fr { overflow: hidden; border-radius: 14px; margin-top: 8px; aspect-ratio: 16/9; background: #000; }
+    .song-fr:empty { display: none; }
+    .song-fr iframe { width: 100%; height: 100%; border: 0; display: block; }
+    html.dark .song { background: linear-gradient(120deg, #2c2645, #1f3040); color: #eceaf5; }
+    html.dark .song .sg-p { background: #3a3358; color: #d6caff; }
     .np-tag { margin-left: auto; display: inline-flex; align-items: center; gap: 3px; padding: 2px 9px; border-radius: 999px; font-size: .7rem; font-weight: 800; background: linear-gradient(120deg, #ffe9ee, #f6eefe); color: #c0485a; border: 1px solid #f4c7d1; white-space: nowrap; }
     .t-title:has(.np-tag) > span:not(.np-tag) { margin-left: 6px; }
     .np-line { display: flex; align-items: center; gap: 8px; margin: 8px 0 2px; padding: 8px 12px; border-radius: 12px; background: linear-gradient(120deg, #fff0f3, #f7f1fe); border: 1px solid #f4cfd8; font-size: .82rem; color: #b04255; font-weight: 700; line-height: 1.4; }
@@ -1525,7 +1543,7 @@
           <div class="t-main">
             ${isPort(c) ? `<div class="port-tag"><span>↪ 이식 예정</span>${portInfo(c) ? `<em>${escH(portInfo(c))}</em>` : ""}</div>` : ""}
             ${headHTML(isReleased(c) ? c.releaseDate : c.date)}${updBadge(c) || logMini(c)}
-            <p class="t-title">${escH(c.name)}${isBday(c) ? `<span class="bday-tag">🎂 생일</span>` : isBdayTmr(c) ? `<span class="bday-tag soon">🎂 내일 생일</span>` : ""}${c.contest ? `<span class="ct-tag">🏆 공모전</span>` : ""}${isNoPort(c) ? `<span class="np-tag">🚫 이식 불가${npLabel(c) ? " " + npLabel(c) : ""}</span>` : ""}</p>
+            <p class="t-title">${escH(c.name)}${isBday(c) ? `<span class="bday-tag">🎂 생일</span>` : isBdayTmr(c) ? `<span class="bday-tag soon">🎂 내일 생일</span>` : ""}${c.contest ? `<span class="ct-tag">🏆 공모전</span>` : ""}${ytId(c.songUrl) ? `<span class="sg-tag">♪ 테마곡</span>` : ""}${isNoPort(c) ? `<span class="np-tag">🚫 이식 불가${npLabel(c) ? " " + npLabel(c) : ""}</span>` : ""}</p>
             ${c.tagline ? `<p class="t-tagline">${fmtText(c.tagline)}</p>` : ""}
             <p class="t-tags">${hashtags(c)}</p>
             <div class="t-media preview" style="--pv:${typeof c.previewPos === "number" ? c.previewPos : 25}%;--px:${typeof c.previewX === "number" ? c.previewX : 50}%;--pz:${typeof c.previewZoom === "number" ? c.previewZoom : 1}">${mediaHTML(c)}${c.adult ? `<span class="badge">19+</span>` : ""}${allImgs(c).length > 1 ? `<span class="many">${I.photos}${allImgs(c).length}</span>` : ""}<span class="expand">♡ 전체 보기</span></div>
@@ -1795,6 +1813,7 @@
           ${c.contest ? `<div class="ct-line">🏆 <span>${c.contestName ? `<b>${escH(c.contestName)}</b> ` : "<b>공모전</b> "}출품작</span>${c.contestResult ? `<em>${escH(c.contestResult)}</em>` : ""}</div>` : ""}
           ${isNoPort(c) ? `<div class="np-line">🚫 <span>${c.noPortUntil ? (() => { const [, m, d] = c.noPortUntil.split("-"); return `${+m}월 ${+d}일까지 이식 불가`; })() : "이식 불가"}</span>${c.noPortReason ? `<em>${escH(c.noPortReason)}</em>` : ""}</div>` : ""}
           ${c.tagline ? `<div class="d-tagline">${fmtText(c.tagline)}</div>` : ""}
+          ${ytId(c.songUrl) ? `<div class="song" data-song="${ytId(c.songUrl)}" role="button" title="테마곡 듣기"><span class="sg-n">♪</span><b>${escH(c.songTitle || "테마곡")}</b><span class="eq"><i></i><i></i><i></i><i></i></span><button type="button" class="sg-p" aria-label="재생">▶</button></div><div class="song-fr"></div>` : ""}
           ${Array.isArray(c.lines) && c.lines.length ? `<div class="lines" data-lines="${i}"><button class="line-btn" data-line-next>💬 한마디 더 듣기 <span class="line-cnt"></span></button><div class="line-bub" aria-live="polite"></div></div>` : ""}
           ${c.description ? `<p class="d-text">${fmtText(c.description)}</p>` : ""}
           <p class="d-tags">${hashtags(c)}</p>
@@ -1823,8 +1842,16 @@
       document.documentElement.classList.add("modal-open");
       setupGallery($("modal"));
     }
+    function ytId(u) { if (!u) return ""; const m = String(u).match(/(?:youtu\.be\/|[?&]v=|\/(?:embed|shorts|live)\/)([\w-]{11})/); return m ? m[1] : ""; }
+    function stopSong() { document.querySelectorAll(".song.on").forEach(el => { el.classList.remove("on"); const b = el.querySelector(".sg-p"); if (b) b.textContent = "▶"; const f = el.nextElementSibling; if (f && f.classList.contains("song-fr")) f.innerHTML = ""; }); }
+    function toggleSong(el) {
+      if (el.classList.contains("on")) return stopSong();
+      stopSong(); el.classList.add("on"); el.querySelector(".sg-p").textContent = "■";
+      el.nextElementSibling.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${el.dataset.song}?autoplay=1&playsinline=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen title="테마곡"></iframe>`;
+    }
     function hideTweet() {
       $("overlay").classList.remove("open");
+      stopSong();
       document.documentElement.classList.remove("modal-open");
     }
 
@@ -2070,6 +2097,7 @@
       if (chip) { activeTag = chip.dataset.tag; return renderView(); }
       const tab = e.target.closest(".tab");
       if (tab) { if (tab.dataset.view !== view) setView(tab.dataset.view, true); return; }
+      const sg = e.target.closest(".song[data-song]"); if (sg) return toggleSong(sg);
       if (e.target.closest("[data-close]") || e.target.id === "overlay") return closeTweet();
       const open = e.target.closest("[data-open]");
       if (open && !e.target.closest(".modal")) return openTweet(+open.dataset.open);
