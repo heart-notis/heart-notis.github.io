@@ -83,7 +83,7 @@ window.SITE_DATA = {
       "releaseTime": "21:00",
       "theme": "sunset",
       "updatedAt": "2026-11-25T04:28:59.795Z",
-      "cardKey": "co9qjt",
+      "cardKey": "17ou9si",
       "songUrl": "https://youtu.be/AnoNJjIikX0?si=Oxf7zrEQQO16S9lf",
       "songTitle": "Wish It Was Me"
     },
@@ -129,7 +129,7 @@ window.SITE_DATA = {
         "자유 시간을 저한테서 통째로 사시려면, 방금 치르신 가이딩 비용에 최소한 외출 할증에 위험 수당까지 얹어주셔야 할 텐데."
       ],
       "slug": "23",
-      "cardKey": "ko3tde",
+      "cardKey": "f6w6zf",
       "songUrl": "https://youtu.be/lGvJ0PIobrw?si=94IliHW8cGkN1sfk",
       "songTitle": "No Strings Attached",
       "updatedAt": "2026-11-25T04:29:58.010Z"
@@ -160,7 +160,7 @@ window.SITE_DATA = {
       "wm": true,
       "birthday": "10-24",
       "slug": "22",
-      "cardKey": "dnmn2l"
+      "cardKey": "1fcn54m"
     },
     {
       "id": "mwso6b62mp9u",
@@ -188,7 +188,7 @@ window.SITE_DATA = {
       "wm": true,
       "birthday": "01-30",
       "slug": "21",
-      "cardKey": "1jzsw0n"
+      "cardKey": "1o9sv0g"
     },
     {
       "id": "mwso5ft3do6j",
@@ -216,7 +216,7 @@ window.SITE_DATA = {
       "wm": true,
       "birthday": "05-03",
       "slug": "20",
-      "cardKey": "13de07m"
+      "cardKey": "x6ghtn"
     },
     {
       "id": "mwso58cyjlaa",
@@ -244,7 +244,7 @@ window.SITE_DATA = {
       "wm": true,
       "birthday": "05-07",
       "slug": "19",
-      "cardKey": "4cakdp"
+      "cardKey": "8majdi"
     },
     {
       "id": "mwsnp9gdcf8e",
@@ -270,7 +270,7 @@ window.SITE_DATA = {
       },
       "wm": true,
       "slug": "18",
-      "cardKey": "1i7vt92"
+      "cardKey": "1twisin"
     },
     {
       "id": "mwso3ed29b5n",
@@ -296,7 +296,7 @@ window.SITE_DATA = {
       },
       "wm": true,
       "slug": "17",
-      "cardKey": "10ifbxk"
+      "cardKey": "g4ph01"
     },
     {
       "id": "mwso3tm7vxda",
@@ -322,7 +322,7 @@ window.SITE_DATA = {
       },
       "wm": true,
       "slug": "16",
-      "cardKey": "1owils8"
+      "cardKey": "1hwz61d"
     },
     {
       "id": "mwso42vhuaf6",
@@ -350,7 +350,7 @@ window.SITE_DATA = {
       },
       "wm": true,
       "slug": "15",
-      "cardKey": "v6ty8"
+      "cardKey": "cjtt7t"
     },
     {
       "id": "mwso4qng640u",
@@ -399,7 +399,7 @@ window.SITE_DATA = {
       "wm": true,
       "birthday": "10-14",
       "slug": "13",
-      "cardKey": "17fkpvl"
+      "cardKey": "m4gvbe"
     },
     {
       "id": "mwrzr4dyeaev",
@@ -430,7 +430,7 @@ window.SITE_DATA = {
       "previewZoom": 1,
       "wm": true,
       "slug": "12",
-      "cardKey": "1r1rdsd"
+      "cardKey": "uj9hbq"
     },
     {
       "id": "mwrtiya3dc2d",
@@ -463,7 +463,7 @@ window.SITE_DATA = {
       "previewZoom": 1,
       "birthday": "08-15",
       "slug": "11",
-      "cardKey": "12bmkne"
+      "cardKey": "466x0z"
     },
     {
       "id": "mwrpnjsa3wrf",
@@ -490,7 +490,7 @@ window.SITE_DATA = {
       "theme": "home",
       "wm": true,
       "slug": "10",
-      "cardKey": "ifjrd0"
+      "cardKey": "1ky5wvh"
     },
     {
       "id": "mwrpmrvpy9l0",
@@ -517,7 +517,7 @@ window.SITE_DATA = {
       "theme": "home",
       "wm": true,
       "slug": "9",
-      "cardKey": "1y0getc"
+      "cardKey": "11hyicp"
     },
     {
       "id": "mwrpqewk3sy6",
@@ -544,7 +544,7 @@ window.SITE_DATA = {
       "theme": "home",
       "wm": true,
       "slug": "8",
-      "cardKey": "8weuye"
+      "cardKey": "hn162n"
     },
     {
       "id": "mwrpoipi2f62",
@@ -571,7 +571,7 @@ window.SITE_DATA = {
       "theme": "home",
       "wm": true,
       "slug": "7",
-      "cardKey": "nae30f"
+      "cardKey": "rke208"
     },
     {
       "id": "mwrpfr95ttut",
@@ -598,7 +598,7 @@ window.SITE_DATA = {
       "wm": true,
       "birthday": "12-24",
       "slug": "6",
-      "cardKey": "1yekn6s"
+      "cardKey": "11w2qq5"
     },
     {
       "id": "mwrpenxf93yt",
@@ -627,7 +627,7 @@ window.SITE_DATA = {
       "previewZoom": 1,
       "birthday": "07-08",
       "slug": "5",
-      "cardKey": "8zm4aq"
+      "cardKey": "12s1a97"
     },
     {
       "id": "mwsj5mvjzgsf",
@@ -654,7 +654,7 @@ window.SITE_DATA = {
       "theme": "fire",
       "wm": true,
       "slug": "4",
-      "cardKey": "caw54s"
+      "cardKey": "1dzwn6t"
     },
     {
       "id": "mwrmeo1x9fr6",
@@ -689,7 +689,7 @@ window.SITE_DATA = {
         "뭘 봐."
       ],
       "slug": "3",
-      "cardKey": "12qmt1g"
+      "cardKey": "1x64uy5"
     },
     {
       "id": "mwrmb1hcvuhk",
@@ -724,7 +724,7 @@ window.SITE_DATA = {
         "혹시 시간 비어요?"
       ],
       "slug": "2",
-      "cardKey": "13q6gdf"
+      "cardKey": "77ojws"
     },
     {
       "id": "mwrlmy5purob",
@@ -761,7 +761,7 @@ window.SITE_DATA = {
         "괜히 돌아다니지 말고 앉아서 쉬기나 해."
       ],
       "slug": "1",
-      "cardKey": "zk95wp"
+      "cardKey": "1b8w56a"
     }
   ]
 };

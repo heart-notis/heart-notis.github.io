@@ -2434,7 +2434,7 @@
     }
     const charUrl = p => p && p.slug ? `${SITE_URL}c/${p.slug}` : SITE_URL;
     const plainTxt = t => String(t || "").replace(/\*\*|__|~~|`/g, "").replace(/\{\{\s*user\s*\}\}/gi, "당신").replace(/\s+/g, " ").trim();
-    const cardKey = p => { const k = JSON.stringify(["v8", p.name, p.tagline || "", p.image || "", p.previewPos ?? 25, p.world || "", !!(p.spoiler && !spoilerOpened(p)), p.releaseDate || "", p.releaseTime || "", p.slug] ); let h = 5381; for (let i = 0; i < k.length; i++) h = (h * 33 + k.charCodeAt(i)) | 0; return (h >>> 0).toString(36); };
+    const cardKey = p => { const k = JSON.stringify(["v10", p.name, p.tagline || "", p.image || "", p.previewPos ?? 25, p.world || "", !!(p.spoiler && !spoilerOpened(p)), p.releaseDate || "", p.releaseTime || "", p.slug] ); let h = 5381; for (let i = 0; i < k.length; i++) h = (h * 33 + k.charCodeAt(i)) | 0; return (h >>> 0).toString(36); };
     function wrapLines(g, text, maxW, maxLines) {
       const words = String(text).split(/(\s+)/), lines = []; let cur = "";
       const push = w => { if (g.measureText(cur + w).width <= maxW) { cur += w; return; } if (cur.trim()) lines.push(cur.trim()); cur = ""; if (g.measureText(w).width > maxW) { for (const ch of w) { if (g.measureText(cur + ch).width > maxW) { lines.push(cur); cur = ""; } cur += ch; } } else cur = w.trimStart(); };
@@ -2463,10 +2463,10 @@
       let tx, tw, dark = false, rx, by, RA = false;
       if (style === 1) {
         cover(0, 0, W, H, spo ? 30 : 0);
-        const gr = L ? g.createLinearGradient(W - 540, 0, 0, 0) : g.createLinearGradient(540, 0, W, 0); gr.addColorStop(0, "rgba(38,28,72,0)"); gr.addColorStop(.4, "rgba(38,28,72,.74)"); gr.addColorStop(1, "rgba(30,24,60,.92)"); g.fillStyle = gr; g.fillRect(0, 0, W, H);
+        const gr = L ? g.createLinearGradient(W - 650, 0, 0, 0) : g.createLinearGradient(650, 0, W, 0); gr.addColorStop(0, "rgba(38,28,72,0)"); gr.addColorStop(.38, "rgba(38,28,72,.72)"); gr.addColorStop(1, "rgba(30,24,60,.92)"); g.fillStyle = gr; g.fillRect(0, 0, W, H);
         const gb = g.createLinearGradient(0, H * .55, 0, H); gb.addColorStop(0, "rgba(30,24,60,0)"); gb.addColorStop(1, "rgba(30,24,60,.45)"); g.fillStyle = gb; g.fillRect(0, 0, W, H);
         if (spo) { g.fillStyle = "rgba(255,255,255,.94)"; g.font = `800 44px ${font}`; g.textAlign = "center"; g.fillText("✦ SPOILER", L ? W - 330 : 330, H / 2 + 16); g.textAlign = "left"; }
-        tw = W - 700 - 56; tx = L ? 56 : 700; dark = true; rx = tx + tw; by = H - 62; RA = !L;
+        tw = 444; tx = L ? 56 : W - 56 - tw; dark = true; rx = tx + tw; by = H - 62; RA = !L;
       } else if (style === 3) {
         cover(0, 0, W, H, 34); g.fillStyle = "rgba(244,239,255,.55)"; g.fillRect(0, 0, W, H);
         photoBox(56, 56, 460, 518, 30);
@@ -2479,6 +2479,7 @@
       }
       const ink = dark ? "#ffffff" : "#1f1d2b", sink = dark ? "rgba(255,255,255,.86)" : "#4b5160", acc = dark ? "#d9ccff" : "#7353d6";
       g.textBaseline = "alphabetic";
+      if (dark) { g.shadowColor = "rgba(20,14,44,.55)"; g.shadowBlur = 14; }
       let y = 120;
       const ex = RA ? tx + tw : tx; g.textAlign = RA ? "right" : "left";   // ①번은 글자 쪽으로 정렬
       if (p.world) { g.font = `700 24px ${font}`; const w0 = Math.min(g.measureText(p.world).width, tw - 64), px = RA ? tx + tw - (w0 + 64) : tx; g.beginPath(); g.roundRect(px, y - 34, w0 + 64, 46, 23); g.fillStyle = dark ? "rgba(255,255,255,.16)" : "rgba(255,255,255,.9)"; g.fill(); heart(px + 16, y - 24, 24); g.fillStyle = acc; g.textAlign = "left"; g.fillText(p.world, px + 48, y - 3, tw - 64); g.textAlign = RA ? "right" : "left"; y += 58; }
@@ -2488,6 +2489,7 @@
       if (spo) { const [, mm, dd] = (p.releaseDate || "").split("-").map(Number); sub = p.releaseDate ? `✦ ${mm}월 ${dd}일${p.releaseTime ? " " + p.releaseTime : ""} 공개 예정` : "✦ 곧 공개 예정"; g.fillStyle = acc; g.font = `700 33px ${font}`; }
       wrapLines(g, sub, tw, 3).forEach(l => { y += 48; g.fillText(l, ex, y); }); g.textAlign = "left";
       // ♥ 하트 @HEART · 오른쪽 아래
+      g.shadowColor = "transparent"; g.shadowBlur = 0;
       g.font = `500 25px ${font}`; const hw = g.measureText("@HEART").width; g.font = `800 29px ${font}`; const nw = g.measureText("하트").width;
       const x0 = L ? tx : rx - (34 + 10 + nw + 10 + hw);
       heart(x0, by - 29, 34); g.fillStyle = ink; g.fillText("하트", x0 + 44, by - 4);
