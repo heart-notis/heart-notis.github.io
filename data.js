@@ -65,7 +65,9 @@ window.SITE_DATA = {
       "previewZoom": 1,
       "wm": true,
       "createdAt": "2026-11-25T03:26:54.631Z",
-      "links": {},
+      "links": {
+        "POSTYPE": "https://posty.pe/ph0bxfb2c"
+      },
       "spoiler": true,
       "slug": "25",
       "images": [
@@ -83,7 +85,7 @@ window.SITE_DATA = {
       "releaseTime": "16:30",
       "theme": "sunset",
       "updatedAt": "2026-11-25T07:25:44.824Z",
-      "cardKey": "1a17y1m",
+      "cardKey": "1na1wzp",
       "songUrl": "https://youtu.be/AnoNJjIikX0?si=Oxf7zrEQQO16S9lf",
       "songTitle": "Wish It Was Me"
     },
