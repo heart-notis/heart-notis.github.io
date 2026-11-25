@@ -84,7 +84,9 @@ window.SITE_DATA = {
         "딱 제시간에 맞춰 오셨네요. 성실한 의뢰인은 언제나 환영이죠.",
         "방금 제가 넣어드린 가이딩은 그쪽 목숨줄 연장하라고 준 거지, 바닥에 내다 버리라고 준 팁이 아닌데요.",
         "자유 시간을 저한테서 통째로 사시려면, 방금 치르신 가이딩 비용에 최소한 외출 할증에 위험 수당까지 얹어주셔야 할 텐데."
-      ]
+      ],
+      "slug": "러브-LOVE",
+      "cardKey": "nh0ejl"
     },
     {
       "id": "mwso99e36g7y",
@@ -110,7 +112,9 @@ window.SITE_DATA = {
       },
       "theme": "palace",
       "wm": true,
-      "birthday": "10-24"
+      "birthday": "10-24",
+      "slug": "카일루스",
+      "cardKey": "bjnibi"
     },
     {
       "id": "mwso6b62mp9u",
@@ -136,7 +140,9 @@ window.SITE_DATA = {
       },
       "theme": "palace",
       "wm": true,
-      "birthday": "01-30"
+      "birthday": "01-30",
+      "slug": "킬리언",
+      "cardKey": "1b7vhct"
     },
     {
       "id": "mwso5ft3do6j",
@@ -162,7 +168,9 @@ window.SITE_DATA = {
       },
       "theme": "palace",
       "wm": true,
-      "birthday": "05-03"
+      "birthday": "05-03",
+      "slug": "이사엘",
+      "cardKey": "r5wqyp"
     },
     {
       "id": "mwso58cyjlaa",
@@ -188,7 +196,9 @@ window.SITE_DATA = {
       },
       "theme": "palace",
       "wm": true,
-      "birthday": "05-07"
+      "birthday": "05-07",
+      "slug": "줄리안",
+      "cardKey": "8zcpck"
     },
     {
       "id": "mwsnp9gdcf8e",
@@ -212,7 +222,9 @@ window.SITE_DATA = {
       "links": {
         "WHIF": "https://whif.io/characters/9fc590b5-7519-4bd0-8a63-c8decfd92458"
       },
-      "wm": true
+      "wm": true,
+      "slug": "권태건",
+      "cardKey": "xiqpz6"
     },
     {
       "id": "mwso3ed29b5n",
@@ -236,7 +248,9 @@ window.SITE_DATA = {
       "links": {
         "WHIF": "https://whif.io/characters/cfea7f3a-cee4-48d0-8743-d8cd54ccea7f"
       },
-      "wm": true
+      "wm": true,
+      "slug": "차승우",
+      "cardKey": "lvme96"
     },
     {
       "id": "mwso3tm7vxda",
@@ -260,7 +274,9 @@ window.SITE_DATA = {
       "links": {
         "WHIF": "https://whif.io/characters/6b89ff45-e02a-44cd-96e0-de22a8fb1456"
       },
-      "wm": true
+      "wm": true,
+      "slug": "강태욱",
+      "cardKey": "192lpto"
     },
     {
       "id": "mwso42vhuaf6",
@@ -286,7 +302,9 @@ window.SITE_DATA = {
         "WHIF": "https://whif.io/characters/5ecc97db-9f4c-4d28-a068-2cf19e7659c4",
         "합작": "https://whif.io/universes/0065d43a-760d-4621-80c8-fcb58b4328fe"
       },
-      "wm": true
+      "wm": true,
+      "slug": "제로",
+      "cardKey": "1pcc4az"
     },
     {
       "id": "mwso4qng640u",
@@ -307,7 +325,8 @@ window.SITE_DATA = {
       "previewZoom": 1,
       "links": {},
       "hidden": true,
-      "wm": true
+      "wm": true,
+      "slug": "-"
     },
     {
       "id": "mwso4a155q12",
@@ -332,7 +351,9 @@ window.SITE_DATA = {
         "WHIF": "https://whif.io/characters/3e675efa-0b5a-491b-bb1d-43319710762d"
       },
       "wm": true,
-      "birthday": "10-14"
+      "birthday": "10-14",
+      "slug": "차이현",
+      "cardKey": "wa2dh2"
     },
     {
       "id": "mwrzr4dyeaev",
@@ -361,7 +382,9 @@ window.SITE_DATA = {
       "theme": "horror",
       "previewX": 50,
       "previewZoom": 1,
-      "wm": true
+      "wm": true,
+      "slug": "바쿠",
+      "cardKey": "17sg8nr"
     },
     {
       "id": "mwrtiya3dc2d",
@@ -392,7 +415,9 @@ window.SITE_DATA = {
       "previewPos": 25,
       "previewX": 50,
       "previewZoom": 1,
-      "birthday": "08-15"
+      "birthday": "08-15",
+      "slug": "차은호",
+      "cardKey": "1506gch"
     },
     {
       "id": "mwrpnjsa3wrf",
@@ -417,7 +442,9 @@ window.SITE_DATA = {
       "previewX": 50,
       "previewZoom": 1,
       "theme": "home",
-      "wm": true
+      "wm": true,
+      "slug": "한세빈",
+      "cardKey": "r9rxg8"
     },
     {
       "id": "mwrpmrvpy9l0",
@@ -442,7 +469,9 @@ window.SITE_DATA = {
       "previewX": 50,
       "previewZoom": 1,
       "theme": "home",
-      "wm": true
+      "wm": true,
+      "slug": "강태승",
+      "cardKey": "1jjw0y2"
     },
     {
       "id": "mwrpqewk3sy6",
@@ -467,7 +496,9 @@ window.SITE_DATA = {
       "previewX": 50,
       "previewZoom": 1,
       "theme": "home",
-      "wm": true
+      "wm": true,
+      "slug": "늘봄-셰어하우스",
+      "cardKey": "1m21gq8"
     },
     {
       "id": "mwrpoipi2f62",
@@ -492,7 +523,9 @@ window.SITE_DATA = {
       "previewX": 50,
       "previewZoom": 1,
       "theme": "home",
-      "wm": true
+      "wm": true,
+      "slug": "늘봄-셰어하우스-2",
+      "cardKey": "1evxgrd"
     },
     {
       "id": "mwrpfr95ttut",
@@ -517,7 +550,9 @@ window.SITE_DATA = {
       "previewX": 50,
       "previewZoom": 1,
       "wm": true,
-      "birthday": "12-24"
+      "birthday": "12-24",
+      "slug": "니힐",
+      "cardKey": "upsj6n"
     },
     {
       "id": "mwrpenxf93yt",
@@ -544,7 +579,9 @@ window.SITE_DATA = {
       "previewPos": 25,
       "previewX": 50,
       "previewZoom": 1,
-      "birthday": "07-08"
+      "birthday": "07-08",
+      "slug": "베일",
+      "cardKey": "bojgbm"
     },
     {
       "id": "mwsj5mvjzgsf",
@@ -569,7 +606,9 @@ window.SITE_DATA = {
         "WHIF": "https://www.whif.io/characters/adcd0db5-f77c-482f-9808-cb4f825b136d"
       },
       "theme": "fire",
-      "wm": true
+      "wm": true,
+      "slug": "중앙소방서-구조대-2팀",
+      "cardKey": "1dnctwk"
     },
     {
       "id": "mwrmeo1x9fr6",
@@ -602,7 +641,9 @@ window.SITE_DATA = {
         "야! 송재현이, 똥강아지!",
         "또 사고치고 있어 저것들이…….",
         "뭘 봐."
-      ]
+      ],
+      "slug": "오태식",
+      "cardKey": "1dlpbk7"
     },
     {
       "id": "mwrmb1hcvuhk",
@@ -635,7 +676,9 @@ window.SITE_DATA = {
         "저랑 만나주실래요?",
         "보고 싶다.",
         "혹시 시간 비어요?"
-      ]
+      ],
+      "slug": "강민우",
+      "cardKey": "u07znv"
     },
     {
       "id": "mwrlmy5purob",
@@ -670,7 +713,9 @@ window.SITE_DATA = {
         "……시끄러워.",
         "밥은 먹었어?",
         "괜히 돌아다니지 말고 앉아서 쉬기나 해."
-      ]
+      ],
+      "slug": "송재현",
+      "cardKey": "brennm"
     }
   ]
 };

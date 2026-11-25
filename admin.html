@@ -238,6 +238,9 @@
     .live-box .lb-bar i { display: block; height: 100%; border-radius: 9px; background: linear-gradient(90deg, #b9a2f6, #7fcdf2); transition: width .8s ease; }
     .live-box.done .lb-bar i { background: linear-gradient(90deg, #7fe0b0, #7fcdf2); }
     .live-box .lb-s { font-size: .72rem; opacity: .75; margin-top: 7px; }
+    .slug-in { display: flex; align-items: center; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: #fff; }
+    .slug-in span { padding: 0 2px 0 12px; font-size: .78rem; color: #9aa0a8; white-space: nowrap; }
+    .slug-in input { border: 0 !important; box-shadow: none !important; padding-left: 0 !important; min-width: 0; flex: 1; }
     .short-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin-top: 8px; }
     .short-links button { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; padding: 8px 10px; border-radius: 12px; border: 1px solid var(--line); background: #faf9ff; font-size: .72rem; color: #6b6f80; cursor: pointer; text-align: left; overflow: hidden; }
     .short-links b { font-size: .8rem; color: #7353d6; }
@@ -1049,7 +1052,7 @@
         const p = data.posts[i];
         if (act === "edit") return openPost(i);
         if (act === "preview") { if (!store.set(DRAFT_KEY, data)) { toast("미리보기 공간이 부족해요"); return; } window.open(`index.html?preview=1#post-${encodeURIComponent(p.id)}`, "_blank"); return; }
-        if (act === "link") { const u = `https://heart-notis.github.io/#post-${encodeURIComponent(p.id)}`; try { await navigator.clipboard.writeText(u); toast("링크를 복사했어요"); } catch { prompt("링크를 복사해주세요", u); } return; }
+        if (act === "link") { const u = p.slug ? charUrl(p) : `https://heart-notis.github.io/#post-${encodeURIComponent(p.id)}`; try { await navigator.clipboard.writeText(u); toast("링크를 복사했어요"); } catch { prompt("링크를 복사해주세요", u); } return; }
         if (act === "top") { data.posts.splice(i, 1); data.posts.unshift(p); toast("맨 위로 올렸어요"); }
         if (act === "spoiler") { if (p.spoiler) delete p.spoiler; else p.spoiler = true; toast(p.spoiler ? "스포일러로 바꿨어요 · 공개 날짜는 수정에서 정해요" : "스포일러를 껐어요"); }
         if (act === "hidden") { if (p.hidden) delete p.hidden; else p.hidden = true; toast(p.hidden ? "비공개로 바꿨어요" : "비공개를 풀었어요"); }
@@ -1156,6 +1159,7 @@
           <details class="sec" id="sec_link" ${index < 0 ? "open" : ""}><summary><span class="sec-t">🔗 대화 링크 · 태그</span><span class="sec-sum" data-sum="sec_link"></span><i class="sec-ar"></i></summary><div class="sec-in">
           <label class="f">해시태그<div class="tag-pick" id="f_tags">${data.tags.map(t => `<button type="button" class="${(item.tags || []).includes(t) ? "on" : ""}" data-tag="${esc(t)}">#${esc(t)}</button>`).join("") || `<small>해시태그 탭에서 먼저 태그를 만들어주세요</small>`}</div></label>
           <label class="f">대화하러 가기 링크 <small>위에서 체크한 해시태그(플랫폼)마다 주소 칸이 생겨요 · #합작은 세계관 보기 버튼이 돼요</small><div class="links-box" id="f_links"></div></label>
+          <label class="f">🔗 공유 주소 <small>X · 카톡에 올리면 이 캐릭터 카드로 떠요 · 비우면 이름으로 자동으로 만들어요</small><div class="slug-in"><span>heart-notis.github.io/c/</span><input type="text" id="f_slug" maxlength="40" value="${esc(item.slug || "")}" placeholder="${esc(slugBase(item.name || ""))}" /></div></label>
           </div></details>
           <details class="sec" id="sec_theme" ${false ? "open" : ""}><summary><span class="sec-t">🎨 꾸미기</span><span class="sec-sum" data-sum="sec_theme"></span><i class="sec-ar"></i></summary><div class="sec-in">
           <div class="f">🎨 페이지 꾸미기 <small>게시물을 눌렀을 때 열리는 페이지의 색감이에요. "미리보기"로 확인할 수 있어요.</small>
@@ -1552,6 +1556,8 @@
       if ($("f_hidden").checked) it.hidden = true; else delete it.hidden;
       if (Array.isArray(it.images) && !it.images.length) delete it.images;
       if ($("f_spoiler").checked) it.spoiler = true; else delete it.spoiler;
+      { const sv = slugBase($("f_slug").value); const raw = $("f_slug").value.trim();
+        if (raw) { if (data.posts.some(x => x !== edit.item && x.id !== it.id && x.slug === sv)) { toast("이미 다른 캐릭터가 쓰는 공유 주소예요"); return; } it.slug = sv; } else delete it.slug; }
       if ($("f_port").checked) { it.port = true; const pn = $("f_portNote").value.trim(); if (pn) it.portNote = pn; else delete it.portNote; const pd = $("f_portDate").value, ptm = $("f_portTime").value; if (pd) it.portDate = pd; else delete it.portDate; if (pd && ptm) it.portTime = ptm; else delete it.portTime; } else { delete it.portTime; delete it.port; delete it.portNote; delete it.portDate; }
       const rel = $("f_release").value;
       if (it.spoiler && rel) it.releaseDate = rel; else delete it.releaseDate;
@@ -1703,7 +1709,7 @@
       const m = [
         [/^(x|t\.co|x\.com|twitter\.com)$/, "X (트위터)"], [/heart-notis\.netlify\.app/, "예전 주소 (이사 전 링크)"], [/postype|posty\.pe/, "포스타입"], [/kakao/, "카카오톡"],
         [/naver/, "네이버"], [/google/, "구글"], [/daum/, "다음"], [/instagram/, "인스타그램"], [/discord/, "디스코드"],
-        [/youtube|youtu\.be/, "유튜브"], [/spin-spin/, "스핀스핀"], [/^direct$/, "직접 · 알 수 없음"]
+        [/youtube|youtu\.be/, "유튜브"], [/spin-spin/, "스핀스핀"], [/^direct$/, "직접 · 알 수 없음"], [/^share$/, "캐릭터 공유 링크"]
       ].find(([re]) => re.test(h));
       return m ? m[1] : h;
     }
@@ -2147,6 +2153,7 @@
           const uploading = new Set(files.map(f => f.path));
           for (const f of all) {
             const name = f.path.replace(/^images\//, "");
+            if (f.type === "blob" && f.path.startsWith("c/") && !used.has(f.path) && !uploading.has(f.path)) { tree.push({ path: f.path, mode: "100644", type: "blob", sha: null }); continue; }
             if (f.type === "blob" && f.path.startsWith("images/") && /^(post-.+|profile-[a-z0-9]{6,}|profile-sm-[a-z0-9]{6,}|header-[a-z0-9]{6,}|og-[a-z0-9]{6,})\.(jpg|webp)$/.test(name) && !used.has(f.path) && !uploading.has(f.path))
               tree.push({ path: f.path, mode: "100644", type: "blob", sha: null });
           }
@@ -2181,12 +2188,14 @@
           const html = new TextDecoder().decode(b64Bytes(await fileB64("index.html", BRANCH)));
           uploads.push({ path: "index.html", bytes: new TextEncoder().encode(patchShareMeta(html, shareOf(out.profile))), label: "공유 카드" });
         }
+        const np = uploads.filter(u => u.path.startsWith("images/")).length;
+        const keep = new Set(); await buildCards(out, uploads, keep, step);
         const outJs = siteJs(out);
         uploads.push({ path: "data.js", bytes: new TextEncoder().encode(outJs), label: "data" });
-        const np = uploads.length - 1;
+        const used = referenced(out); keep.forEach(k => used.add(k));
         // 📦 사진 + 글 + 정리를 "한 번에" 올려요 → 사이트가 한 번만 새로 만들어져서 훨씬 빨리 반영돼요
-        await commitAll(uploads, referenced(out),
-          `업데이트 · 게시물 ${out.posts.length}개 · 공지 ${out.notices.length}개${np ? ` · 사진 ${np}장` : ""}`,
+        await commitAll(uploads, used,
+          changeSummary(SERVER, out) + (np ? ` · 🖼 사진 ${np}장` : ""),
           (i, n) => step(n > 1 ? `올리는 중 (${i}/${n})` : "올리는 중…"));
 
         SERVER = clone(out); data = out; data._base = H(SERVER);
@@ -2287,6 +2296,133 @@
         console.error(e); toast(ghErrorText(e));
         document.querySelectorAll("[data-restore]").forEach(b => b.disabled = false); btn.textContent = "이때로";
       }
+    }
+
+
+    /* ---------- 🔗 캐릭터별 공유 주소 + 공유 카드 ---------- */
+    const SITE_URL = "https://heart-notis.github.io/";
+    // 등록된 이름으로 주소 만들기 (이모티콘·기호는 빼고, 띄어쓰기는 -)
+    const slugBase = name => String(name || "").normalize("NFC")
+      .replace(/[\p{Extended_Pictographic}\u{FE0F}\u{FE0E}\u{200D}\u{20E3}\u{1F1E6}-\u{1F1FF}\u{1F3FB}-\u{1F3FF}]/gu, "")
+      .replace(/[\/\\?#%.,:;"'<>|*~`!@$^&()\[\]{}+=♥♡❤]/g, " ").trim().replace(/\s+/g, "-").slice(0, 40) || "c";
+    function assignSlugs(posts) {
+      const used = new Set();
+      posts.forEach(p => { if (p.slug) { if (used.has(p.slug)) delete p.slug; else used.add(p.slug); } });
+      posts.forEach(p => { if (p.slug) return; const b = slugBase(p.name); let s = b, n = 2; while (used.has(s)) s = `${b}-${n++}`; p.slug = s; used.add(s); });
+    }
+    const charUrl = p => p && p.slug ? `${SITE_URL}c/${p.slug}` : SITE_URL;
+    const plainTxt = t => String(t || "").replace(/\*\*|__|~~|`/g, "").replace(/\{\{\s*user\s*\}\}/gi, "당신").replace(/\s+/g, " ").trim();
+    const cardKey = p => { const k = JSON.stringify(["v1", p.name, p.tagline || "", p.image || "", p.previewPos ?? 25, p.world || "", !!(p.spoiler && !spoilerOpened(p)), p.releaseDate || "", p.releaseTime || "", p.slug]); let h = 5381; for (let i = 0; i < k.length; i++) h = (h * 33 + k.charCodeAt(i)) | 0; return (h >>> 0).toString(36); };
+    function wrapLines(g, text, maxW, maxLines) {
+      const words = String(text).split(/(\s+)/), lines = []; let cur = "";
+      const push = w => { if (g.measureText(cur + w).width <= maxW) { cur += w; return; } if (cur.trim()) lines.push(cur.trim()); cur = ""; if (g.measureText(w).width > maxW) { for (const ch of w) { if (g.measureText(cur + ch).width > maxW) { lines.push(cur); cur = ""; } cur += ch; } } else cur = w.trimStart(); };
+      words.forEach(push); if (cur.trim()) lines.push(cur.trim());
+      if (lines.length > maxLines) { lines.length = maxLines; let l = lines[maxLines - 1]; while (l && g.measureText(l + "…").width > maxW) l = l.slice(0, -1); lines[maxLines - 1] = l + "…"; }
+      return lines;
+    }
+    async function makeCard(p, imgSrc) {
+      const W = 1200, H = 630, cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+      const g = cv.getContext("2d"); g.imageSmoothingQuality = "high";
+      try { await document.fonts.load('800 60px "Pretendard Variable"'); await document.fonts.load('500 30px "Pretendard Variable"'); } catch {}
+      const font = '"Pretendard Variable", Pretendard, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
+      const spo = !!(p.spoiler && !spoilerOpened(p));
+      // 오른쪽 바탕
+      const bg = g.createLinearGradient(0, 0, W, H); bg.addColorStop(0, "#f4efff"); bg.addColorStop(1, "#e6f3fd"); g.fillStyle = bg; g.fillRect(0, 0, W, H);
+      // 왼쪽: 캐릭터 사진 (목록 위치 기준으로 정사각형)
+      const S = 630;
+      try {
+        const im = await loadImage(imgSrc || p.image);
+        const sc = Math.max(S / im.width, S / im.height), iw = im.width * sc, ih = im.height * sc;
+        const pv = (typeof p.previewPos === "number" ? p.previewPos : 25) / 100;
+        g.save(); g.beginPath(); g.rect(0, 0, S, H); g.clip();
+        if (spo) g.filter = "blur(26px) saturate(1.1)";
+        g.drawImage(im, (S - iw) / 2, (H - ih) * pv, iw, ih); g.filter = "none";
+        if (spo) { g.fillStyle = "rgba(60,40,120,.28)"; g.fillRect(0, 0, S, H); }
+        g.restore();
+      } catch { g.fillStyle = "#d9cffb"; g.fillRect(0, 0, S, H); }
+      const edge = g.createLinearGradient(S - 60, 0, S, 0); edge.addColorStop(0, "rgba(244,239,255,0)"); edge.addColorStop(1, "rgba(244,239,255,.9)"); g.fillStyle = edge; g.fillRect(S - 60, 0, 60, H);
+      if (spo) { g.fillStyle = "rgba(255,255,255,.92)"; g.font = `800 46px ${font}`; g.textAlign = "center"; g.fillText("✦ SPOILER", S / 2, H / 2 + 16); g.textAlign = "left"; }
+      const heart = (x, y, sz) => { g.save(); g.translate(x, y); g.scale(sz / 24, sz / 24); const hg = g.createLinearGradient(0, 0, 24, 24); hg.addColorStop(0, "#b9a2f6"); hg.addColorStop(1, "#7fcdf2"); g.fillStyle = hg; g.fill(new Path2D("M12 21.2s-8.6-5.2-10.4-10.6C.3 6.6 2.8 2.8 6.7 2.8c2.3 0 4.1 1.2 5.3 3.1 1.2-1.9 3-3.1 5.3-3.1 3.9 0 6.4 3.8 5.1 7.8C20.6 16 12 21.2 12 21.2z")); g.restore(); };
+      const x = S + 56, maxW = W - x - 56; let y = 92;
+      g.textBaseline = "alphabetic";
+      // 세계관 칩
+      if (p.world) {
+        g.font = `700 24px ${font}`; const t = p.world, tw = Math.min(g.measureText(t).width, maxW - 60);
+        g.beginPath(); g.roundRect(x, y - 34, tw + 64, 46, 23); g.fillStyle = "rgba(255,255,255,.85)"; g.fill();
+        heart(x + 16, y - 24, 24); g.fillStyle = "#7353d6"; g.fillText(t, x + 48, y - 3, maxW - 64); y += 58;
+      } else y += 10;
+      // 이름 (등록된 이름 그대로, 이모티콘 포함)
+      let fs = 72; g.font = `800 ${fs}px ${font}`;
+      let nl = wrapLines(g, p.name || "", maxW, 2); if (nl.length > 1) { fs = 56; g.font = `800 ${fs}px ${font}`; nl = wrapLines(g, p.name || "", maxW, 2); }
+      g.fillStyle = "#1f1d2b"; nl.forEach(l => { y += fs + 4; g.fillText(l, x, y); }); y += 30;
+      // 한 줄 소개 / 스포일러 공개일
+      g.font = `500 34px ${font}`; g.fillStyle = "#4b5160";
+      let sub = plainTxt(p.tagline);
+      if (spo) { const [yy, mm, dd] = (p.releaseDate || "").split("-").map(Number); sub = p.releaseDate ? `✦ ${mm}월 ${dd}일${p.releaseTime ? " " + p.releaseTime : ""} 공개 예정` : "✦ 곧 공개 예정"; g.fillStyle = "#7353d6"; g.font = `700 34px ${font}`; }
+      wrapLines(g, sub, maxW, 3).forEach(l => { y += 50; g.fillText(l, x, y); });
+      // 아래: 하트 @HEART + 주소
+      const by = H - 84; heart(x, by - 30, 36);
+      g.fillStyle = "#1f1d2b"; g.font = `800 30px ${font}`; g.fillText("하트", x + 46, by - 4);
+      const hw = g.measureText("하트").width; g.fillStyle = "#8a8f99"; g.font = `500 26px ${font}`; g.fillText("@HEART", x + 56 + hw, by - 4);
+      g.font = `600 22px ${font}`; g.fillStyle = "#8b7cf0"; g.fillText("heart-notis.github.io", x + 46, by + 30);
+      return cv.toDataURL("image/jpeg", 0.88);
+    }
+    function cardPage(p, key) {
+      const spo = !!(p.spoiler && !spoilerOpened(p));
+      const title = `${p.name} · 하트 (@HEART)`;
+      const desc = spo ? "✦ 곧 공개될 캐릭터예요 · 하트 (@HEART)" : (plainTxt(p.tagline) || "하트 (@HEART)의 캐릭터예요 💙");
+      const dir = `${SITE_URL}c/${encodeURIComponent(p.slug)}/`, img = `${dir}card.jpg?v=${key}`;
+      const go = `/?from=share#post-${encodeURIComponent(p.id)}`;
+      return `<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><meta name="robots" content="noindex" />
+<title>${esc(title)}</title>
+<meta property="og:type" content="website" /><meta property="og:site_name" content="하트 (@HEART)" />
+<meta property="og:title" content="${esc(title)}" /><meta property="og:description" content="${esc(desc)}" />
+<meta property="og:url" content="${esc(dir)}" /><meta property="og:image" content="${esc(img)}" />
+<meta property="og:image:width" content="1200" /><meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" /><meta name="twitter:title" content="${esc(title)}" /><meta name="twitter:description" content="${esc(desc)}" /><meta name="twitter:image" content="${esc(img)}" />
+<script>location.replace(${JSON.stringify(go)});<\/script>
+<meta http-equiv="refresh" content="0; url=${esc(go)}" />
+</head><body></body></html>
+`;
+    }
+    // 올릴 때: 바뀐 캐릭터만 공유 카드를 새로 만들어요
+    async function buildCards(out, uploads, keep, step) {
+      assignSlugs(out.posts);
+      const byPath = new Map(uploads.map(u => [u.path, u]));
+      for (const p of out.posts) {
+        if (p.hidden || !p.image) { delete p.cardKey; continue; }
+        const dir = `c/${p.slug}/`; keep.add(dir + "index.html"); keep.add(dir + "card.jpg");
+        const k = cardKey(p); if (p.cardKey === k) continue;
+        step(`공유 카드 만드는 중… ${p.name}`);
+        let src = p.image, tmp = null;
+        const up = byPath.get(p.image); if (up) { tmp = URL.createObjectURL(new Blob([up.bytes])); src = tmp; }
+        try {
+          const jpg = await makeCard(p, src);
+          uploads.unshift({ path: dir + "card.jpg", bytes: b64Bytes(jpg.split(",")[1]), label: "card" }, { path: dir + "index.html", bytes: new TextEncoder().encode(cardPage(p, k)), label: "card" });
+          p.cardKey = k;
+        } catch (e) { console.warn("공유 카드 건너뜀", p.name, e); }
+        finally { if (tmp) URL.revokeObjectURL(tmp); }
+      }
+    }
+    // 올린 기록에 남길 "뭐가 바뀌었나" 한 줄
+    function changeSummary(a, b) {
+      a = a || { posts: [], notices: [] };
+      const clean = x => { const y = { ...x }; delete y.cardKey; delete y.slug; return JSON.stringify(y); };
+      const names = (arr, n = 2) => arr.slice(0, n).join(" · ") + (arr.length > n ? ` 외 ${arr.length - n}` : "");
+      const parts = [], A = new Map((a.posts || []).map(p => [p.id, p])), B = new Map((b.posts || []).map(p => [p.id, p]));
+      const add = b.posts.filter(p => !A.has(p.id)).map(p => p.name), del = (a.posts || []).filter(p => !B.has(p.id)).map(p => p.name);
+      const mod = b.posts.filter(p => A.has(p.id) && clean(A.get(p.id)) !== clean(p)).map(p => p.name);
+      if (add.length) parts.push(`➕ ${names(add)} 추가`);
+      if (mod.length) parts.push(`✏️ ${names(mod)} 수정`);
+      if (del.length) parts.push(`🗑 ${names(del)} 지움`);
+      if (!add.length && !del.length && (a.posts || []).map(p => p.id).join() !== b.posts.map(p => p.id).join()) parts.push("↕ 게시물 순서");
+      const NA = new Map((a.notices || []).map(n => [n.id, n])), NB = new Set((b.notices || []).map(n => n.id));
+      const nAdd = b.notices.filter(n => !NA.has(n.id)).length, nDel = (a.notices || []).filter(n => !NB.has(n.id)).length, nMod = b.notices.filter(n => NA.has(n.id) && JSON.stringify(NA.get(n.id)) !== JSON.stringify(n)).length;
+      if (nAdd) parts.push(`📌 공지 ${nAdd}개 추가`); if (nMod) parts.push(`📌 공지 ${nMod}개 수정`); if (nDel) parts.push(`📌 공지 ${nDel}개 지움`);
+      if (JSON.stringify(a.profile || {}) !== JSON.stringify(b.profile || {})) parts.push("👤 프로필");
+      if (JSON.stringify(a.tags || []) !== JSON.stringify(b.tags || [])) parts.push("# 해시태그");
+      return parts.join(" · ") || "업데이트";
     }
 
     /* ---------- 🚀 사이트 반영 확인: 실제로 사이트에 뜰 때까지 보여줘요 ---------- */

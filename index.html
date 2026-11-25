@@ -1489,7 +1489,7 @@
               <button class="act reply" data-open="${i}" aria-label="자세히">${I.reply}</button>
               <span class="act rt deco" aria-hidden="true">${I.rt}${fmt(c.rts || 0)}</span>
               <button class="act like ${liked[c.name] ? "liked" : ""}" data-like="${i}" aria-label="마음에 들어요">${I.like}<span data-likes="${i}">${fmt(likeCount(c))}</span></button>
-              <span class="act share deco" aria-hidden="true">${I.share}</span>
+              <button class="act share" data-share="${i}" aria-label="공유">${I.share}</button>
             </div>
           </div>
         </article>`;
@@ -1758,7 +1758,7 @@
             <button class="act reply" aria-label="답글">${I.reply}</button>
             <span class="act rt deco" aria-hidden="true">${I.rt}</span>
             <button class="act like ${liked[c.name] ? "liked" : ""}" data-like="${i}" aria-label="마음에 들어요">${I.like}</button>
-            <span class="act share deco" aria-hidden="true">${I.share}</span>
+            <button class="act share" data-share="${i}" aria-label="공유">${I.share}</button>
           </div>
         </div>
         ${chatLinks(c).length ? `<div class="chat-ctas">${chatLinks(c).map(([t, url]) => `<a class="chat-cta" href="${esc(url)}" target="_blank" rel="noopener" data-cta="${esc(isCollab(t) ? "합작" : t || "link")}">${isCollab(t) ? `${I.world} ${c.world ? `${escH(c.world)} 보러 가기` : "합작 세계관 보러 가기"}` : `${I.reply} ${t ? `${esc(t)}에서 대화하기` : `${escH(c.name)}와 대화하러 가기`}`}</a>`).join("")}</div>` : ""}
@@ -1930,6 +1930,15 @@
       const t = $("toast"); t.textContent = msg; t.classList.add("show");
       clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("show"), 1800);
     }
+    // 🔗 캐릭터 공유: 그 캐릭터 카드로 뜨는 짧은 주소 (heart-notis.github.io/c/이름)
+    async function shareChar(i) {
+      const c = characters[i]; if (!c) return;
+      const url = c.slug ? `${location.origin}/c/${c.slug}` : location.href.split("#")[0];
+      try {
+        if (navigator.share && matchMedia("(pointer: coarse)").matches) { await navigator.share({ title: `${c.name} · 하트 (@HEART)`, url: encodeURI(url) }); return; }
+        await navigator.clipboard.writeText(url); toast("💜 캐릭터 링크를 복사했어요");
+      } catch (e) { if (e && e.name === "AbortError") return; prompt("링크를 복사해주세요", url); }
+    }
     async function share(title) {
       const url = location.href.split("#")[0];
       try {
@@ -1943,7 +1952,7 @@
       const like = e.target.closest("[data-like]");
       if (like) { e.stopPropagation(); return toggleLike(+like.dataset.like); }
       const sh = e.target.closest("[data-share]");
-      if (sh) return share(characters[+sh.dataset.share].name);
+      if (sh) { e.stopPropagation(); return shareChar(+sh.dataset.share); }
       const arrow = e.target.closest("[data-scroll]");
       if (arrow) { const box = $("chips"); box.scrollBy({ left: +arrow.dataset.scroll * box.clientWidth * 0.6 }); return; }
       if (e.target.closest("#calBtn")) return openCal();
@@ -2104,6 +2113,8 @@
       el.onclick = e => { if (e.target === el || e.target.tagName === "BUTTON") el.remove(); };
       document.body.appendChild(el);
     }
+    // ⚡ 다시 올 때 빨리 열리게 (사진·글꼴을 폰에 저장해둬요) · 미리보기 화면은 빼요
+    if ("serviceWorker" in navigator && !/[?&]preview/.test(location.search)) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
     async function toggleNotify(id) {
       if (pushSubs[id]) {   // 취소
         fetch(MSG_API, { method: "POST", headers: { "content-type": "text/plain" }, body: JSON.stringify({ action: "push-unsub", post: id, endpoint: pushSubs[id] }) }).catch(() => {});
