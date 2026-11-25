@@ -1041,8 +1041,8 @@
 
     /* ---------- 🎴 편집 화면: 공유 카드 고르기 + 미리보기 ---------- */
     function setupCardPick() {
-      if (!$("csUrl")) return; const it = edit.item;
-      $("csUrl").textContent = it.slug ? `heart-notis.github.io/c/${it.slug}` : `heart-notis.github.io/c/${slugBase(it.name || "")} · 올리면 생겨요`;
+      if (!$("f_slug")) return;
+      $("f_name").addEventListener("input", () => { $("f_slug").placeholder = slugBase($("f_name").value); });
     }
 
     /* ---------- ⋯ 엄지 메뉴 (아래에서 올라오는 시트) ---------- */
@@ -1178,7 +1178,7 @@
           <details class="sec" id="sec_link" ${index < 0 ? "open" : ""}><summary><span class="sec-t">🔗 대화 링크 · 태그</span><span class="sec-sum" data-sum="sec_link"></span><i class="sec-ar"></i></summary><div class="sec-in">
           <label class="f">해시태그<div class="tag-pick" id="f_tags">${data.tags.map(t => `<button type="button" class="${(item.tags || []).includes(t) ? "on" : ""}" data-tag="${esc(t)}">#${esc(t)}</button>`).join("") || `<small>해시태그 탭에서 먼저 태그를 만들어주세요</small>`}</div></label>
           <label class="f">대화하러 가기 링크 <small>위에서 체크한 해시태그(플랫폼)마다 주소 칸이 생겨요 · #합작은 세계관 보기 버튼이 돼요</small><div class="links-box" id="f_links"></div></label>
-<div class="f">🔗 공유 주소 <small>이름으로 자동으로 만들어져요 · 공유하는 사람이 카드 모양 ①②③을 골라서 퍼가요</small><div class="cs-url-box" id="csUrl"></div></div>
+<label class="f">🔗 공유 주소 <small>제작자만 바꿀 수 있어요 · 비우면 이름으로 자동으로 만들어져요 · 공유하는 사람이 카드 모양 ①②③을 골라서 퍼가요</small><div class="slug-in"><span>heart-notis.github.io/c/</span><input type="text" id="f_slug" maxlength="40" value="${esc(item.slug || "")}" placeholder="${esc(slugBase(item.name || ""))}" /></div></label>
           </div></details>
           <details class="sec" id="sec_theme" ${false ? "open" : ""}><summary><span class="sec-t">🎨 꾸미기</span><span class="sec-sum" data-sum="sec_theme"></span><i class="sec-ar"></i></summary><div class="sec-in">
           <div class="f">🎨 페이지 꾸미기 <small>게시물을 눌렀을 때 열리는 페이지의 색감이에요. "미리보기"로 확인할 수 있어요.</small>
@@ -1575,6 +1575,9 @@
       if ($("f_hidden").checked) it.hidden = true; else delete it.hidden;
       if (Array.isArray(it.images) && !it.images.length) delete it.images;
       if ($("f_spoiler").checked) it.spoiler = true; else delete it.spoiler;
+      { const raw = $("f_slug").value.trim();
+        if (raw) { const sv = slugBase(raw); if (data.posts.some(x => x !== it && x.slug === sv)) { toast("이미 다른 캐릭터가 쓰는 공유 주소예요"); $("f_slug").focus(); return; } if (it.slug !== sv) { it.slug = sv; delete it.cardKey; } }
+        else if (it.slug) { delete it.slug; delete it.cardKey; } }
       if ($("f_port").checked) { it.port = true; const pn = $("f_portNote").value.trim(); if (pn) it.portNote = pn; else delete it.portNote; const pd = $("f_portDate").value, ptm = $("f_portTime").value; if (pd) it.portDate = pd; else delete it.portDate; if (pd && ptm) it.portTime = ptm; else delete it.portTime; } else { delete it.portTime; delete it.port; delete it.portNote; delete it.portDate; }
       const rel = $("f_release").value;
       if (it.spoiler && rel) it.releaseDate = rel; else delete it.releaseDate;
