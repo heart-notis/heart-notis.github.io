@@ -164,6 +164,11 @@
     .sel-chip.on { background: var(--grad); color: #fff; border-color: transparent; }
     .sel-chip.del { color: #e0527a; border-color: #f6cbd8; }
     .sel-chip:disabled { opacity: .4; }
+    .side-pick { display: flex; gap: 6px; margin-top: 6px; }
+    .side-pick button { flex: 1; height: 40px; border-radius: 12px; border: 1px solid var(--line); background: #fff; font-weight: 800; font-size: .84rem; color: #5b5770; cursor: pointer; }
+    .side-pick button.on { background: var(--grad); color: #fff; border-color: transparent; }
+    .card-pv { display: none; width: 100%; aspect-ratio: 1200/630; border-radius: 12px; margin-top: 8px; border: 1px solid var(--line); object-fit: cover; }
+    .card-pv.show { display: block; }
     .sel-sub { margin: 9px 2px 6px; font-size: .78rem; font-weight: 800; color: #5b5770; } .sel-sub small { font-weight: 600; color: #9aa0a8; margin-left: 4px; }
     .sel-chip.more { background: #f6f3ff; border-color: #e4dcf7; color: #6a4fd0; }
     .sel-chip.more.on { background: var(--grad); color: #fff; }
@@ -1241,6 +1246,9 @@
           <label class="f">해시태그<div class="tag-pick" id="f_tags">${data.tags.map(t => `<button type="button" class="${(item.tags || []).includes(t) ? "on" : ""}" data-tag="${esc(t)}">#${esc(t)}</button>`).join("") || `<small>해시태그 탭에서 먼저 태그를 만들어주세요</small>`}</div></label>
           <label class="f">대화하러 가기 링크 <small>위에서 체크한 해시태그(플랫폼)마다 주소 칸이 생겨요 · #합작은 세계관 보기 버튼이 돼요</small><div class="links-box" id="f_links"></div></label>
 <label class="f">🔗 공유 주소 <small>제작자만 바꿀 수 있어요 · 비우면 번호로 자동 · kailus처럼 영문 별명도 돼요 (한글은 영문으로 바뀌어요) · 카드 모양 ②③은 뒤에 b · c가 붙어요</small><div class="slug-in"><span>heart-notis.github.io/c/</span><input type="text" id="f_slug" maxlength="40" value="${esc(item.slug || "")}" placeholder="자동 번호" /></div></label>
+          <div class="f">🃏 공유 카드 ① 글자 위치 <small>얼굴이 오른쪽에 있으면 왼쪽으로 바꿔주세요 · 공유하는 사람이 고르는 ①번 카드에만 적용돼요</small>
+            <div class="side-pick" id="f_cardSide"><button type="button" data-side="" class="${item.cardSide === "left" ? "" : "on"}">글자 오른쪽 ▶</button><button type="button" data-side="left" class="${item.cardSide === "left" ? "on" : ""}">◀ 글자 왼쪽</button></div>
+            <img id="f_cardPv" class="card-pv" alt="" /></div>
           </div></details>
           <details class="sec" id="sec_theme" ${false ? "open" : ""}><summary><span class="sec-t">🎨 꾸미기</span><span class="sec-sum" data-sum="sec_theme"></span><i class="sec-ar"></i></summary><div class="sec-in">
           <div class="f">🎨 페이지 꾸미기 <small>게시물을 눌렀을 때 열리는 페이지의 색감이에요. "미리보기"로 확인할 수 있어요.</small>
@@ -1393,6 +1401,12 @@
       document.querySelectorAll(".f-status").forEach(cb => cb.onchange = () => { if (cb.checked) document.querySelectorAll(".f-status").forEach(o => { if (o !== cb) o.checked = false; }); });
       $("f_noPort").onchange = () => { ["f_npRow", "f_npReasonRow"].forEach(id => $(id).classList.toggle("hidden", !$("f_noPort").checked)); };
       $("f_npClr").onclick = () => { $("f_npUntil").value = ""; };
+      const cardPv = async () => { const im = $("f_cardPv"); if (!im || !(item.image || $("pvImg")?.src)) return; const sd = document.querySelector("#f_cardSide .on")?.dataset.side;
+        const pp = { ...item, name: $("f_name")?.value.trim() || item.name, tagline: $("f_tagline")?.value.trim() || item.tagline, world: $("f_world")?.value.trim() || item.world, cardSide: sd || "" };
+        try { im.src = await makeCard(pp, $("pvImg")?.src || item.image, { style: 1 }); im.classList.add("show"); } catch {} };
+      $("f_cardSide").onclick = e => { const b = e.target.closest("[data-side]"); if (!b) return; document.querySelectorAll("#f_cardSide button").forEach(x => x.classList.toggle("on", x === b)); cardPv(); };
+      $("sec_link").addEventListener("toggle", () => { if ($("sec_link").open && !$("f_cardPv").src) cardPv(); });
+      if ($("sec_link").open) cardPv();
       $("f_contest").onchange = () => { ["f_contestRow", "f_contestResRow"].forEach(id => $(id).classList.toggle("hidden", !$("f_contest").checked)); };
       $("f_port").onchange = () => { $("f_portRow").classList.toggle("hidden", !$("f_port").checked); $("f_portDateRow").classList.toggle("hidden", !$("f_port").checked); };
       $("f_portDateClr").onclick = () => { $("f_portDate").value = ""; $("f_portTime").value = ""; };
@@ -1649,6 +1663,7 @@
       if ($("f_hidden").checked) it.hidden = true; else delete it.hidden;
       if (Array.isArray(it.images) && !it.images.length) delete it.images;
       if ($("f_spoiler").checked) it.spoiler = true; else delete it.spoiler;
+      { const sd = document.querySelector("#f_cardSide .on")?.dataset.side; if (sd) it.cardSide = sd; else delete it.cardSide; }
       { const raw = $("f_slug").value.trim();
         if (raw) { const sv = /^\d+$/.test(raw) ? raw : slugBase(raw); if (data.posts.some(x => x !== it && x !== edit.item && x.id !== it.id && x.slug && [x.slug, x.slug + "b", x.slug + "c"].some(a => [sv, sv + "b", sv + "c"].includes(a)))) { toast("이미 다른 캐릭터가 쓰는 공유 주소예요"); $("f_slug").focus(); return; } if (it.slug !== sv) { it.slug = sv; delete it.cardKey; } }
         else if (it.slug) { delete it.slug; delete it.cardKey; } }
@@ -2428,7 +2443,7 @@
     }
     const charUrl = p => p && p.slug ? `${SITE_URL}c/${p.slug}` : SITE_URL;
     const plainTxt = t => String(t || "").replace(/\*\*|__|~~|`/g, "").replace(/\{\{\s*user\s*\}\}/gi, "당신").replace(/\s+/g, " ").trim();
-    const cardKey = p => { const k = JSON.stringify(["v7", p.name, p.tagline || "", p.image || "", p.previewPos ?? 25, p.world || "", !!(p.spoiler && !spoilerOpened(p)), p.releaseDate || "", p.releaseTime || "", p.slug]); let h = 5381; for (let i = 0; i < k.length; i++) h = (h * 33 + k.charCodeAt(i)) | 0; return (h >>> 0).toString(36); };
+    const cardKey = p => { const k = JSON.stringify(["v7", p.name, p.tagline || "", p.image || "", p.previewPos ?? 25, p.world || "", !!(p.spoiler && !spoilerOpened(p)), p.releaseDate || "", p.releaseTime || "", p.slug, ...(p.cardSide ? [p.cardSide] : [])]); let h = 5381; for (let i = 0; i < k.length; i++) h = (h * 33 + k.charCodeAt(i)) | 0; return (h >>> 0).toString(36); };
     function wrapLines(g, text, maxW, maxLines) {
       const words = String(text).split(/(\s+)/), lines = []; let cur = "";
       const push = w => { if (g.measureText(cur + w).width <= maxW) { cur += w; return; } if (cur.trim()) lines.push(cur.trim()); cur = ""; if (g.measureText(w).width > maxW) { for (const ch of w) { if (g.measureText(cur + ch).width > maxW) { lines.push(cur); cur = ""; } cur += ch; } } else cur = w.trimStart(); };
@@ -2457,10 +2472,11 @@
       let tx, tw, dark = false, rx, by;
       if (style === 1) {
         cover(0, 0, W, H, spo ? 30 : 0);
-        const gr = g.createLinearGradient(380, 0, W, 0); gr.addColorStop(0, "rgba(38,28,72,0)"); gr.addColorStop(.45, "rgba(38,28,72,.72)"); gr.addColorStop(1, "rgba(30,24,60,.92)"); g.fillStyle = gr; g.fillRect(0, 0, W, H);
+        const L = p.cardSide === "left";
+        const gr = L ? g.createLinearGradient(W - 380, 0, 0, 0) : g.createLinearGradient(380, 0, W, 0); gr.addColorStop(0, "rgba(38,28,72,0)"); gr.addColorStop(.45, "rgba(38,28,72,.72)"); gr.addColorStop(1, "rgba(30,24,60,.92)"); g.fillStyle = gr; g.fillRect(0, 0, W, H);
         const gb = g.createLinearGradient(0, H * .55, 0, H); gb.addColorStop(0, "rgba(30,24,60,0)"); gb.addColorStop(1, "rgba(30,24,60,.45)"); g.fillStyle = gb; g.fillRect(0, 0, W, H);
-        if (spo) { g.fillStyle = "rgba(255,255,255,.94)"; g.font = `800 44px ${font}`; g.textAlign = "center"; g.fillText("✦ SPOILER", 330, H / 2 + 16); g.textAlign = "left"; }
-        tx = 700; tw = W - tx - 56; dark = true; rx = W - 56; by = H - 62;
+        if (spo) { g.fillStyle = "rgba(255,255,255,.94)"; g.font = `800 44px ${font}`; g.textAlign = "center"; g.fillText("✦ SPOILER", L ? W - 330 : 330, H / 2 + 16); g.textAlign = "left"; }
+        tw = W - 700 - 56; tx = L ? 56 : 700; dark = true; rx = tx + tw; by = H - 62;
       } else if (style === 3) {
         cover(0, 0, W, H, 34); g.fillStyle = "rgba(244,239,255,.55)"; g.fillRect(0, 0, W, H);
         photoBox(56, 56, 460, 518, 30);
