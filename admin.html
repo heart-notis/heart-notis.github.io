@@ -238,6 +238,7 @@
     .live-box .lb-bar i { display: block; height: 100%; border-radius: 9px; background: linear-gradient(90deg, #b9a2f6, #7fcdf2); transition: width .8s ease; }
     .live-box.done .lb-bar i { background: linear-gradient(90deg, #7fe0b0, #7fcdf2); }
     .live-box .lb-s { font-size: .72rem; opacity: .75; margin-top: 7px; }
+    .cs-url-box { padding: 11px 12px; border-radius: 12px; background: #f6f5fb; font-size: .84rem; font-weight: 700; color: #7353d6; word-break: break-all; }
     .cs-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
     .cs-url { flex: 1; min-width: 0; font-size: .76rem; color: #8b7cf0; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .cs-dots { display: flex; gap: 6px; }
@@ -1040,28 +1041,8 @@
 
     /* ---------- 🎴 편집 화면: 공유 카드 고르기 + 미리보기 ---------- */
     function setupCardPick() {
-      if (!$("csPrev")) return;
-      const it = edit.item; edit.cardStyle = cardStyleOf(it);
-      $("csUrl").textContent = it.slug ? `heart-notis.github.io/c/${it.slug}` : `heart-notis.github.io/c/${slugBase(it.name || "")} (올리면 생겨요)`;
-      let seq = 0, timer = null;
-      const draw = async () => {
-        const my = ++seq; $("csLoad").classList.add("show");
-        const pv = { ...it, name: $("f_name").value.trim() || it.name || "", tagline: $("f_tagline").value.trim(), world: $("f_world").value.trim(), cardStyle: edit.cardStyle,
-          spoiler: $("f_spoiler") ? $("f_spoiler").checked : it.spoiler, releaseDate: $("f_release") ? $("f_release").value : it.releaseDate, releaseTime: $("f_releaseTime") ? $("f_releaseTime").value : it.releaseTime };
-        try { const url = await makeCard(pv, it.image); if (my === seq && $("csImg")) $("csImg").src = url; } catch {}
-        if (my === seq && $("csLoad")) $("csLoad").classList.remove("show");
-      };
-      const mark = () => { document.querySelectorAll("#csDots [data-cs]").forEach(b => b.classList.toggle("on", +b.dataset.cs === edit.cardStyle)); document.querySelectorAll("#csPg i").forEach((d, k) => d.classList.toggle("on", k + 1 === edit.cardStyle)); };
-      const pick = n => { edit.cardStyle = Math.min(3, Math.max(1, n)); mark(); draw(); };
-      $("csDots").onclick = e => { const b = e.target.closest("[data-cs]"); if (b) pick(+b.dataset.cs); };
-      let x0 = null; const pr = $("csPrev");
-      pr.addEventListener("pointerdown", e => { x0 = e.clientX; });
-      pr.addEventListener("pointerup", e => { if (x0 === null) return; const dx = e.clientX - x0; x0 = null; if (Math.abs(dx) > 40) pick(edit.cardStyle + (dx < 0 ? 1 : -1)); });
-      ["f_name", "f_tagline", "f_world"].forEach(id => $(id) && $(id).addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(draw, 500); }));
-      ["pvPos"].forEach(id => $(id) && $(id).addEventListener("change", draw));
-      $("sec_link").addEventListener("toggle", () => { if ($("sec_link").open) draw(); });
-      mark(); if ($("sec_link").open) draw();
-      edit.redrawCard = draw;
+      if (!$("csUrl")) return; const it = edit.item;
+      $("csUrl").textContent = it.slug ? `heart-notis.github.io/c/${it.slug}` : `heart-notis.github.io/c/${slugBase(it.name || "")} · 올리면 생겨요`;
     }
 
     /* ---------- ⋯ 엄지 메뉴 (아래에서 올라오는 시트) ---------- */
@@ -1197,10 +1178,7 @@
           <details class="sec" id="sec_link" ${index < 0 ? "open" : ""}><summary><span class="sec-t">🔗 대화 링크 · 태그</span><span class="sec-sum" data-sum="sec_link"></span><i class="sec-ar"></i></summary><div class="sec-in">
           <label class="f">해시태그<div class="tag-pick" id="f_tags">${data.tags.map(t => `<button type="button" class="${(item.tags || []).includes(t) ? "on" : ""}" data-tag="${esc(t)}">#${esc(t)}</button>`).join("") || `<small>해시태그 탭에서 먼저 태그를 만들어주세요</small>`}</div></label>
           <label class="f">대화하러 가기 링크 <small>위에서 체크한 해시태그(플랫폼)마다 주소 칸이 생겨요 · #합작은 세계관 보기 버튼이 돼요</small><div class="links-box" id="f_links"></div></label>
-<div class="f">🎴 공유 카드 <small>X · 카톡에 올리면 이 카드로 떠요 · 숫자를 누르거나 카드를 옆으로 밀어서 골라요</small>
-            <div class="cs-head"><span class="cs-url" id="csUrl"></span><span class="cs-dots" id="csDots">${[1, 2, 3].map(n => `<button type="button" data-cs="${n}">${n}</button>`).join("")}</span></div>
-            <div class="cs-prev" id="csPrev"><img id="csImg" alt="" /><span class="cs-load" id="csLoad">만드는 중…</span></div>
-            <div class="cs-pg" id="csPg"><i></i><i></i><i></i></div></div>
+<div class="f">🔗 공유 주소 <small>이름으로 자동으로 만들어져요 · 공유하는 사람이 카드 모양 ①②③을 골라서 퍼가요</small><div class="cs-url-box" id="csUrl"></div></div>
           </div></details>
           <details class="sec" id="sec_theme" ${false ? "open" : ""}><summary><span class="sec-t">🎨 꾸미기</span><span class="sec-sum" data-sum="sec_theme"></span><i class="sec-ar"></i></summary><div class="sec-in">
           <div class="f">🎨 페이지 꾸미기 <small>게시물을 눌렀을 때 열리는 페이지의 색감이에요. "미리보기"로 확인할 수 있어요.</small>
@@ -1313,7 +1291,6 @@
         edit.item.image = url;
         $("imgPrev").innerHTML = `<img src="${url}" alt="" />`;
         drawPv();
-        if (edit.redrawCard && $("sec_link") && $("sec_link").open) edit.redrawCard();
         if (!$("imgRecrop")) $("imgBtns").insertAdjacentHTML("beforeend", `<button class="btn btn-ghost btn-sm" id="imgRecrop">✂️ 다시 자르기</button>`);
         $("imgRecrop").onclick = recrop;
       };
@@ -1598,7 +1575,6 @@
       if ($("f_hidden").checked) it.hidden = true; else delete it.hidden;
       if (Array.isArray(it.images) && !it.images.length) delete it.images;
       if ($("f_spoiler").checked) it.spoiler = true; else delete it.spoiler;
-      if (edit.cardStyle && edit.cardStyle !== 2) it.cardStyle = edit.cardStyle; else delete it.cardStyle;
       if ($("f_port").checked) { it.port = true; const pn = $("f_portNote").value.trim(); if (pn) it.portNote = pn; else delete it.portNote; const pd = $("f_portDate").value, ptm = $("f_portTime").value; if (pd) it.portDate = pd; else delete it.portDate; if (pd && ptm) it.portTime = ptm; else delete it.portTime; } else { delete it.portTime; delete it.port; delete it.portNote; delete it.portDate; }
       const rel = $("f_release").value;
       if (it.spoiler && rel) it.releaseDate = rel; else delete it.releaseDate;
@@ -2353,7 +2329,7 @@
     }
     const charUrl = p => p && p.slug ? `${SITE_URL}c/${p.slug}` : SITE_URL;
     const plainTxt = t => String(t || "").replace(/\*\*|__|~~|`/g, "").replace(/\{\{\s*user\s*\}\}/gi, "당신").replace(/\s+/g, " ").trim();
-    const cardKey = p => { const k = JSON.stringify(["v3", cardStyleOf(p), p.name, p.tagline || "", p.image || "", p.previewPos ?? 25, p.world || "", !!(p.spoiler && !spoilerOpened(p)), p.releaseDate || "", p.releaseTime || "", p.slug]); let h = 5381; for (let i = 0; i < k.length; i++) h = (h * 33 + k.charCodeAt(i)) | 0; return (h >>> 0).toString(36); };
+    const cardKey = p => { const k = JSON.stringify(["v4", p.name, p.tagline || "", p.image || "", p.previewPos ?? 25, p.world || "", !!(p.spoiler && !spoilerOpened(p)), p.releaseDate || "", p.releaseTime || "", p.slug]); let h = 5381; for (let i = 0; i < k.length; i++) h = (h * 33 + k.charCodeAt(i)) | 0; return (h >>> 0).toString(36); };
     function wrapLines(g, text, maxW, maxLines) {
       const words = String(text).split(/(\s+)/), lines = []; let cur = "";
       const push = w => { if (g.measureText(cur + w).width <= maxW) { cur += w; return; } if (cur.trim()) lines.push(cur.trim()); cur = ""; if (g.measureText(w).width > maxW) { for (const ch of w) { if (g.measureText(cur + ch).width > maxW) { lines.push(cur); cur = ""; } cur += ch; } } else cur = w.trimStart(); };
@@ -2369,7 +2345,7 @@
       try { await document.fonts.load('800 60px "Pretendard Variable"'); await document.fonts.load('500 30px "Pretendard Variable"'); } catch {}
       const font = '"Pretendard Variable", Pretendard, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
       const spo = opt.open ? false : !!(p.spoiler && !spoilerOpened(p));
-      const style = cardStyleOf(p);
+      const style = [1, 2, 3].includes(+opt.style) ? +opt.style : 2;
       let im = null; try { im = await loadImage(imgSrc || p.image); } catch {}
       const pv = (typeof p.previewPos === "number" ? p.previewPos : 25) / 100;
       const heart = (x, y, sz) => { g.save(); g.translate(x, y); g.scale(sz / 24, sz / 24); const hg = g.createLinearGradient(0, 0, 24, 24); hg.addColorStop(0, "#b9a2f6"); hg.addColorStop(1, "#7fcdf2"); g.fillStyle = hg; g.fill(new Path2D("M12 21.2s-8.6-5.2-10.4-10.6C.3 6.6 2.8 2.8 6.7 2.8c2.3 0 4.1 1.2 5.3 3.1 1.2-1.9 3-3.1 5.3-3.1 3.9 0 6.4 3.8 5.1 7.8C20.6 16 12 21.2 12 21.2z")); g.restore(); };
@@ -2412,11 +2388,12 @@
       g.fillStyle = dark ? "rgba(255,255,255,.72)" : "#8a8f99"; g.font = `500 25px ${font}`; g.fillText("@HEART", x0 + 54 + nw, by - 4);
       return cv.toDataURL("image/jpeg", 0.88);
     }
-    function cardPage(p, key, open = false) {
+    const styleDir = n => n === 2 ? "" : `${n}/`;   // 2번(기본)은 c/이름, 1·3번은 c/이름/1 · c/이름/3
+    function cardPage(p, key, open = false, n = 2) {
       const spo = open ? false : !!(p.spoiler && !spoilerOpened(p));
       const title = `${p.name} · 하트 (@HEART)`;
       const desc = spo ? "✦ 곧 공개될 캐릭터예요 · 하트 (@HEART)" : (plainTxt(p.tagline) || "하트 (@HEART)의 캐릭터예요 💙");
-      const dir = `${SITE_URL}c/${encodeURIComponent(p.slug)}/`, img = `${dir}${open ? "card-open.jpg" : "card.jpg"}?v=${key}`;
+      const dir = `${SITE_URL}c/${encodeURIComponent(p.slug)}/${styleDir(n)}`, img = `${dir}${open ? "card-open.jpg" : "card.jpg"}?v=${key}`;
       const go = `/?from=share#post-${encodeURIComponent(p.id)}`;
       return `<!DOCTYPE html>
 <html lang="ko"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><meta name="robots" content="noindex" />
@@ -2437,21 +2414,24 @@
       const byPath = new Map(uploads.map(u => [u.path, u]));
       for (const p of out.posts) {
         if (p.hidden || !p.image) { delete p.cardKey; continue; }
-        const dir = `c/${p.slug}/`, spoNow = !!(p.spoiler && !spoilerOpened(p)); keep.add(dir + "index.html"); keep.add(dir + "card.jpg");
-        if (spoNow) { keep.add(dir + "open.html"); keep.add(dir + "card-open.jpg"); }
+        const base = `c/${p.slug}/`, spoNow = !!(p.spoiler && !spoilerOpened(p));
+        for (const n of [1, 2, 3]) { const d = base + styleDir(n); keep.add(d + "index.html"); keep.add(d + "card.jpg"); if (spoNow) { keep.add(d + "open.html"); keep.add(d + "card-open.jpg"); } }
         const k = cardKey(p); if (p.cardKey === k) continue;
         step(`공유 카드 만드는 중… ${p.name}`);
         let src = p.image, tmp = null;
         const up = byPath.get(p.image); if (up) { tmp = URL.createObjectURL(new Blob([up.bytes])); src = tmp; }
         try {
-          const jpg = await makeCard(p, src);
-          uploads.unshift({ path: dir + "card.jpg", bytes: b64Bytes(jpg.split(",")[1]), label: "card" }, { path: dir + "index.html", bytes: new TextEncoder().encode(cardPage(p, k)), label: "card" });
-          // 🔓 스포일러: 공개되면 깃허브가 바꿔 끼울 "공개 후 카드"를 미리 만들어둬요
-          if (spoNow) {
-            const jo = await makeCard(p, src, { open: true });
-            uploads.unshift({ path: dir + "card-open.jpg", bytes: b64Bytes(jo.split(",")[1]), label: "card" }, { path: dir + "open.html", bytes: new TextEncoder().encode(cardPage(p, k + "o", true)), label: "card" });
+          for (const n of [1, 2, 3]) {
+            const d = base + styleDir(n);
+            const jpg = await makeCard(p, src, { style: n });
+            uploads.unshift({ path: d + "card.jpg", bytes: b64Bytes(jpg.split(",")[1]), label: "card" }, { path: d + "index.html", bytes: new TextEncoder().encode(cardPage(p, k, false, n)), label: "card" });
+            // 🔓 스포일러: 공개되면 깃허브가 바꿔 끼울 "공개 후 카드"를 미리 만들어둬요
+            if (spoNow) {
+              const jo = await makeCard(p, src, { open: true, style: n });
+              uploads.unshift({ path: d + "card-open.jpg", bytes: b64Bytes(jo.split(",")[1]), label: "card" }, { path: d + "open.html", bytes: new TextEncoder().encode(cardPage(p, k + "o", true, n)), label: "card" });
+            }
           }
-          p.cardKey = k;
+          p.cardKey = k; delete p.cardStyle;
         } catch (e) { console.warn("공유 카드 건너뜀", p.name, e); }
         finally { if (tmp) URL.revokeObjectURL(tmp); }
       }
