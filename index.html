@@ -401,6 +401,19 @@
     html.dark .tweet.porting { background: linear-gradient(90deg, #1b2234 0%, #221d38 60%, #15151e 100%); }
     .port-tag { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 0 0 6px; }
     .port-tag span { display: inline-block; padding: 4px 11px; border-radius: 999px; font-size: .7rem; font-weight: 800; letter-spacing: .06em; color: #fff; background: linear-gradient(120deg, #7fb5f2, #a98cf3); box-shadow: 0 3px 10px rgba(120,140,240,.3); }
+    .port-tag span.port-done { letter-spacing: .02em; background: linear-gradient(120deg, #a993f4, #74c6f0); box-shadow: 0 3px 10px rgba(140,120,240,.3); }
+    /* 🏷️ 해시태그 플랫폼별 색 (앱 아이콘 색을 홈페이지 톤에 맞게 낮춤 · 배경·굵기는 그대로) */
+    .hash.p-whif { color: #8a6fe0; } .hash.p-tingle { color: #e06aa8; } .hash.p-bloom { color: #6f93e8; } .hash.p-teapot { color: #3fb489; } .hash.p-postype { color: #6b7280; } .hash.p-hap { color: #9aa0a8; }
+    html.dark .hash.p-postype { color: #a3a9b4; }
+    /* ⏳ 공개 당일 실시간 카운트다운 */
+    .cd-live { display: inline-flex; align-items: center; gap: 6px; margin: 6px 0 2px; padding: 5px 12px; border-radius: 12px; background: linear-gradient(120deg, #2b2840, #3d3466); color: #fff; font-weight: 800; font-size: .8rem; }
+    .cd-live b { font-variant-numeric: tabular-nums; font-size: .98rem; letter-spacing: .06em; color: #d9ccff; }
+    /* 🌸 하트 누르면 테마 이모지 팡 */
+    .fx-emo { position: fixed; z-index: 300; pointer-events: none; line-height: 1; animation: fxEmo 1s cubic-bezier(.2,.8,.3,1) forwards; }
+    @keyframes fxEmo { 0% { transform: translate(0,0) scale(.3) rotate(0); opacity: 0; } 15% { opacity: 1; } 70% { opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) scale(1) rotate(var(--rot)); opacity: 0; } }
+    /* ⌨️ 한 줄 소개 타자 효과 커서 */
+    .type-cur { display: inline-block; width: 2px; height: 1em; margin-left: 2px; vertical-align: -2px; background: currentColor; animation: typeBlink .8s steps(1) infinite; }
+    @keyframes typeBlink { 50% { opacity: 0; } }
     .port-tag em { font-style: normal; font-size: .78rem; font-weight: 800; background: linear-gradient(120deg, #8b6fe8, #5fa8ea); -webkit-background-clip: text; background-clip: text; color: transparent; }
     .upd-mini { display: flex; align-items: center; gap: 5px; margin: 1px 0 2px; font-size: .72rem; color: var(--sub); min-width: 0; }
     .upd-mini b { color: var(--blue); }
@@ -1429,7 +1442,8 @@
         : `${dt.getFullYear()}년 ${dt.getMonth() + 1}월 ${dt.getDate()}일`;
     };
     const longDate = d => { const dt = toDay(d); return isNaN(dt) ? "" : `${dt.getFullYear()}년 ${dt.getMonth() + 1}월 ${dt.getDate()}일`; };
-    const hashtags = c => c.tags.map(t => `<span class="hash">#${esc(t.replace(/\s/g, ""))}</span>`).join(" ");
+    const PLAT_CLS = { WHIF: "p-whif", TINGLE: "p-tingle", BLOOM: "p-bloom", TEAPOT: "p-teapot", POSTYPE: "p-postype", "합작": "p-hap" };
+    const hashtags = c => c.tags.map(t => { const k = t.replace(/\s/g, ""); return `<span class="hash${PLAT_CLS[k.toUpperCase()] || PLAT_CLS[k] ? " " + (PLAT_CLS[k.toUpperCase()] || PLAT_CLS[k]) : ""}">#${esc(k)}</span>`; }).join(" ");
 
     const I = {
       world: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 20.2s-7.6-4.6-9.2-9.4C1.6 7.2 3.8 3.8 7.3 3.8c2 0 3.6 1.1 4.7 2.8 1.1-1.7 2.7-2.8 4.7-2.8 3.5 0 5.7 3.4 4.5 7C19.6 15.6 12 20.2 12 20.2z"/><path d="M8.6 9.4c.4-1 1.1-1.6 2-1.8" stroke-linecap="round"/></svg>`,
@@ -1498,6 +1512,13 @@
     const isNoPort = c => !!(c && c.noPort && (!npEnd(c) || Date.now() < npEnd(c)));
     const npLabel = c => { if (!c.noPortUntil) return ""; const [, m, d] = c.noPortUntil.split("-"); return `~${+m}/${+d}`; };
     const isPort = c => !!(c && c.port && !isSpoiler(c) && (!portEnd(c) || Date.now() < portEnd(c)));
+    // ✓ 이식 날짜가 지나면 "이식 완료" 딱지 (7일 동안만 · 그다음엔 저절로 사라져요)
+    const isPortDone = c => { const t = c && c.port && !isSpoiler(c) ? portEnd(c) : 0; return !!t && Date.now() >= t && Date.now() - t < 7 * 86400000; };
+    const portDoneTag = (c, st = "") => {
+      if (!isPortDone(c)) return "";
+      const where = String(c.portNote || "").split("·")[0].trim(), md = c.portDate ? `${+c.portDate.slice(5, 7)}/${+c.portDate.slice(8, 10)}` : "";
+      return `<div class="port-tag"${st}><span class="port-done">✓ 이식 완료${where ? " · " + escH(where) : ""}${md ? " · " + md : ""}</span></div>`;
+    };
     const portInfo = c => c.portNote || (c.portDate ? (() => { const [, m, d] = c.portDate.split("-"); return `${+m}월 ${+d}일${c.portTime ? " " + c.portTime : ""} 이식`; })() : "");
     const isUpdated = c => { const t = Date.parse(c.updatedAt || ""); return !isNaN(t) && Date.now() - t < 86400000; };
     const updBadge = c => {
@@ -1522,6 +1543,8 @@
     const headHTML = (d, label) => `
       <div class="t-head"><b>${esc(profile.name)}</b>${I.verified}<span class="muted">@${esc(profile.handle)} · ${label || shortDate(d)}</span></div>`;
     // ✦ 스포일러 공개 예정일: "12월 3일 공개 예정" (지난 날짜/오늘이면 "오늘 공개")
+    const cdText = ms => { const t = Math.max(0, Math.floor(ms / 1000)), p = n => String(n).padStart(2, "0"); return `${p(Math.floor(t / 3600))}:${p(Math.floor(t % 3600 / 60))}:${p(t % 60)}`; };
+    setInterval(() => document.querySelectorAll("[data-cd]").forEach(el => { const left = +el.dataset.cd - Date.now(); el.textContent = cdText(left); if (left <= 0) el.closest(".cd-live")?.remove(); }), 1000);
     const releaseLabel = (d, time) => {
       const dt = toDay(d); if (!d || isNaN(dt)) return "";
       const now = new Date(), today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -1673,7 +1696,7 @@
           ${meAva()}
           <div class="t-main">
             <div class="spoil-tag"><span>✦ SPOILER</span>${c.releaseDate && c.id ? `<button class="notify-btn ${pushSubs[c.id] ? "on" : ""}" data-notify="${esc(c.id)}"><span class="bell">🔔</span>${pushSubs[c.id] ? "알림 신청됨" : "공개 알림"}</button>` : ""}</div>
-            ${headHTML(c.date, releaseLabel(c.releaseDate, c.releaseTime))}
+            ${headHTML(c.date, releaseLabel(c.releaseDate, c.releaseTime))}${(() => { const at = releaseAt(c); return at && at - Date.now() > 0 && at - Date.now() < 86400000 ? `<div class="cd-live">✦ 공개까지 <b data-cd="${at}">${cdText(at - Date.now())}</b></div>` : ""; })()}
             <p class="t-title">${escH(c.name)}</p>
             <p class="t-tags">${hashtags(c)}</p>
             ${c.image ? `<div class="t-media preview${c.tagline ? " can-talk" : ""}" style="--pv:${typeof c.previewPos === "number" ? c.previewPos : 25}%;--px:${typeof c.previewX === "number" ? c.previewX : 50}%;--pz:${typeof c.previewZoom === "number" ? c.previewZoom : 1}">${mediaHTML(c)}${veilHTML(c)}${c.tagline ? `
@@ -1705,7 +1728,7 @@
         <article class="tweet${isBday(c) ? " bday" : ""}${isPort(c) ? " porting" : ""}" data-open="${i}">${isBday(c) ? `<div class="bday-petals" aria-hidden="true">${Array.from({ length: 10 }, (_, k) => `<i style="left:${(k * 37 + 7) % 96}%;animation-duration:${7 + (k * 7) % 5}s;animation-delay:-${(k * 1.7) % 7}s;--sz:${.55 + ((k * 13) % 5) / 10}"></i>`).join("")}</div>` : ""}
           ${meAva()}
           <div class="t-main">
-            ${isPort(c) ? `<div class="port-tag"><span>↪ 이식 예정</span>${portInfo(c) ? `<em>${escH(portInfo(c))}</em>` : ""}</div>` : ""}
+            ${isPort(c) ? `<div class="port-tag"><span>↪ 이식 예정</span>${portInfo(c) ? `<em>${escH(portInfo(c))}</em>` : ""}</div>` : portDoneTag(c)}
             ${headHTML(isReleased(c) ? c.releaseDate : c.date)}${updNote(c) || logMini(c)}
             <p class="t-title">${escH(c.name)}${isBday(c) ? `<span class="bday-tag">🎂 생일</span>` : isBdayTmr(c) ? `<span class="bday-tag soon">🎂 내일 생일</span>` : ""}${c.contest ? `<span class="ct-tag">🏆 공모전</span>` : ""}${ytId(c.songUrl) ? `<span class="sg-tag">♪ 테마곡</span>` : ""}${isNoPort(c) ? `<span class="np-tag">🚫 이식 불가${npLabel(c) ? " " + npLabel(c) : ""}</span>` : ""}</p>
             ${c.tagline ? `<p class="t-tagline">${fmtText(c.tagline)}</p>` : ""}
@@ -1991,7 +2014,7 @@
             ${meAva()}
             <div><div class="name">${esc(profile.name)}${I.verified}</div><div class="handle">@${esc(profile.handle)}</div></div>
           </div>
-          ${isPort(c) ? `<div class="port-tag" style="margin:14px 0 10px"><span>↪ 이식 예정</span>${portInfo(c) ? `<em>${escH(portInfo(c))}</em>` : ""}</div>` : ""}
+          ${isPort(c) ? `<div class="port-tag" style="margin:14px 0 10px"><span>↪ 이식 예정</span>${portInfo(c) ? `<em>${escH(portInfo(c))}</em>` : ""}</div>` : portDoneTag(c, ' style="margin:14px 0 10px"')}
           <div class="d-title">${escH(c.name)}${isBday(c) ? `<span class="bday-tag">🎂 생일</span>` : isBdayTmr(c) ? `<span class="bday-tag soon">🎂 내일 생일</span>` : ""}${c.world ? `<span class="d-world" data-world-go="${esc(c.world)}" role="button" title="이 세계관 캐릭터 모아보기">${escH(c.world)}<em class="dw-go">›</em></span>` : ""}</div>
           ${c.contest ? `<div class="ct-line">🏆 <span>${c.contestName ? `<b>${escH(c.contestName)}</b> ` : "<b>공모전</b> "}출품작</span>${c.contestResult ? `<em>${escH(c.contestResult)}</em>` : ""}</div>` : ""}
           ${isNoPort(c) ? `<div class="np-line">🚫 <span>${c.noPortUntil ? (() => { const [, m, d] = c.noPortUntil.split("-"); return `${+m}월 ${+d}일까지 이식 불가`; })() : "이식 불가"}</span>${c.noPortReason ? `<em>${escH(c.noPortReason)}</em>` : ""}</div>` : ""}
@@ -2024,6 +2047,58 @@
       $("overlay").classList.add("open");
       document.documentElement.classList.add("modal-open");
       setupGallery($("modal"));
+      typeTagline($("modal").querySelector(".d-tagline"));
+      autoTint(c);
+    }
+    /* ⌨️ 상세를 열면 한 줄 소개가 한 글자씩 써져요 (다 써지면 원래 꾸밈 그대로) */
+    let typeTok = 0;
+    function typeTagline(el) {
+      const tok = ++typeTok;
+      if (!el || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const html = el.innerHTML, chars = [...el.textContent]; if (chars.length < 2) return;
+      const step = Math.max(18, Math.min(42, 1500 / chars.length)); let n = 0;
+      el.style.minHeight = el.offsetHeight + "px"; el.textContent = "";
+      const cur = document.createElement("span"); cur.className = "type-cur";
+      (function tick() {
+        if (tok !== typeTok || !el.isConnected) return;
+        n++; el.textContent = chars.slice(0, n).join(""); el.appendChild(cur);
+        if (n < chars.length) setTimeout(tick, step); else setTimeout(() => { if (tok === typeTok) { el.innerHTML = html; el.style.minHeight = ""; } }, 350);
+      })();
+    }
+    /* 🎨 꾸미기를 안 고른 캐릭터는 그림 색을 따라 포인트 색이 바뀌어요 (흑백 그림은 기본 보라 그대로) */
+    const tintCache = {};
+    const TINT_PROPS = ["--blue", "--blue-soft", "--m-quote", "--m-quote-line", "--m-glow", "--grad-strong", "background-image"];
+    function autoTint(c) {
+      const m = $("modal"); TINT_PROPS.forEach(k => m.style.removeProperty(k));
+      if (!c || !c.image || m.dataset.theme) return;
+      const apply = h => {
+        if (h == null || m.dataset.theme || !$("overlay").classList.contains("open")) return;
+        const dark = document.documentElement.classList.contains("dark");
+        const v = dark
+          ? { "--blue": `hsl(${h} 70% 76%)`, "--blue-soft": `hsla(${h}, 60%, 60%, .14)`, "--m-quote": `hsla(${h}, 60%, 60%, .08)`, "--m-quote-line": `hsl(${h} 55% 62%)`, "--m-glow": `hsla(${h}, 60%, 55%, .35)`, "background-image": `linear-gradient(180deg, hsla(${h}, 45%, 35%, .35), transparent 42%)` }
+          : { "--blue": `hsl(${h} 52% 46%)`, "--blue-soft": `hsl(${h} 70% 95%)`, "--m-quote": `hsl(${h} 65% 97%)`, "--m-quote-line": `hsl(${h} 55% 70%)`, "--m-glow": `hsla(${h}, 60%, 60%, .3)`, "background-image": `linear-gradient(180deg, hsl(${h} 70% 96%), transparent 42%)` };
+        v["--grad-strong"] = `linear-gradient(120deg, hsl(${h} 58% 64%), hsl(${(h + 28) % 360} 62% 72%))`;
+        Object.entries(v).forEach(([k, val]) => m.style.setProperty(k, val));
+      };
+      if (c.image in tintCache) return apply(tintCache[c.image]);
+      const im = new Image();
+      im.onload = () => {
+        try {
+          const cv = document.createElement("canvas"); cv.width = cv.height = 40; const x = cv.getContext("2d", { willReadFrequently: true }); x.drawImage(im, 0, 0, 40, 40);
+          const d = x.getImageData(0, 0, 40, 40).data, bins = new Array(36).fill(0), hs = new Array(36).fill(0); let sat = 0, tot = 0;
+          for (let i = 0; i < d.length; i += 4) {
+            const r = d[i] / 255, g = d[i + 1] / 255, b = d[i + 2] / 255, mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, dl = mx - mn; tot++;
+            if (dl < .08 || l < .1 || l > .92) continue;
+            const sv = dl / (1 - Math.abs(2 * l - 1)); let h = mx === r ? ((g - b) / dl) % 6 : mx === g ? (b - r) / dl + 2 : (r - g) / dl + 4; h = (h * 60 + 360) % 360;
+            const w = sv * (1 - Math.abs(l - .5)) * (h > 8 && h < 42 && sv < .75 ? .3 : 1);   // 피부색은 덜 세게
+            const k = Math.floor(h / 10); bins[k] += w; hs[k] += h * w; sat += w;
+          }
+          let k = 0; for (let i = 0; i < 36; i++) if (bins[i] + .5 * (bins[(i + 35) % 36] + bins[(i + 1) % 36]) > bins[k] + .5 * (bins[(k + 35) % 36] + bins[(k + 1) % 36])) k = i;
+          tintCache[c.image] = sat / tot < .05 ? null : Math.round(hs[k] / bins[k]);
+        } catch { tintCache[c.image] = null; }
+        apply(tintCache[c.image]);
+      };
+      im.src = c.image;
     }
     function ytId(u) { if (!u) return ""; const m = String(u).match(/(?:youtu\.be\/|[?&]v=|\/(?:embed|shorts|live)\/)([\w-]{11})/); return m ? m[1] : ""; }
     function stopSong() { document.querySelectorAll(".song.on").forEach(el => { el.classList.remove("on"); const b = el.querySelector(".sg-p"); if (b) b.textContent = "▶"; const f = el.nextElementSibling; if (f && f.classList.contains("song-fr")) f.innerHTML = ""; }); }
@@ -2170,9 +2245,24 @@
       else hideTweet();
     });
 
-    function toggleLike(i) {
+    const THEME_FX = { sakura: "🌸", night: "✨", forest: "🍃", sunset: "🧡", ocean: "🫧", cream: "🤍", noir: "🖤", rose: "🌹", lavender: "💜", mint: "🌱", lemon: "🍋", peach: "🍑", sky: "☁️", mono: "🖤", wine: "🍷",
+      home: "🏠", fire: "🔥", police: "⭐", hospital: "💊", school: "✏️", office: "📎", cafe: "☕", idol: "✨", palace: "👑", oriental: "🌸", apocalypse: "☢️", cyber: "⚡", horror: "👻", game: "⭐", gamedark: "👾",
+      coral: "🐚", sage: "🌿", blush: "🎀", choco: "🍫", navy: "⭐", winter: "❄️", xmas: "🎄", gothic: "🦇", magic: "✨", space: "⭐", retro: "💿", band: "🎶", sports: "⚽", fairy: "🌟" };
+    function themeBurst(btn) {
+      const th = $("overlay").classList.contains("open") && btn.closest("#modal") ? $("modal").dataset.theme : "", em = THEME_FX[th];
+      if (!em || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const r = btn.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      for (let k = 0; k < 10; k++) {
+        const a = -Math.PI / 2 + (k / 9 - .5) * Math.PI * 1.3, d = 50 + Math.random() * 40, sz = 14 + Math.random() * 10;
+        const s = document.createElement("span"); s.className = "fx-emo"; s.textContent = em;
+        s.style.cssText = `left:${cx - sz / 2}px;top:${cy - sz / 2}px;font-size:${sz}px;--dx:${Math.cos(a) * d}px;--dy:${Math.sin(a) * d - 10}px;--rot:${(Math.random() - .5) * 80}deg;animation-delay:${k * 25}ms`;
+        document.body.appendChild(s); setTimeout(() => s.remove(), 1300);
+      }
+    }
+    function toggleLike(i, btn) {
       const c = characters[i];
       liked[c.name] = !liked[c.name];
+      if (liked[c.name] && btn) themeBurst(btn);
       store.set("tw_liked", liked);
       track("like", { post: postKey(i), on: !!liked[c.name] });
       document.querySelectorAll(`[data-like="${i}"]`).forEach(b => {
@@ -2241,7 +2331,7 @@
     document.addEventListener("click", e => {
       if (e.target.closest("[data-more]")) { moreN += MORE_STEP; renderView(); return; }
       const like = e.target.closest("[data-like]");
-      if (like) { e.stopPropagation(); return toggleLike(+like.dataset.like); }
+      if (like) { e.stopPropagation(); return toggleLike(+like.dataset.like, like); }
       const sh = e.target.closest("[data-share]");
       if (sh) { e.stopPropagation(); return shareChar(+sh.dataset.share); }
       const arrow = e.target.closest("[data-scroll]");
