@@ -84,10 +84,12 @@ window.SITE_DATA = {
       "releaseDate": "2026-11-25",
       "releaseTime": "16:30",
       "theme": "sunset",
-      "updatedAt": "2026-11-25T07:25:44.824Z",
+      "updatedAt": "2026-11-25T07:56:40.906Z",
       "cardKey": "1na1wzp",
       "songUrl": "https://youtu.be/AnoNJjIikX0?si=Oxf7zrEQQO16S9lf",
-      "songTitle": "Wish It Was Me"
+      "songTitle": "Wish It Was Me",
+      "contest": true,
+      "contestName": "POSTYPE 제9회 캐릭터톡 공모전"
     },
     {
       "id": "mwspzf0v78ao",
