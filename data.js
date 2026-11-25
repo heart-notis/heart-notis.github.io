@@ -48,15 +48,17 @@ window.SITE_DATA = {
       "id": "mwvk7bdxh5u0",
       "name": "차해온",
       "world": "크리스마스에는 고백을",
-      "tagline": "",
-      "tags": [],
+      "tagline": "좋아하는 사람에게서 고백을 도와달라는 부탁을 받았다.",
+      "tags": [
+        "POSTYPE"
+      ],
       "image": "images/post-mwvk7bdxh5u0-mwvkbbwp.webp",
       "adult": false,
-      "likes": 356,
-      "rts": 39,
+      "likes": 1004,
+      "rts": 254,
       "date": "2026-11-25",
-      "description": "",
-      "greeting": "",
+      "description": "**#로맨스 #순애 #짝사랑 #겨울**",
+      "greeting": "내가 짝사랑하는 {{user}}의 고백 돕기 프로젝트! ……그래서 그 짝사랑 상대가 누군데?!",
       "link": "",
       "previewPos": 32,
       "previewX": 50,
@@ -64,9 +66,24 @@ window.SITE_DATA = {
       "wm": true,
       "createdAt": "2026-11-25T03:26:54.631Z",
       "links": {},
-      "hidden": true,
       "spoiler": true,
-      "slug": "24"
+      "slug": "25",
+      "images": [
+        "images/post-mwvk7bdxh5u0-mwvko4qa-2.webp",
+        "images/post-mwvk7bdxh5u0-mwvko4qa-3.webp",
+        "images/post-mwvk7bdxh5u0-mwvko4qa-4.webp"
+      ],
+      "birthday": "06-07",
+      "lines": [
+        "짝사랑이 이렇게 싱겁게 끝나는구나.",
+        "근데, 네가 예쁜 연애 했으면 좋겠어.",
+        "정말 많이 좋아해. 이젠 전하지 못하게 되려나……."
+      ],
+      "releaseDate": "2026-11-25",
+      "releaseTime": "21:00",
+      "theme": "sunset",
+      "updatedAt": "2026-11-25T03:36:49.444Z",
+      "cardKey": "1tmtqq0"
     },
     {
       "id": "mwspzf0v78ao",
