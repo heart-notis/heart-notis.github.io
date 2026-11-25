@@ -606,6 +606,11 @@
     .shr-card { touch-action: pan-y; user-select: none; }
     .shr-slide { display: flex; transition: transform .3s ease; }
     .shr-slide img { flex: 0 0 100%; width: 100%; aspect-ratio: 1200 / 630; object-fit: cover; display: block; background: #f3efff; pointer-events: none; }
+    .shr-side { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 10px; font-size: .76rem; color: var(--sub); transition: opacity .2s; }
+    .shr-side.off { opacity: 0; pointer-events: none; }
+    .shr-side span { margin-right: 4px; font-weight: 700; }
+    .shr-side button { height: 30px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--sub); font-weight: 800; font-size: .76rem; cursor: pointer; }
+    .shr-side button.on { background: linear-gradient(120deg, #a993f4, #74c6f0); color: #fff; border-color: transparent; }
     .shr-pg { display: flex; justify-content: center; gap: 5px; margin: 10px 0 14px; }
     .shr-pg i { width: 6px; height: 6px; border-radius: 9px; background: #ddd6f5; transition: all .2s; }
     .shr-pg i.on { width: 18px; background: linear-gradient(90deg, #b9a2f6, #7fcdf2); }
@@ -2009,7 +2014,8 @@
     function shareChar(i) {
       const c = characters[i]; if (!c) return;
       let st = 2;
-      const sd = n => ["", "b", "c"][n - 1] || "";
+      let side = "";   // ①번 글자: "" 오른쪽 · "l" 왼쪽 (공유하는 사람이 골라요)
+      const sd = n => n === 1 ? side : ["", "b", "c"][n - 1] || "";
       const urlOf = n => c.slug ? `${location.origin}/c/${c.slug}${sd(n)}` : location.href.split("#")[0];
       const imgOf = n => c.slug ? `c/${encodeURIComponent(c.slug + sd(n))}/card.jpg${c.cardKey ? "?v=" + c.cardKey : ""}` : "";
       const sub = isSpoiler(c) ? "✦ 곧 공개될 캐릭터예요" : String(c.tagline || "").replace(/\*\*|__|~~|`/g, "").replace(/\{\{\s*user\s*\}\}/gi, "당신");
@@ -2018,6 +2024,7 @@
         <div class="shr-top"><div><b class="shr-t">💜 ${escH(c.name)} 공유하기</b><div class="shr-s">카드 모양을 골라보세요 · 옆으로 밀어도 돼요</div></div>
           ${c.slug ? `<div class="shr-dots">${[1, 2, 3].map(n => `<button data-st="${n}" aria-label="${n}번 카드">${n}</button>`).join("")}</div>` : ""}</div>
         <div class="shr-card">${c.slug ? `<div class="shr-slide" id="shrSlide">${[1, 2, 3].map(n => `<img src="${esc(imgOf(n))}" alt="" draggable="false" />`).join("")}</div>` : ""}<div class="shr-meta"><b>${escH(c.name)} · 하트 (@HEART)</b>${sub ? `<span>${escH(sub)}</span>` : ""}</div></div>
+        ${c.slug ? `<div class="shr-side"><span>글자 위치</span><button data-side="l">◀ 왼쪽</button><button data-side="" class="on">오른쪽 ▶</button></div>` : ""}
         ${c.slug ? `<div class="shr-pg">${[1, 2, 3].map(n => `<i data-pg="${n}"></i>`).join("")}</div>` : ""}
         <div class="shr-btns"><button data-shr-x>닫기</button><button class="go" data-shr-copy>링크 복사하기</button></div></div>`;
       document.body.appendChild(el); requestAnimationFrame(() => el.classList.add("show"));
@@ -2026,6 +2033,7 @@
         el.querySelectorAll("[data-st]").forEach(b => b.classList.toggle("on", +b.dataset.st === st));
         el.querySelectorAll("[data-pg]").forEach(d => d.classList.toggle("on", +d.dataset.pg === st));
         const sl = el.querySelector("#shrSlide"); if (sl) sl.style.transform = `translateX(${-(st - 1) * 100}%)`;
+        el.querySelector(".shr-side")?.classList.toggle("off", st !== 1);
       };
       set(1);
       const card = el.querySelector(".shr-card"); let x0 = null;
@@ -2034,6 +2042,7 @@
       const close = () => { el.classList.remove("show"); setTimeout(() => el.remove(), 250); };
       el.onclick = async e => {
         const b = e.target.closest("[data-st]"); if (b) return set(+b.dataset.st);
+        const sb = e.target.closest("[data-side]"); if (sb) { side = sb.dataset.side; el.querySelectorAll("[data-side]").forEach(x => x.classList.toggle("on", x === sb)); const im = el.querySelector("#shrSlide img"); if (im) im.src = imgOf(1); return; }
         if (e.target.closest("[data-shr-x]")) return close();
         if (e.target.closest("[data-shr-copy]")) {
           const url = urlOf(st);
