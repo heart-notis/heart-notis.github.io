@@ -435,7 +435,11 @@ window.SITE_DATA = {
       "wm": true,
       "slug": "12",
       "cardKey": "1vy5l3r",
-      "birthday": "12-31"
+      "birthday": "12-31",
+      "port": true,
+      "portNote": "TEAPOT · 12월 4일",
+      "portDate": "2026-12-04",
+      "updatedAt": "2026-11-25T11:48:36.521Z"
     },
     {
       "id": "mwrtiya3dc2d",
