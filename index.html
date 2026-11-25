@@ -173,6 +173,7 @@
     .upd { display: flex; align-items: center; gap: 6px; margin: 2px 0 1px; flex-wrap: wrap; }
     .upd-tag { padding: 1px 8px; border-radius: 999px; font-size: .62rem; font-weight: 900; letter-spacing: .1em; color: #fff; background: linear-gradient(120deg, #a98cf3, #7fb5f2); box-shadow: 0 2px 6px rgba(140,120,240,.3); animation: updPulse 2s ease-in-out infinite; }
     .upd-note { font-size: .74rem; font-weight: 700; color: #7353d6; }
+    .t-tags.has-upd { display: flex; align-items: center; gap: 8px; } .t-tags.has-upd .upd-tag { margin-left: auto; flex-shrink: 0; } .t-tags.has-upd .tg-l { min-width: 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     @keyframes updPulse { 50% { box-shadow: 0 2px 12px rgba(140,120,240,.6); } }
     html.dark .upd-note { color: #c4b5fd; }
     /* 💍 새 게시물 링 */
@@ -1386,6 +1387,13 @@
       const note = (Array.isArray(c.log) ? c.log : []).find(l => l.d === k);
       return `<div class="upd"><span class="upd-tag">✦ UPDATE</span>${note ? `<span class="upd-note">${escH(note.t)}</span>` : ""}</div>`;
     };
+    // 목록: UPDATE 딱지는 해시태그 줄 오른쪽 끝 · 오늘 적은 업데이트 기록만 위에 한 줄로
+    const updNote = c => {
+      if (!isUpdated(c)) return "";
+      const d = new Date(c.updatedAt), k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      const note = (Array.isArray(c.log) ? c.log : []).find(l => l.d === k);
+      return note ? `<div class="upd"><span class="upd-note">🛠️ ${escH(note.t)}</span></div>` : " ";
+    };
     // 🛠️ 업데이트 기록이 있으면 목록에 작게 (24시간 UPDATE 뱃지가 떠 있을 땐 그것만)
     const logMini = c => {
       const L = Array.isArray(c.log) ? c.log.slice().sort((a, b) => String(b.d).localeCompare(String(a.d))) : [];
@@ -1579,10 +1587,10 @@
           ${meAva()}
           <div class="t-main">
             ${isPort(c) ? `<div class="port-tag"><span>↪ 이식 예정</span>${portInfo(c) ? `<em>${escH(portInfo(c))}</em>` : ""}</div>` : ""}
-            ${headHTML(isReleased(c) ? c.releaseDate : c.date)}${updBadge(c) || logMini(c)}
+            ${headHTML(isReleased(c) ? c.releaseDate : c.date)}${updNote(c) || logMini(c)}
             <p class="t-title">${escH(c.name)}${isBday(c) ? `<span class="bday-tag">🎂 생일</span>` : isBdayTmr(c) ? `<span class="bday-tag soon">🎂 내일 생일</span>` : ""}${c.contest ? `<span class="ct-tag">🏆 공모전</span>` : ""}${ytId(c.songUrl) ? `<span class="sg-tag">♪ 테마곡</span>` : ""}${isNoPort(c) ? `<span class="np-tag">🚫 이식 불가${npLabel(c) ? " " + npLabel(c) : ""}</span>` : ""}</p>
             ${c.tagline ? `<p class="t-tagline">${fmtText(c.tagline)}</p>` : ""}
-            <p class="t-tags">${hashtags(c)}</p>
+            <p class="t-tags${isUpdated(c) ? " has-upd" : ""}">${isUpdated(c) ? `<span class="tg-l">${hashtags(c)}</span>` : hashtags(c)}${isUpdated(c) ? `<span class="upd-tag">✦ UPDATE</span>` : ""}</p>
             <div class="t-media preview" style="--pv:${typeof c.previewPos === "number" ? c.previewPos : 25}%;--px:${typeof c.previewX === "number" ? c.previewX : 50}%;--pz:${typeof c.previewZoom === "number" ? c.previewZoom : 1}">${mediaHTML(c)}${c.adult ? `<span class="badge">19+</span>` : ""}${allImgs(c).length > 1 ? `<span class="many">${I.photos}${allImgs(c).length}</span>` : ""}<span class="expand">♡ 전체 보기</span></div>
             <div class="t-actions">
               <button class="act reply" data-open="${i}" aria-label="자세히">${I.reply}</button>
@@ -1717,6 +1725,18 @@
     }
 
     /* ---- 본문 ---- */
+    // ✦ UPDATE 딱지가 붙은 해시태그 줄: 길어서 딱지에 닿으면 태그 글자를 줄여 한 줄로
+    function fitTags() {
+      document.querySelectorAll(".t-tags.has-upd .tg-l").forEach(t => {
+        t.style.fontSize = "";
+        let f = parseFloat(getComputedStyle(t).fontSize), min = f * .72;
+        while (t.scrollWidth > t.clientWidth + 1 && f > min) { f -= .5; t.style.fontSize = f + "px"; }
+      });
+    }
+    let fitRaf = 0; const fitSoon = () => { cancelAnimationFrame(fitRaf); fitRaf = requestAnimationFrame(fitTags); };
+    addEventListener("load", () => { const v = $("view"); if (v) new MutationObserver(fitSoon).observe(v, { childList: true }); fitSoon(); });
+    addEventListener("resize", fitSoon);
+    if (document.fonts) document.fonts.ready.then(fitSoon);
     function renderView() {
       const el = $("view");
       if (view === "message") { renderMessage(el); return; }
