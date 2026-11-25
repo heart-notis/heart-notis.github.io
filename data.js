@@ -492,7 +492,10 @@ window.SITE_DATA = {
       "theme": "home",
       "wm": true,
       "slug": "10",
-      "cardKey": "nbxyoe"
+      "cardKey": "nbxyoe",
+      "noPort": true,
+      "noPortUntil": "2027-03-15",
+      "noPortReason": "포스타입 공모전 규정"
     },
     {
       "id": "mwrpmrvpy9l0",
@@ -519,7 +522,10 @@ window.SITE_DATA = {
       "theme": "home",
       "wm": true,
       "slug": "9",
-      "cardKey": "3vqk5m"
+      "cardKey": "3vqk5m",
+      "noPort": true,
+      "noPortUntil": "2027-03-15",
+      "noPortReason": "포스타입 공모전 규정"
     },
     {
       "id": "mwrpqewk3sy6",
@@ -546,7 +552,10 @@ window.SITE_DATA = {
       "theme": "home",
       "wm": true,
       "slug": "8",
-      "cardKey": "bquzr4"
+      "cardKey": "bquzr4",
+      "noPort": true,
+      "noPortUntil": "2027-03-15",
+      "noPortReason": "포스타입 공모전 규정"
     },
     {
       "id": "mwrpoipi2f62",
@@ -573,7 +582,10 @@ window.SITE_DATA = {
       "theme": "home",
       "wm": true,
       "slug": "7",
-      "cardKey": "1a62fd5"
+      "cardKey": "1a62fd5",
+      "noPort": true,
+      "noPortUntil": "2027-03-15",
+      "noPortReason": "포스타입 공모전 규정"
     },
     {
       "id": "mwrpfr95ttut",
