@@ -164,6 +164,16 @@
     .sel-chip.on { background: var(--grad); color: #fff; border-color: transparent; }
     .sel-chip.del { color: #e0527a; border-color: #f6cbd8; }
     .sel-chip:disabled { opacity: .4; }
+    .sel-sub { margin: 9px 2px 6px; font-size: .78rem; font-weight: 800; color: #5b5770; } .sel-sub small { font-weight: 600; color: #9aa0a8; margin-left: 4px; }
+    .sel-chip.more { background: #f6f3ff; border-color: #e4dcf7; color: #6a4fd0; }
+    .sel-chip.more.on { background: var(--grad); color: #fff; }
+    .bf-form { padding: 0 4px; } .bf-form .f { margin-bottom: 10px; }
+    .bf-hint { font-size: .8rem; color: #8a8fa0; margin: -4px 4px 8px; }
+    .bf-tags { padding: 0 4px 10px; }
+    .bf-scroll { max-height: 46vh; overflow-y: auto; }
+    .bf-btns { display: flex; gap: 8px; margin-top: 4px; }
+    .bf-btns button { flex: 1; height: 50px; border: 0; border-radius: 15px; font-weight: 800; font-size: .95rem; cursor: pointer; }
+    .bf-ok { background: var(--grad); color: #fff; flex: 2 !important; } .bf-off { background: #fff0f4; color: #e0527a; }
     body.sel-on .toast { bottom: 210px; }
     .sel-hint { margin-top: 6px; font-size: .7rem; color: var(--sub); }
     #postList { padding-bottom: 4px; }
@@ -841,13 +851,11 @@
       ["adult", "19+", p => !!p.adult],
       ["asset", "🔧 교체중", p => p.status === "asset"],
       ["renewal", "✨ 리뉴얼", p => p.status === "renewal"],
-      ["hidden", "🙈 비공개", p => !!p.hidden],
-      ["spoiler", "✦ 스포일러", p => !!p.spoiler],
-      ["port", "↪ 이식 예정", p => !!p.port]
+      ["hidden", "🙈 비공개", p => !!p.hidden]
     ];
     function renderSelBar() {
       const bar = $("selBar");
-      bar.classList.toggle("hidden", !selMode); $("postList").style.paddingBottom = selMode ? "170px" : ""; document.body.classList.toggle("sel-on", selMode);
+      bar.classList.toggle("hidden", !selMode); $("postList").style.paddingBottom = selMode ? "250px" : ""; document.body.classList.toggle("sel-on", selMode);
       if (!selMode) return;
       const ps = data.posts.filter(p => sel.has(p.id));
       bar.innerHTML = `
@@ -857,9 +865,62 @@
           ${BULK.map(([k, label, has]) => `<button class="sel-chip${ps.length && ps.every(has) ? " on" : ""}" data-bulk="${k}" ${ps.length ? "" : "disabled"}>${label}</button>`).join("")}
           <button class="sel-chip del" data-bulk="del" ${ps.length ? "" : "disabled"}>🗑 지우기</button>
         </div>
-        <div class="sel-hint">누르면 켜지고, 고른 게 전부 켜져 있으면 꺼져요</div>`;
+        <div class="sel-sub">📝 자세히 바꾸기 <small>날짜·이름까지 한 번에</small></div>
+        <div class="sel-chips">
+          ${Object.entries(BULK_FORM).map(([k, f]) => `<button class="sel-chip more${ps.length && f.has && ps.every(f.has) ? " on" : ""}" data-bform="${k}" ${ps.length ? "" : "disabled"}>${f.label} ›</button>`).join("")}
+        </div>
+        <div class="sel-hint">윗줄: 누르면 켜기·끄기 · 아랫줄: 눌러서 날짜·내용까지</div>`;
+    }
+    /* 📝 자세히 바꾸기: 날짜·이름이 필요한 것들 (고른 게시물 전부에 똑같이) */
+    const same = (ps, k) => ps.length && ps.every(p => (p[k] || "") === (ps[0][k] || "")) ? (ps[0][k] || "") : "";
+    const BULK_FORM = {
+      spoiler: { label: "✦ 스포일러", has: p => !!p.spoiler, off: ["spoiler", "releaseDate", "releaseTime"],
+        fields: [["releaseDate", "공개 날짜", "date"], ["releaseTime", "공개 시간", "time"]],
+        apply: (p, v) => { p.spoiler = true; setOrDel(p, "releaseDate", v.releaseDate); setOrDel(p, "releaseTime", v.releaseDate && v.releaseTime); } },
+      port: { label: "↪ 이식 예정", has: p => !!p.port, off: ["port", "portDate", "portTime", "portNote"],
+        fields: [["portDate", "이식 날짜", "date"], ["portTime", "시간", "time"], ["portNote", "어디로 · 메모 (선택)", "text"]],
+        apply: (p, v) => { p.port = true; setOrDel(p, "portDate", v.portDate); setOrDel(p, "portTime", v.portDate && v.portTime); setOrDel(p, "portNote", v.portNote); } },
+      contest: { label: "🏆 공모전", has: p => !!p.contest, off: ["contest", "contestName", "contestResult"],
+        fields: [["contestName", "공모전 이름", "text", "WHIF 겨울 캐릭터 공모전"], ["contestResult", "결과 (선택)", "text", "우수상"]],
+        apply: (p, v) => { p.contest = true; setOrDel(p, "contestName", v.contestName); setOrDel(p, "contestResult", v.contestResult); } },
+      noPort: { label: "🚫 이식 불가", has: p => !!p.noPort, off: ["noPort", "noPortUntil", "noPortReason"],
+        fields: [["noPortUntil", "언제까지 (지나면 딱지 자동으로 떨어져요)", "date"], ["noPortReason", "이유 (선택)", "text", "공모전 규정"]],
+        apply: (p, v) => { p.noPort = true; setOrDel(p, "noPortUntil", v.noPortUntil); setOrDel(p, "noPortReason", v.noPortReason); } },
+      date: { label: "📅 올린 날짜", fields: [["date", "올린 날짜", "date"]], apply: (p, v) => { if (v.date) p.date = v.date; } },
+      world: { label: "🌍 세계관", fields: [["world", "세계관 이름 (비우면 빼기)", "text", "아르켈 제국"]], apply: (p, v) => setOrDel(p, "world", v.world) },
+      tags: { label: "# 해시태그" },
+      theme: { label: "🎨 꾸미기" }
+    };
+    function setOrDel(p, k, v) { if (v) p[k] = v; else delete p[k]; }
+    function bulkDone(ps, msg) { saveDraft(); renderPosts(); renderSelBar(); toast(`${ps.length}개 ${msg}`); }
+    function openBulkForm(k) {
+      const f = BULK_FORM[k], ps = data.posts.filter(p => sel.has(p.id)); if (!ps.length) return;
+      const head = `<div class="sheet-t"><b>${f.label} · ${ps.length}개 한 번에</b></div>`;
+      if (k === "tags") {
+        openSheet(`${head}<p class="bf-hint">붙이거나 뗄 태그를 골라주세요</p><div class="tag-pick bf-tags">${data.tags.map(t => `<button type="button" data-btag="${esc(t)}">#${esc(t)}</button>`).join("") || "<small>해시태그 탭에서 먼저 태그를 만들어주세요</small>"}</div>
+          <div class="bf-btns"><button data-pick="add" class="bf-ok">＋ 붙이기</button><button data-pick="rm" class="bf-off">－ 떼기</button></div>`, act => {
+          const ts = [...document.querySelectorAll(".bf-tags .on")].map(b => b.dataset.btag); if (!ts.length) return toast("태그를 하나 이상 골라주세요");
+          ps.forEach(p => { const cur = new Set(p.tags || []); ts.forEach(t => act === "add" ? cur.add(t) : cur.delete(t)); p.tags = [...cur]; });
+          bulkDone(ps, `${act === "add" ? "붙임" : "뗌"}: ${ts.map(t => "#" + t).join(" ")}`);
+        });
+        $("sheet").addEventListener("click", e => { const b = e.target.closest("[data-btag]"); if (b) b.classList.toggle("on"); });
+        return;
+      }
+      if (k === "theme") {
+        openSheet(`${head}<div class="sheet-li bf-scroll"><button data-pick="">기본 (꾸미기 없음)</button>${THEMES.filter(t => t.key).map(t => `<button data-pick="${esc(t.key)}">${esc(themeName(t.key))}</button>`).join("")}</div>`, key => {
+          ps.forEach(p => setOrDel(p, "theme", key)); bulkDone(ps, `꾸미기: ${key ? themeName(key) : "기본"}`);
+        });
+        return;
+      }
+      const rows = f.fields.map(([id, label, type, ph]) => `<label class="f">${label}<input type="${type}" data-bf="${id}" value="${esc(same(ps, id))}" ${ph ? `placeholder="${esc(ph)}"` : ""}></label>`).join("");
+      openSheet(`${head}<div class="bf-form">${rows}</div><div class="bf-btns"><button data-pick="ok" class="bf-ok">${f.off ? "켜고 적용하기" : "적용하기"}</button>${f.off ? `<button data-pick="off" class="bf-off">끄기</button>` : ""}</div>`, act => {
+        if (act === "off") { ps.forEach(p => f.off.forEach(x => delete p[x])); return bulkDone(ps, `끔: ${f.label}`); }
+        const v = {}; document.querySelectorAll("[data-bf]").forEach(i => v[i.dataset.bf] = i.value.trim());
+        ps.forEach(p => f.apply(p, v)); bulkDone(ps, `적용: ${f.label}`);
+      });
     }
     $("selBar").addEventListener("click", async e => {
+      const fb = e.target.closest("[data-bform]"); if (fb) return openBulkForm(fb.dataset.bform);
       const b = e.target.closest("[data-bulk]"); if (!b) return;
       const k = b.dataset.bulk, ps = data.posts.filter(p => sel.has(p.id));
       if (k === "all") { if (ps.length === data.posts.length) sel.clear(); else data.posts.forEach(p => sel.add(p.id)); }
