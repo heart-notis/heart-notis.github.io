@@ -11,7 +11,7 @@ self.addEventListener("fetch", e => {
   const url = new URL(req.url);
   const same = url.origin === location.origin, font = /cdn\.jsdelivr\.net$/.test(url.hostname) && /pretendard/.test(url.pathname);
   if (!same && !font) return;
-  if (same && (/\/admin\.html$/.test(url.pathname) || url.pathname.startsWith("/c/") || /\/sw\.js$/.test(url.pathname))) return;
+  if (same && (/\/admin\.html$/.test(url.pathname) || url.pathname.startsWith("/admin/") || url.pathname.startsWith("/c/") || /\/sw\.js$/.test(url.pathname))) return;
   const isAsset = font || /\.(webp|jpg|jpeg|png|svg|woff2?)$/i.test(url.pathname);
   if (isAsset) {
     e.respondWith(caches.open(CACHE).then(async c => {
