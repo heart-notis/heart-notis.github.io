@@ -6,6 +6,7 @@ window.SITE_DATA = {
     "POSTYPE",
     "BLOOM",
     "TINGLE",
+    "CAVEDUCK",
     "합작"
   ],
   "profile": {

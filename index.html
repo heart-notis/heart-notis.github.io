@@ -403,7 +403,7 @@
     .port-tag span { display: inline-block; padding: 4px 11px; border-radius: 999px; font-size: .7rem; font-weight: 800; letter-spacing: .06em; color: #fff; background: linear-gradient(120deg, #7fb5f2, #a98cf3); box-shadow: 0 3px 10px rgba(120,140,240,.3); }
     .port-tag span.port-done { letter-spacing: .02em; background: linear-gradient(120deg, #a993f4, #74c6f0); box-shadow: 0 3px 10px rgba(140,120,240,.3); }
     /* 🏷️ 해시태그 플랫폼별 색 (앱 아이콘 색을 홈페이지 톤에 맞게 낮춤 · 배경·굵기는 그대로) */
-    .hash.p-whif { color: #8a6fe0; } .hash.p-tingle { color: #e06aa8; } .hash.p-bloom { color: #6f93e8; } .hash.p-teapot { color: #3fb489; } .hash.p-postype { color: #6b7280; } .hash.p-hap { color: #9aa0a8; }
+    .hash.p-whif { color: #8a6fe0; } .hash.p-tingle { color: #e06aa8; } .hash.p-bloom { color: #6f93e8; } .hash.p-teapot { color: #3fb489; } .hash.p-postype { color: #6b7280; } .hash.p-caveduck { color: #d39a14; } .hash.p-hap { color: #9aa0a8; }
     html.dark .hash.p-postype { color: #a3a9b4; }
     /* ⏳ 공개 당일 실시간 카운트다운 */
     .cd-live { display: inline-flex; align-items: center; gap: 6px; margin: 6px 0 2px; padding: 5px 12px; border-radius: 12px; background: linear-gradient(120deg, #2b2840, #3d3466); color: #fff; font-weight: 800; font-size: .8rem; }
@@ -1445,7 +1445,7 @@
         : `${dt.getFullYear()}년 ${dt.getMonth() + 1}월 ${dt.getDate()}일`;
     };
     const longDate = d => { const dt = toDay(d); return isNaN(dt) ? "" : `${dt.getFullYear()}년 ${dt.getMonth() + 1}월 ${dt.getDate()}일`; };
-    const PLAT_CLS = { WHIF: "p-whif", TINGLE: "p-tingle", BLOOM: "p-bloom", TEAPOT: "p-teapot", POSTYPE: "p-postype", "합작": "p-hap" };
+    const PLAT_CLS = { WHIF: "p-whif", TINGLE: "p-tingle", BLOOM: "p-bloom", TEAPOT: "p-teapot", POSTYPE: "p-postype", CAVEDUCK: "p-caveduck", "합작": "p-hap" };
     const hashtags = c => c.tags.map(t => { const k = t.replace(/\s/g, ""); return `<span class="hash${PLAT_CLS[k.toUpperCase()] || PLAT_CLS[k] ? " " + (PLAT_CLS[k.toUpperCase()] || PLAT_CLS[k]) : ""}">#${esc(k)}</span>`; }).join(" ");
 
     const I = {
