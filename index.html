@@ -1788,8 +1788,17 @@
         if (qs.has("from") || qs.has("utm_source")) { qs.delete("from"); qs.delete("utm_source"); history.replaceState(history.state, "", location.pathname + (qs.toString() ? "?" + qs : "") + location.hash); }
         if (localStorage.getItem("heart_me") || localStorage.getItem("heart_gh_token")) return;
         if (sessionStorage.getItem("heart_v")) return;
-        sessionStorage.setItem("heart_v", "1");
-        fetch(MSG_API, { method: "POST", headers: { "content-type": "text/plain" }, body: JSON.stringify({ action: "visit", src }), keepalive: true }).catch(() => {});
+        // 🤖 자동 점검 로봇은 빼요: 로봇 표시가 있거나, 화면에 안 보이거나, 금방 닫히면(배포 확인용 접속) 안 세요
+        if (navigator.webdriver || /headless|bot|crawl|spider|preview|lighthouse|pagespeed|screenshot/i.test(navigator.userAgent)) return;
+        let sent = false;
+        const send = () => {
+          if (sent || document.visibilityState !== "visible") return;
+          sent = true; sessionStorage.setItem("heart_v", "1");
+          fetch(MSG_API, { method: "POST", headers: { "content-type": "text/plain" }, body: JSON.stringify({ action: "visit", src }), keepalive: true }).catch(() => {});
+        };
+        setTimeout(send, 2500);   // 2.5초 넘게 머물면 사람으로 쳐요
+        ["pointerdown", "keydown", "scroll", "touchstart"].forEach(ev => addEventListener(ev, send, { once: true, passive: true }));
+        document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") setTimeout(send, 2500); });
       } catch {}
     })();
     // 💜 캐릭터 반응 세기 (조회 · 하트 · 대화 버튼) — 제작자 기기와 미리보기는 빼요
