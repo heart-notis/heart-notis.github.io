@@ -1657,7 +1657,7 @@
     // 🔗 링크 주소만 보고 플랫폼 태그를 알아서 켜줘요 (예전 게시물 링크에서 배운 것 + 기본값)
     function hostTag(url) {
       let h = ""; try { h = new URL(String(url).trim()).hostname.replace(/^www\./, ""); } catch { return ""; }
-      const known = { "whif.io": "WHIF", "tingle.chat": "TINGLE", "teapotchat.com": "TEAPOT", "posty.pe": "POSTYPE", "postype.com": "POSTYPE", "bloom-ai.me": "BLOOM", "caveduck.io": "CAVEDUCK" };
+      const known = { "whif.io": "WHIF", "tingle.chat": "TINGLE", "teapotchat.com": "TEAPOT", "posty.pe": "POSTYPE", "postype.com": "POSTYPE", "bloom-ai.me": "BLOOM", "caveduck.io": "CAVEDUCK", "tikita.ai": "TIKITA" };
       data.posts.forEach(p => Object.entries(p.links || {}).forEach(([t, v]) => { if (t && t !== "합작" && v) try { known[new URL(v).hostname.replace(/^www\./, "")] ??= t; } catch {} }));
       const hit = Object.keys(known).find(k => h === k || h.endsWith("." + k));
       return hit && data.tags.includes(known[hit]) ? known[hit] : "";
@@ -1959,7 +1959,7 @@
             <div class="vs-ref-top"><b>🔗 어디서 왔나</b><div class="vs-seg">${["오늘", "7일", "14일", "전체"].map((t, k) => `<button data-ref="${k}" class="${k === 1 ? "on" : ""}">${t}</button>`).join("")}</div></div>
             <div id="refList"></div>
             <div class="hint" style="margin-top:6px">💡 올리는 곳마다 아래 <b>짧은 주소</b>를 쓰면 어디서 왔는지 정확히 구분돼요 · 누르면 복사돼요</div>
-            <div class="short-links">${[["x", "X"], ["p", "포스타입"], ["t", "티팟"], ["w", "위프"], ["b", "블룸"], ["tg", "팅글"], ["cd", "케이브덕"]].map(([k, n]) => `<button type="button" data-copy="https://heart-notis.github.io/${k}"><b>${n}</b>heart-notis.github.io/${k}</button>`).join("")}</div>
+            <div class="short-links">${[["x", "X"], ["p", "포스타입"], ["t", "티팟"], ["w", "위프"], ["b", "블룸"], ["tg", "팅글"], ["cd", "케이브덕"], ["tk", "티키타"]].map(([k, n]) => `<button type="button" data-copy="https://heart-notis.github.io/${k}"><b>${n}</b>heart-notis.github.io/${k}</button>`).join("")}</div>
           </div>
           <div class="vs-ref">
             <div class="vs-ref-top"><b>💜 캐릭터 반응</b><div class="vs-seg">${[["v", "조회"], ["l", "하트"], ["c", "대화"], ["s", "알림"]].map(([k, t], n) => `<button data-rk="${k}" class="${n === 0 ? "on" : ""}">${t}</button>`).join("")}</div></div>

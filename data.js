@@ -7,6 +7,7 @@ window.SITE_DATA = {
     "BLOOM",
     "TINGLE",
     "CAVEDUCK",
+    "TIKITA",
     "합작"
   ],
   "profile": {
