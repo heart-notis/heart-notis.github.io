@@ -98,8 +98,7 @@ window.SITE_DATA = {
       "world": "SIGNAL",
       "tagline": "너무 진심이 되지는 말아요, 서로 부담스럽잖아.",
       "tags": [
-        "WHIF",
-        "BLOOM"
+        "WHIF"
       ],
       "image": "images/post-mwspzf0v78ao-mwt41224.webp",
       "adult": true,
@@ -112,7 +111,9 @@ window.SITE_DATA = {
       "previewPos": 25,
       "previewX": 50,
       "previewZoom": 1,
-      "links": {},
+      "links": {
+        "WHIF": "https://whif.io/characters/89bb2cbc-e888-4305-bd90-f3be49e8933e"
+      },
       "spoiler": true,
       "theme": "rose",
       "releaseDate": "2026-11-27",
@@ -137,7 +138,7 @@ window.SITE_DATA = {
       "cardKey": "k6upz0",
       "songUrl": "https://youtu.be/lGvJ0PIobrw?si=94IliHW8cGkN1sfk",
       "songTitle": "No Strings Attached",
-      "updatedAt": "2026-11-25T04:29:58.010Z"
+      "updatedAt": "2026-11-27T02:24:24.464Z"
     },
     {
       "id": "mwso99e36g7y",
