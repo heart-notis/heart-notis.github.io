@@ -28,12 +28,12 @@ window.SITE_DATA = {
   },
   "notices": [
     {
-      "id": "mwrzipxtojfo",
+      "id": "mwzpj2id7cn8",
       "title": "♥ 작품 업로드 일정",
-      "date": "2026-11-23",
+      "date": "2026-11-28",
       "pinned": false,
-      "body": "♥ **WHIF** - 가이드버스 합작 **11월 27일 금요일 21시**\n♥ **BLOOM** - 가이드버스 합작 이식 **12월 03일 목요일**\n♥ **TEAPOT** - 이그노어 합작 이식\n\n이후 **포스타입** 늘봄 셰어하우스 정우진 > 윤도하 순으로 개인 캐릭터톡 제작 예정입니다 ♥",
-      "createdAt": "2026-11-22T15:21:31.601Z",
+      "body": "♥ **BLOOM** - 가이드버스 합작 이식 **12월 03일 목요일**\n♥ **TEAPOT** - 이그노어 합작 이식 **12월 04일 금요일**\n\n이후 **포스타입** 늘봄 셰어하우스 정우진 > 윤도하 순으로 개인 캐릭터톡 제작 예정입니다 ♥",
+      "createdAt": "2026-11-28T01:04:01.141Z",
       "onPosts": true
     },
     {
@@ -136,7 +136,7 @@ window.SITE_DATA = {
         "자유 시간을 저한테서 통째로 사시려면, 방금 치르신 가이딩 비용에 최소한 외출 할증에 위험 수당까지 얹어주셔야 할 텐데."
       ],
       "slug": "23",
-      "cardKey": "k6upz0",
+      "cardKey": "1d2q347",
       "songUrl": "https://youtu.be/lGvJ0PIobrw?si=94IliHW8cGkN1sfk",
       "songTitle": "No Strings Attached",
       "updatedAt": "2026-11-27T02:24:24.464Z"
